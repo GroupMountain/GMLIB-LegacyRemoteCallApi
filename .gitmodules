@@ -1,0 +1,3 @@
+[submodule "SDK-GMLIB"]
+	path = SDK-GMLIB
+	url = https://github.com/GroupMountain/SDK-GMLIB.git
