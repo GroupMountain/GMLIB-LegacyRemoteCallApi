@@ -13,7 +13,7 @@ std::variant<std::string, std::vector<RecipeIngredient>> makeRecipeUnlockingKey(
     return result;
 }
 
-void ExportGMLib_ModAPI() {
+void Export_Legacy_GMLib_ModAPI() {
     // 合成表部分
     RemoteCall::exportAs(
         "GMLib_ModAPI",
