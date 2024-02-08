@@ -1,47 +1,47 @@
 #include "Global.h"
 
 void ExportGMLib_ServerAPI() {
-    RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", [](bool value) -> void { 
-        GMLib_Server::setEducationFeatureEnabled(value);
+    RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", []() -> void { 
+        GMLIB_Level::addEducationEditionRequired();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "registerAbilityCommand", []() -> void { 
-        GMLib_Server::registerAbilityCommand();
+        GMLIB_Level::forceEnableAbilityCommand();
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "sendAddFloatingTextPacket", [](std::string text, Vec3 pos, int dimid) -> int { 
-        return GMLib_Server::sendAddFloatingTextPacket(text, pos, dimid);
+    RemoteCall::exportAs("GMLib_ServerAPI", "addFloatingTextPacket", [](std::string text, std::pair<Vec3, int> pos, int dimid) -> int {
+        auto ft = new FloatingText(text, pos.first, pos.second);
+        return ft->mRuntimeId;
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "sendAddFloatingTextPacketToPlayer", [](std::string text, Vec3 pos, int dimid, Player* pl) -> int { 
-        return GMLib_Server::sendAddFloatingTextPacketToPlayer(text, pos, dimid, (Player*)pl);
-    });
-    RemoteCall::exportAs("GMLib_ServerAPI", "sendDeleteFloatingTextPacket", [](int id) -> void { 
-        GMLib_Server::sendDeleteFloatingTextPacket(id);
+    RemoteCall::exportAs("GMLib_ServerAPI", "deleteFloatingTextPacket", [](int id) -> void { 
+        FloatingText::deleteFloatingText(id);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setEnableAchievement", []() -> void { 
-        GMLib_Server::setEnableAchievement();
+        GMLIB_Level::setForceAchievementsEnabled();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setForceTrustSkins", []() -> void { 
-        GMLib_Server::setForceTrustSkins();
+        GMLIB_Level::setForceTrustSkin();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "enableCoResourcePack", []() -> void { 
-        GMLib_Server::enableCoResourcePack();
+        GMLIB_Level::setCoResourcePack();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "getLevelName", []() -> std::string { 
-        return GMLib_Server::getLevelName();
+        return GMLIB_Level::getLevel()->getLevelName();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setLevelName", [](std::string name) -> void { 
-        GMLib_Server::setLevelName(name);
+        GMLIB_Level::getLevel()->setLevelName(name);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setFakeSeed", [](int64_t seed) -> void { 
-        GMLib_Server::setFakeSeed(seed);
+        GMLIB_Level::getLevel()->setFakeSeed(seed);
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "spawnEntity", [](Vec3 pos, int dimid, std::string name) -> Actor* { 
-        return GMLib_Server::spawnActor(pos, dimid, name);
+    RemoteCall::exportAs("GMLib_ServerAPI", "spawnEntity", [](std::pair<Vec3, int> pos, std::string name) -> Actor* { 
+        return GMLIB_Spawner::spawnEntity(pos.first, pos.second, name);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "shootProjectile", [](Actor* owner, std::string name, float speed, float offset) -> Actor* { 
-        return GMLib_Server::shootProjectile((Actor*)owner, name, speed, offset);
+        auto ac = (GMLIB_Actor*)owner;
+        return ac->shootProjectile(name, speed, offset);
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "throwEntity", [](Actor* owner, Actor* actor, float speed, float offset) -> bool { 
-        return GMLib_Server::throwEntity((Actor*)owner, (Actor*)actor, speed, offset);
+    RemoteCall::exportAs("GMLib_ServerAPI", "throwEntity", [](Actor* owner, Actor* actor, float speed, float offset) -> bool {
+        auto ac = (GMLIB_Actor*)owner;
+        return ac->throwEntity(actor, speed, offset);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "PlayerToEntity", [](Player* player) -> Actor* { 
         return (Actor*)player;
