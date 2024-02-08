@@ -7,6 +7,10 @@ namespace plugin {
 
 Plugin::Plugin(ll::plugin::NativePlugin& self) : mSelf(self) {
     // Code for loading the plugin goes here.
+    
+    logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
+    logger.info("Author: GroupMountain");
+    logger.info("Repository: https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi");
 }
 
 bool Plugin::enable() {

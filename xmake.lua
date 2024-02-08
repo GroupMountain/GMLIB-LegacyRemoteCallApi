@@ -8,6 +8,7 @@ end
 
 -- Option 1: Use the latest version of LeviLamina released on GitHub.
 add_requires("levilamina")
+add_requires("legacyremotecall")
 
 -- Option 2: Use a specific version of LeviLamina released on GitHub.
 -- add_requires("levilamina x.x.x")
@@ -40,7 +41,7 @@ add_requires("levilamina")
 --         import("package.tools.xmake").install(package)
 --     end)
 
-target("plugin") -- Change this to your plugin name.
+target("GMLIB-LegacyRemoteCallApi") -- Change this to your plugin name.
     add_cxflags(
         "/EHa",
         "/utf-8"
@@ -59,7 +60,8 @@ target("plugin") -- Change this to your plugin name.
         "src"
     )
     add_packages(
-        "levilamina"
+        "levilamina",
+        "legacyremotecall"
     )
     add_shflags(
         "/DELAYLOAD:bedrock_server.dll" -- Magic to import symbols from BDS
