@@ -1,6 +1,6 @@
 #include "Global.h"
 
-void ExportGMLib_ServerAPI() {
+void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", []() -> void { 
         GMLIB_Level::addEducationEditionRequired();
     });
