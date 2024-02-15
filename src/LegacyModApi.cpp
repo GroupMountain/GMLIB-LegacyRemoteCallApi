@@ -1,7 +1,7 @@
 #include "Global.h"
 
 std::unordered_set<std::string> HardCodedKeys   = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
-std::unordered_set<int>         ExperimentsList = {6, 7, 8, 9, 10, 12, 15, 16};
+std::unordered_set<int>         ExperimentsList = {6, 7, 8, 9, 10, 13, 16, 17, 18};
 
 std::variant<std::string, std::vector<RecipeIngredient>> makeRecipeUnlockingKey(std::string& key) {
     if (HardCodedKeys.count(key)) {
