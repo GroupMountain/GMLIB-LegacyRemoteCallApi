@@ -13,7 +13,7 @@
             "Library"
         ]
     },
-    "asset_url": "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v0.8.0/GMLIB-LegacyRemoteCallApi-windows-x64.zip",
+    "asset_url": "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v0.8.1/GMLIB-LegacyRemoteCallApi-windows-x64.zip",
     "dependencies": {
         "github.com/GroupMountain/GMLIB": ">=0.8.1"
     },
