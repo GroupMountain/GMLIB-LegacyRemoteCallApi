@@ -2,7 +2,6 @@
 #include "Global.h"
 
 ll::Logger logger(PLUGIN_NAME);
-bool       isServerStarted = false;
 
 namespace plugin {
 
@@ -17,7 +16,6 @@ Plugin::Plugin(ll::plugin::NativePlugin& self) : mSelf(self) {
 }
 
 bool Plugin::enable() {
-    isServerStarted = true;
     // Code for enabling the plugin goes here.
     return true;
 }

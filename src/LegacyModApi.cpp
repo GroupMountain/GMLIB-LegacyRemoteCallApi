@@ -1,7 +1,7 @@
 #include "Global.h"
 
 std::unordered_set<std::string> HardCodedKeys   = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
-std::unordered_set<int>         ExperimentsList = {6, 7, 8, 9, 10, 13, 16, 17, 18};
+std::unordered_set<int>         ExperimentsList = {6, 7, 8, 9, 10, 12, 15, 16};
 
 std::variant<std::string, std::vector<RecipeIngredient>> makeRecipeUnlockingKey(std::string& key) {
     if (HardCodedKeys.count(key)) {
@@ -23,9 +23,6 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string              result,
            int                      count,
            std::string              unlock) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             std::vector<RecipeIngredient> types;
             for (auto ing : ingredients) {
                 auto key = RecipeIngredient(ing, 0, 1);
@@ -45,9 +42,6 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string              result,
            int                      count,
            std::string              unlock) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             std::vector<RecipeIngredient> types;
             for (auto ing : ingredients) {
                 auto key = RecipeIngredient(ing, 0, 1);
@@ -62,9 +56,6 @@ void Export_Legacy_GMLib_ModAPI() {
         "GMLib_ModAPI",
         "registerFurnaceRecipe",
         [](std::string recipe_id, std::string input, std::string output, std::vector<std::string> tags) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
             GMLIB::Mod::CustomRecipe::registerFurnaceRecipe(recipe_id, inp, outp, tags);
@@ -74,9 +65,6 @@ void Export_Legacy_GMLib_ModAPI() {
         "GMLib_ModAPI",
         "registerBrewingMixRecipe",
         [](std::string recipe_id, std::string input, std::string output, std::string reagent) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             auto rea = RecipeIngredient(reagent, 0, 1);
             GMLIB::Mod::CustomRecipe::registerBrewingMixRecipe(recipe_id, input, output, rea);
         }
@@ -85,9 +73,6 @@ void Export_Legacy_GMLib_ModAPI() {
         "GMLib_ModAPI",
         "registerBrewingContainerRecipe",
         [](std::string recipe_id, std::string input, std::string output, std::string reagent) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
             auto rea  = RecipeIngredient(reagent, 0, 1);
@@ -102,9 +87,6 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string base,
            std::string addition,
            std::string result) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             GMLIB::Mod::CustomRecipe::registerSmithingTransformRecipe(
                 recipe_id,
                 smithing_template,
@@ -118,9 +100,6 @@ void Export_Legacy_GMLib_ModAPI() {
         "GMLib_ModAPI",
         "registerSmithingTrimRecipe",
         [](std::string recipe_id, std::string smithing_template, std::string base, std::string addition) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             GMLIB::Mod::CustomRecipe::registerSmithingTrimRecipe(recipe_id, smithing_template, base, addition);
         }
     );
@@ -133,9 +112,6 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string output,
            int         output_data,
            int         output_count) -> void {
-            if (!isServerStarted) {
-                return;
-            }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
             GMLIB::Mod::CustomRecipe::registerStoneCutterRecipe(recipe_id, inp, outp);
@@ -154,17 +130,11 @@ void Export_Legacy_GMLib_ModAPI() {
         }
     });
     RemoteCall::exportAs("GMLib_ModAPI", "setExperimentEnabled", [](int experiment_id, bool value) -> void {
-        if (!isServerStarted) {
-            return;
-        }
         if (ExperimentsList.count(experiment_id)) {
             GMLIB_Level::getLevel()->setExperimentEnabled(((AllExperiments)experiment_id), value);
         } else ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
     });
     RemoteCall::exportAs("GMLib_ModAPI", "getExperimentEnabled", [](int experiment_id) -> bool {
-        if (!isServerStarted) {
-            return false;
-        }
         if (ExperimentsList.count(experiment_id)) {
             return GMLIB_Level::getLevel()->getExperimentEnabled(((AllExperiments)experiment_id));
         } else {
