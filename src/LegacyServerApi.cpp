@@ -7,17 +7,6 @@ void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "registerAbilityCommand", []() -> void {
         GMLIB_Level::forceEnableAbilityCommand();
     });
-    RemoteCall::exportAs(
-        "GMLib_ServerAPI",
-        "addFloatingTextPacket",
-        [](std::string text, std::pair<Vec3, int> pos, int dimid) -> int {
-            auto ft = new GMLIB::Server::FloatingText(text, pos.first, pos.second);
-            return ft->getRuntimeID();
-        }
-    );
-    RemoteCall::exportAs("GMLib_ServerAPI", "deleteFloatingTextPacket", [](int id) -> void {
-        GMLIB::Server::FloatingText::deleteFloatingText(id);
-    });
     RemoteCall::exportAs("GMLib_ServerAPI", "setEnableAchievement", []() -> void {
         GMLIB_Level::setForceAchievementsEnabled();
     });
