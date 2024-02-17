@@ -40,11 +40,11 @@ void Export_Compatibility_API() {
         }
         return "";
     });
-    RemoteCall::exportAs("GMLIB_API", "createFloatingText", [](std::pair<Vec3, int> pos, std::string text) -> int64 {
+    RemoteCall::exportAs("GMLIB_API", "createFloatingText", [](std::pair<Vec3, int> pos, std::string text) -> int {
         auto ft = new GMLIB::Server::FloatingText(text, pos.first, pos.second);
         return ft->getRuntimeID();
     });
-    RemoteCall::exportAs("GMLIB_API", "updateFloatingText", [](int64 id, std::string text) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "setFloatingTextData", [](int id, std::string text) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
             ft->setText(text);
@@ -52,10 +52,10 @@ void Export_Compatibility_API() {
         }
         return false;
     });
-    RemoteCall::exportAs("GMLIB_API", "deleteFloatingText", [](int64 id) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "deleteFloatingText", [](int id) -> bool {
         return GMLIB::Server::FloatingText::deleteFloatingText(id);
     });
-    RemoteCall::exportAs("GMLIB_API", "sendFloatingTextToPlayer", [](int64 id, Player* pl) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "sendFloatingTextToPlayer", [](int id, Player* pl) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
             ft->sendToClient(pl);
@@ -63,7 +63,7 @@ void Export_Compatibility_API() {
         }
         return false;
     });
-    RemoteCall::exportAs("GMLIB_API", "sendFloatingText", [](int64 id) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "sendFloatingText", [](int id) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
             ft->sendToAllClients();
@@ -71,7 +71,7 @@ void Export_Compatibility_API() {
         }
         return false;
     });
-    RemoteCall::exportAs("GMLIB_API", "removeFloatingTextFromPlayer", [](int64 id, Player* pl) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "removeFloatingTextFromPlayer", [](int id, Player* pl) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
             ft->removeFromClient(pl);
@@ -79,7 +79,7 @@ void Export_Compatibility_API() {
         }
         return false;
     });
-    RemoteCall::exportAs("GMLIB_API", "removeFloatingText", [](int64 id) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "removeFloatingText", [](int id) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
             ft->removeFromAllClients();
