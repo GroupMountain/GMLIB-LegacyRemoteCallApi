@@ -1,7 +1,6 @@
 #include "Global.h"
 
-std::unordered_set<std::string> HardCodedKeys   = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
-std::unordered_set<int>         ExperimentsList = {6, 7, 8, 9, 10, 13, 16, 17, 18};
+std::unordered_set<std::string> HardCodedKeys = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
 
 std::variant<std::string, std::vector<RecipeIngredient>> makeRecipeUnlockingKey(std::string& key) {
     if (HardCodedKeys.count(key)) {
@@ -155,7 +154,8 @@ void Export_Legacy_GMLib_ModAPI() {
     });
     // 实验性
     RemoteCall::exportAs("GMLib_ModAPI", "registerExperimentsRequire", [](int experiment_id) -> void {
-        if (ExperimentsList.count(experiment_id)) {
+        auto map = GMLIB_Level::getAllExperiments();
+        if (map.count(experiment_id)) {
             GMLIB_Level::addExperimentsRequire((AllExperiments)experiment_id);
         } else {
             ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
@@ -166,7 +166,8 @@ void Export_Legacy_GMLib_ModAPI() {
         if (!level) {
             return;
         }
-        if (ExperimentsList.count(experiment_id)) {
+        auto map = GMLIB_Level::getAllExperiments();
+        if (map.count(experiment_id)) {
             GMLIB_Level::getLevel()->setExperimentEnabled(((AllExperiments)experiment_id), value);
         } else ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
     });
@@ -175,7 +176,8 @@ void Export_Legacy_GMLib_ModAPI() {
         if (!level) {
             return false;
         }
-        if (ExperimentsList.count(experiment_id)) {
+        auto map = GMLIB_Level::getAllExperiments();
+        if (map.count(experiment_id)) {
             return GMLIB_Level::getLevel()->getExperimentEnabled(((AllExperiments)experiment_id));
         } else {
             ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
