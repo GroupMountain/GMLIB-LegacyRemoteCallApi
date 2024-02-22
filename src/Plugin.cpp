@@ -10,6 +10,7 @@ Plugin::Plugin(ll::plugin::NativePlugin& self) : mSelf(self) {
     Export_Legacy_GMLib_ModAPI();
     Export_Legacy_GMLib_ServerAPI();
     Export_Compatibility_API();
+    ExportPAPI();
     logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
     logger.info("Author: GroupMountain");
     logger.info("Repository: https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi");
