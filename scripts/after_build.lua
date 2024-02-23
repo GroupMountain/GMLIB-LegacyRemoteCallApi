@@ -92,6 +92,7 @@ function pack_plugin(target,plugin_define)
         local outputdir = path.join(bindir, plugin_define.pluginName)
         local targetfile = path.join(outputdir, plugin_define.pluginFile)
         local pdbfile = path.join(outputdir, path.basename(plugin_define.pluginFile) .. ".pdb")
+        local libfile = path.join(os.projectdir(), "lib")
         local manifestfile = path.join(outputdir, "manifest.json")
         local oritargetfile = target:targetfile()
         local oripdbfile = path.join(path.directory(oritargetfile), path.basename(oritargetfile) .. ".pdb")
@@ -101,6 +102,7 @@ function pack_plugin(target,plugin_define)
         if os.isfile(oripdbfile) then
             os.cp(oripdbfile, pdbfile)
         end
+        os.cp(libfile, outputdir)
 
         formattedmanifest = string_formatter(manifest, plugin_define)
         io.writefile(manifestfile,formattedmanifest)

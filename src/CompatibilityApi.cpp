@@ -36,14 +36,18 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getExperimentTranslatedName", [](int id) -> std::string {
         auto map = GMLIB_Level::getAllExperimentsTranslateKeys();
         if (map.count(id)) {
-            return map[id];
+            return std::string(map[id]);
         }
         return "";
     });
-    RemoteCall::exportAs("GMLIB_API", "createFloatingText", [](std::pair<Vec3, int> pos, std::string text) -> int {
-        auto ft = new GMLIB::Server::FloatingText(text, pos.first, pos.second);
-        return ft->getRuntimeID();
-    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "createFloatingText",
+        [](std::pair<Vec3, int> pos, std::string text, bool papi) -> int {
+            auto ft = new GMLIB::Server::FloatingText(text, pos.first, pos.second, papi);
+            return ft->getRuntimeID();
+        }
+    );
     RemoteCall::exportAs("GMLIB_API", "setFloatingTextData", [](int id, std::string text) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
