@@ -1,19 +1,20 @@
 {
     "format_version": 2,
     "tooth": "github.com/GroupMountain/GMLIB-LegacyRemoteCallApi",
-    "version": "0.8.2",
+    "version": "0.8.3",
     "info": {
         "name": "GMLIB-LegacyRemoteCallApi",
         "description": "Legacy RemoteCall API for GMLIB",
+        "source": "github.com/GroupMountain/GMLIB-LegacyRemoteCallApi",
         "author": "GroupMountain",
         "tags": [
-            "LeviLamina",
-            "GMLIB",
-            "GMLIB-LegacyRemoteCallApi",
-            "Library"
+            "levilamina",
+            "gmlib",
+            "lse",
+            "library"
         ]
     },
-    "asset_url": "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v0.8.2/GMLIB-LegacyRemoteCallApi-windows-x64.zip",
+    "asset_url": "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v0.8.3/GMLIB-LegacyRemoteCallApi-windows-x64.zip",
     "dependencies": {
         "github.com/GroupMountain/GMLIB": ">=0.8.1"
     },
