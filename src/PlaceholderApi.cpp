@@ -108,12 +108,12 @@ std::string registerStaticPlaceholder(
 }
 
 std::string translateString(std::string const& str, std::string const& xuid) {
-    std::string _str = str;
-    GMLIB::Server::PlaceholderAPI::translateString(_str, ll::service::bedrock::getLevel()->getPlayerByXuid(xuid));
-    return _str;
+    return GMLIB::Server::PlaceholderAPI::translate(str, ll::service::bedrock::getLevel()->getPlayerByXuid(xuid));
 }
 
 bool unRegisterPlaceholder(std::string const& str) { return GMLIB::Server::PlaceholderAPI::unRegisterPlaceholder(str); }
+
+std::vector<std::string> getAllPAPI() { return GMLIB::Server::PlaceholderAPI::getAllPAPI(); }
 
 } // namespace PAPIRemoteCall
 
@@ -128,4 +128,5 @@ void ExportPAPI() {
     EXPORTAPI(PAPIRemoteCall::GetValueWithPlayer);
     EXPORTAPI(PAPIRemoteCall::translateString);
     EXPORTAPI(PAPIRemoteCall::unRegisterPlaceholder);
+    EXPORTAPI(PAPIRemoteCall::getAllPAPI);
 }
