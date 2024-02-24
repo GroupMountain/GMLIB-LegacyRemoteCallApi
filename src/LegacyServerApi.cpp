@@ -27,11 +27,7 @@ void Export_Legacy_GMLib_ServerAPI() {
         return level->setLevelName(name);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setFakeSeed", [](int64_t seed) -> void {
-        auto level = GMLIB_Level::getLevel();
-        if (!level) {
-            return;
-        }
-        return level->setFakeSeed(seed);
+        return GMLIB_Level::setFakeSeed(seed);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "spawnEntity", [](std::pair<Vec3, int> pos, std::string name) -> Actor* {
         return GMLIB_Spawner::spawnEntity(pos.first, pos.second, name);
