@@ -43,14 +43,6 @@ void Export_Compatibility_API() {
             return GMLIB_Player::setPlayerNbtTags(uid, *nbt, tags);
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "tryGetNameFormUuid", [](std::string uuid) -> std::string {
-        auto uid  = mce::UUID::fromString(uuid);
-        auto info = ll::service::PlayerInfo::getInstance().fromUuid(uid);
-        if (info) {
-            return info->name;
-        }
-        return "";
-    });
     RemoteCall::exportAs("GMLIB_API", "getAllExperiments", []() -> std::vector<int> {
         auto             map = GMLIB_Level::getAllExperiments();
         std::vector<int> result;
