@@ -1,5 +1,5 @@
 #pragma once
-#include <GMLIB/include_lib.h>
+#include <include_all.h>
 #include <RemoteCallAPI.h>
 
 #define PLUGIN_NAME "GMLIB-LRCA"

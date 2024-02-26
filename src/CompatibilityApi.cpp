@@ -25,6 +25,33 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getAllPlayerUuids", []() -> std::vector<std::string> {
         return GMLIB_Player::getAllUuids();
     });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerNbt", [](std::string uuid) -> std::string {
+        auto uid = mce::UUID::fromString(uuid);
+        return GMLIB_Player::getPlayerNbt(uid)->toSnbt();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setPlayerNbt", [](std::string uuid, std::string snbt) -> bool {
+        auto uid = mce::UUID::fromString(uuid);
+        auto nbt = CompoundTag::fromSnbt(snbt);
+        return GMLIB_Player::setPlayerNbt(uid, *nbt);
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "setPlayerNbtTags",
+        [](std::string uuid, std::string snbt, std::vector<std::string> tags) -> bool {
+            auto uid = mce::UUID::fromString(uuid);
+            auto nbt = CompoundTag::fromSnbt(snbt);
+            logger.error("call");
+            return GMLIB_Player::setPlayerNbtTags(uid, *nbt, tags);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "tryGetNameFormUuid", [](std::string uuid) -> std::string {
+        auto uid  = mce::UUID::fromString(uuid);
+        auto info = ll::service::PlayerInfo::getInstance().fromUuid(uid);
+        if (info) {
+            return info->name;
+        }
+        return "";
+    });
     RemoteCall::exportAs("GMLIB_API", "getAllExperiments", []() -> std::vector<int> {
         auto             map = GMLIB_Level::getAllExperiments();
         std::vector<int> result;
@@ -87,6 +114,22 @@ void Export_Compatibility_API() {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
             ft->removeFromAllClients();
+            return true;
+        }
+        return false;
+    });
+    RemoteCall::exportAs("GMLIB_API", "updateClientFloatingTextData", [](int id, Player* pl) -> bool {
+        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
+        if (ft) {
+            ft->updateClient(pl);
+            return true;
+        }
+        return false;
+    });
+    RemoteCall::exportAs("GMLIB_API", "updateAllClientsFloatingTextData", [](int id) -> bool {
+        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
+        if (ft) {
+            ft->updateAllClients();
             return true;
         }
         return false;
