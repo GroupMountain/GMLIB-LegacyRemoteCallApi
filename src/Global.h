@@ -3,7 +3,7 @@
 #include <RemoteCallAPI.h>
 
 #define PLUGIN_NAME "GMLIB-LRCA"
-#define LIB_VERSION SemVersion(0, 8, 4, "", "")
+#define LIB_VERSION SemVersion(0, 9, 0, "", "")
 
 extern ll::Logger logger;
 
