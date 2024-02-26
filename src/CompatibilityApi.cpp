@@ -40,7 +40,6 @@ void Export_Compatibility_API() {
         [](std::string uuid, std::string snbt, std::vector<std::string> tags) -> bool {
             auto uid = mce::UUID::fromString(uuid);
             auto nbt = CompoundTag::fromSnbt(snbt);
-            logger.error("call");
             return GMLIB_Player::setPlayerNbtTags(uid, *nbt, tags);
         }
     );
