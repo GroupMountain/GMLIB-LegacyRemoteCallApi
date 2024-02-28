@@ -18,7 +18,7 @@ auto load(ll::plugin::NativePlugin& self) -> bool {
     selfPluginInstance = std::make_unique<std::reference_wrapper<ll::plugin::NativePlugin>>(self);
     Export_Legacy_GMLib_ModAPI();
     Export_Legacy_GMLib_ServerAPI();
-    Export_Legacy_GMLib_FakeListAPI();
+    Export_GMLib_FakeListAPI();
     Export_Compatibility_API();
     ExportPAPI();
     logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
