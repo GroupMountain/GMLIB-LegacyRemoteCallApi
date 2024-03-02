@@ -108,7 +108,7 @@ std::string registerStaticPlaceholder(
 }
 
 std::string translateString(std::string const& str, std::string const& xuid) {
-    return GMLIB::Server::PlaceholderAPI::translate(str, ll::service::bedrock::getLevel()->getPlayerByXuid(xuid));
+    return GMLIB::Server::PlaceholderAPI::translateString(str, ll::service::bedrock::getLevel()->getPlayerByXuid(xuid));
 }
 
 bool unRegisterPlaceholder(std::string const& str) { return GMLIB::Server::PlaceholderAPI::unRegisterPlaceholder(str); }
