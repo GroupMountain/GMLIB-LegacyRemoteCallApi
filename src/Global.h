@@ -1,9 +1,10 @@
 #pragma once
 #include <include_all.h>
+
 #include <RemoteCallAPI.h>
 
 #define PLUGIN_NAME "GMLIB-LRCA"
-#define LIB_VERSION SemVersion(0, 9, 0, "", "")
+#define LIB_VERSION SemVersion(0, 9, 1, "", "")
 
 extern ll::Logger logger;
 
