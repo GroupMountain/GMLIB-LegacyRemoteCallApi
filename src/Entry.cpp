@@ -20,6 +20,7 @@ auto load(ll::plugin::NativePlugin& self) -> bool {
     Export_Legacy_GMLib_ServerAPI();
     Export_Compatibility_API();
     ExportPAPI();
+    Export_Event_API();
     logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
     logger.info("Version: {}", LIB_VERSION.asString());
     logger.info("Author: GroupMountain");
