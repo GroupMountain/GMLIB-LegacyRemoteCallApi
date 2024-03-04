@@ -133,4 +133,12 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getVersion_GMLIB", []() -> std::string {
         return GMLIB::Version::getLibVersionString();
     });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "resourcePackTranslate",
+        [](std::string key, std::vector<std::string> params) -> std::string { return I18n::get(key, params); }
+    );
+    RemoteCall::exportAs("GMLIB_API", "chooseResourcePackI18nLanguage", [](std::string code) -> void {
+        I18n::chooseLanguage(code);
+    });
 }
