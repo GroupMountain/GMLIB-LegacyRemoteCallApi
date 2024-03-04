@@ -132,6 +132,26 @@ void Export_Event_API() {
                     );
                     return true;
                 }
+                case do_hash("onDeathMessage"): {
+                    auto Call = RemoteCall::importAs<
+                        bool(std::string message, std::vector<std::string>, Actor * dead, Actor * killer, int cause)>(
+                        eventName,
+                        eventId
+                    );
+                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::DeathMessageAfterEvent>(
+                        [Call](GMLIB::Event::EntityEvent::DeathMessageAfterEvent& ev) {
+                            auto   msg    = ev.getDeathMessage();
+                            auto   source = ev.getDamageSource();
+                            Actor* entity = nullptr;
+                            entity        = GMLIB_Level::getLevel()->fetchEntity(source.getDamagingEntityUniqueID());
+                            if (entity->getOwner()) {
+                                entity = entity->getOwner();
+                            }
+                            Call(msg.first, msg.second, &ev.self(), entity, (int)source.getCause());
+                        }
+                    );
+                    return true;
+                }
                 default:
                     return false;
                 }
