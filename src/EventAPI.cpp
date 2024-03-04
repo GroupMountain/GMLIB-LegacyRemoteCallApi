@@ -17,12 +17,14 @@ void Export_Event_API() {
                     );
                     eventBus->emplaceListener<GMLIB::Event::PacketEvent::ClientLoginAfterEvent>(
                         [Call](GMLIB::Event::PacketEvent::ClientLoginAfterEvent& ev) {
-                            Call(
-                                ev.getRealName(),
-                                ev.getUuid().asString(),
-                                ev.getServerAuthXuid(),
-                                ev.getClientAuthXuid()
-                            );
+                            try {
+                                Call(
+                                    ev.getRealName(),
+                                    ev.getUuid().asString(),
+                                    ev.getServerAuthXuid(),
+                                    ev.getClientAuthXuid()
+                                );
+                            } catch (...) {}
                         }
                     );
                     return true;
@@ -96,7 +98,9 @@ void Export_Event_API() {
                             auto                 pos    = ev.getPosition();
                             auto                 dimid  = ev.getBlockSource().getDimensionId().id;
                             std::pair<Vec3, int> lsePos = {pos, dimid};
-                            Call(&ev.getItem(), (Actor*)&ev.getItemActor(), lsePos, ev.getSpawner());
+                            try {
+                                Call(&ev.getItem(), (Actor*)&ev.getItemActor(), lsePos, ev.getSpawner());
+                            } catch (...) {}
                         }
                     );
                     return true;
@@ -133,21 +137,17 @@ void Export_Event_API() {
                     return true;
                 }
                 case do_hash("onDeathMessage"): {
-                    auto Call = RemoteCall::importAs<
-                        bool(std::string message, std::vector<std::string>, Actor * dead, Actor * killer, int cause)>(
+                    auto Call = RemoteCall::importAs<bool(std::string message, std::vector<std::string>, Actor * dead)>(
                         eventName,
                         eventId
                     );
                     eventBus->emplaceListener<GMLIB::Event::EntityEvent::DeathMessageAfterEvent>(
                         [Call](GMLIB::Event::EntityEvent::DeathMessageAfterEvent& ev) {
-                            auto   msg    = ev.getDeathMessage();
-                            auto   source = ev.getDamageSource();
-                            Actor* entity = nullptr;
-                            entity        = GMLIB_Level::getLevel()->fetchEntity(source.getDamagingEntityUniqueID());
-                            if (entity->getOwner()) {
-                                entity = entity->getOwner();
-                            }
-                            Call(msg.first, msg.second, &ev.self(), entity, (int)source.getCause());
+                            auto msg    = ev.getDeathMessage();
+                            auto source = ev.getDamageSource();
+                            try {
+                                Call(msg.first, msg.second, &ev.self());
+                            } catch (...) {}
                         }
                     );
                     return true;
