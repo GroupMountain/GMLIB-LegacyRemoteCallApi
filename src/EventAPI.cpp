@@ -117,6 +117,21 @@ void Export_Event_API() {
                     );
                     return true;
                 }
+                case do_hash("onLeaveBed"): {
+                    auto Call = RemoteCall::importAs<bool(Player * pl)>(eventName, eventId);
+                    eventBus->emplaceListener<GMLIB::Event::PlayerEvent::PlayerStopSleepBeforeEvent>(
+                        [Call](GMLIB::Event::PlayerEvent::PlayerStopSleepBeforeEvent& ev) {
+                            bool result = true;
+                            try {
+                                result = Call(&ev.self());
+                            } catch (...) {}
+                            if (!result) {
+                                ev.cancel();
+                            }
+                        }
+                    );
+                    return true;
+                }
                 default:
                     return false;
                 }
