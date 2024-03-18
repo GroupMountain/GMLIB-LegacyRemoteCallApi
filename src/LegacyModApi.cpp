@@ -33,7 +33,7 @@ void Export_Legacy_GMLib_ModAPI() {
             }
             auto res = RecipeIngredient(result, 0, count);
             auto unl = makeRecipeUnlockingKey(unlock);
-            GMLIB::Mod::CustomRecipe::registerShapelessCraftingTableRecipe(recipe_id, types, res, unl);
+            GMLIB::Mod::JsonRecipe::registerShapelessCraftingTableRecipe(recipe_id, types, res, unl);
         }
     );
     RemoteCall::exportAs(
@@ -56,7 +56,7 @@ void Export_Legacy_GMLib_ModAPI() {
             }
             auto res = RecipeIngredient(result, 0, count);
             auto unl = makeRecipeUnlockingKey(unlock);
-            GMLIB::Mod::CustomRecipe::registerShapedCraftingTableRecipe(recipe_id, shape, types, res, unl);
+            GMLIB::Mod::JsonRecipe::registerShapedCraftingTableRecipe(recipe_id, shape, types, res, unl);
         }
     );
     RemoteCall::exportAs(
@@ -69,7 +69,7 @@ void Export_Legacy_GMLib_ModAPI() {
             }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
-            GMLIB::Mod::CustomRecipe::registerFurnaceRecipe(recipe_id, inp, outp, tags);
+            GMLIB::Mod::JsonRecipe::registerFurnaceRecipe(recipe_id, inp, outp, tags);
         }
     );
     RemoteCall::exportAs(
@@ -81,7 +81,7 @@ void Export_Legacy_GMLib_ModAPI() {
                 return;
             }
             auto rea = RecipeIngredient(reagent, 0, 1);
-            GMLIB::Mod::CustomRecipe::registerBrewingMixRecipe(recipe_id, input, output, rea);
+            GMLIB::Mod::JsonRecipe::registerBrewingMixRecipe(recipe_id, input, output, rea);
         }
     );
     RemoteCall::exportAs(
@@ -95,7 +95,7 @@ void Export_Legacy_GMLib_ModAPI() {
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
             auto rea  = RecipeIngredient(reagent, 0, 1);
-            GMLIB::Mod::CustomRecipe::registerBrewingContainerRecipe(recipe_id, inp, outp, rea);
+            GMLIB::Mod::JsonRecipe::registerBrewingContainerRecipe(recipe_id, inp, outp, rea);
         }
     );
     RemoteCall::exportAs(
@@ -110,7 +110,7 @@ void Export_Legacy_GMLib_ModAPI() {
             if (!level) {
                 return;
             }
-            GMLIB::Mod::CustomRecipe::registerSmithingTransformRecipe(
+            GMLIB::Mod::JsonRecipe::registerSmithingTransformRecipe(
                 recipe_id,
                 smithing_template,
                 base,
@@ -127,7 +127,7 @@ void Export_Legacy_GMLib_ModAPI() {
             if (!level) {
                 return;
             }
-            GMLIB::Mod::CustomRecipe::registerSmithingTrimRecipe(recipe_id, smithing_template, base, addition);
+            GMLIB::Mod::JsonRecipe::registerSmithingTrimRecipe(recipe_id, smithing_template, base, addition);
         }
     );
     RemoteCall::exportAs(
@@ -145,7 +145,7 @@ void Export_Legacy_GMLib_ModAPI() {
             }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
-            GMLIB::Mod::CustomRecipe::registerStoneCutterRecipe(recipe_id, inp, outp);
+            GMLIB::Mod::JsonRecipe::registerStoneCutterRecipe(recipe_id, inp, outp);
         }
     );
     // 错误方块清理
