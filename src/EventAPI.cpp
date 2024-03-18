@@ -8,8 +8,8 @@ void Export_Event_API() {
         "callCustomEvent",
         [eventBus](std::string eventName, std::string eventId) -> bool {
             if (RemoteCall::hasFunc(eventName, eventId)) {
-                switch (do_hash(eventName)) {
-                case do_hash("onClientLogin"): {
+                switch (doHash(eventName)) {
+                case doHash("onClientLogin"): {
                     auto Call = RemoteCall::importAs<
                         bool(std::string realName, std::string uuid, std::string serverXuid, std::string clientXuid)>(
                         eventName,
@@ -29,7 +29,7 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case do_hash("onWeatherChange"): {
+                case doHash("onWeatherChange"): {
                     auto Call =
                         RemoteCall::importAs<bool(int lightningLevel, int rainLevel, int lightningLast, int rainLast)>(
                             eventName,
@@ -53,7 +53,7 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case do_hash("onMobPick"): {
+                case doHash("onMobPick"): {
                     auto Call = RemoteCall::importAs<bool(Actor * mob, Actor * item)>(eventName, eventId);
                     eventBus->emplaceListener<GMLIB::Event::EntityEvent::MobPickupItemBeforeEvent>(
                         [Call](GMLIB::Event::EntityEvent::MobPickupItemBeforeEvent& ev) {
@@ -68,7 +68,7 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case do_hash("onItemTrySpawn"): {
+                case doHash("onItemTrySpawn"): {
                     auto Call = RemoteCall::importAs<
                         bool(const ItemStack* item, std::pair<Vec3, int> position, Actor* spawner)>(eventName, eventId);
                     eventBus->emplaceListener<GMLIB::Event::EntityEvent::ItemActorSpawnBeforeEvent>(
@@ -87,7 +87,7 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case do_hash("onItemSpawned"): {
+                case doHash("onItemSpawned"): {
                     auto Call = RemoteCall::importAs<
                         bool(const ItemStack* item, Actor* itemActor, std::pair<Vec3, int> position, Actor* spawner)>(
                         eventName,
@@ -105,7 +105,7 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case do_hash("onTextSend"): {
+                case doHash("onTextSend"): {
                     auto Call = RemoteCall::importAs<bool(std::string author, std::string message)>(eventName, eventId);
                     eventBus->emplaceListener<GMLIB::Event::PacketEvent::TextPacketSendBeforeEvent>(
                         [Call](GMLIB::Event::PacketEvent::TextPacketSendBeforeEvent& ev) {
@@ -121,7 +121,7 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case do_hash("onLeaveBed"): {
+                case doHash("onLeaveBed"): {
                     auto Call = RemoteCall::importAs<bool(Player * pl)>(eventName, eventId);
                     eventBus->emplaceListener<GMLIB::Event::PlayerEvent::PlayerStopSleepBeforeEvent>(
                         [Call](GMLIB::Event::PlayerEvent::PlayerStopSleepBeforeEvent& ev) {
@@ -136,7 +136,7 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case do_hash("onDeathMessage"): {
+                case doHash("onDeathMessage"): {
                     auto Call = RemoteCall::importAs<bool(std::string message, std::vector<std::string>, Actor * dead)>(
                         eventName,
                         eventId
