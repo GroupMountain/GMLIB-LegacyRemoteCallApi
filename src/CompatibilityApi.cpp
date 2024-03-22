@@ -27,7 +27,11 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerNbt", [](std::string uuid) -> std::string {
         auto uid = mce::UUID::fromString(uuid);
-        return GMLIB_Player::getPlayerNbt(uid)->toSnbt();
+        auto nbt = GMLIB_Player::getPlayerNbt(uid);
+        if (nbt) {
+            return nbt->toSnbt();
+        }
+        return "null";
     });
     RemoteCall::exportAs("GMLIB_API", "setPlayerNbt", [](std::string uuid, std::string snbt) -> bool {
         auto uid = mce::UUID::fromString(uuid);
