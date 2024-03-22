@@ -10,7 +10,7 @@ namespace {
 std::unique_ptr<std::reference_wrapper<ll::plugin::NativePlugin>>
     selfPluginInstance; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
-auto disable(ll::plugin::NativePlugin& /*self*/) -> bool { return false; }
+auto disable(ll::plugin::NativePlugin& /*self*/) -> bool { return true; }
 
 auto enable(ll::plugin::NativePlugin& /*self*/) -> bool { return true; }
 

@@ -13,14 +13,14 @@ void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setForceTrustSkins", []() -> void { GMLIB_Level::setForceTrustSkin(); });
     RemoteCall::exportAs("GMLib_ServerAPI", "enableCoResourcePack", []() -> void { GMLIB_Level::setCoResourcePack(); });
     RemoteCall::exportAs("GMLib_ServerAPI", "getLevelName", []() -> std::string {
-        auto level = GMLIB_Level::getLevel();
+        auto level = GMLIB_Level::getInstance();
         if (!level) {
             return "";
         }
         return level->getLevelName();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setLevelName", [](std::string name) -> void {
-        auto level = GMLIB_Level::getLevel();
+        auto level = GMLIB_Level::getInstance();
         if (!level) {
             return;
         }
