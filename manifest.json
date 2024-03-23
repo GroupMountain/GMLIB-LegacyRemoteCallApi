@@ -1,7 +1,7 @@
 {
     "name": "${pluginName}",
     "entry": "${pluginFile}",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "type": "native",
     "dependencies": [
         {

@@ -1,4 +1,4 @@
-add_rules("mode.debug", "mode.release", "mode.releasedbg")
+add_rules("mode.debug", "mode.release")
 
 add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 
@@ -47,7 +47,8 @@ target("GMLIB-LegacyRemoteCallApi") -- Change this to your plugin name.
         "/utf-8"
     )
     add_defines(
-        "_HAS_CXX23=1" -- To enable C++23 features
+        "NOMINMAX",
+        "UNICODE"
     )
     add_files(
         "src/**.cpp"
@@ -68,7 +69,8 @@ target("GMLIB-LegacyRemoteCallApi") -- Change this to your plugin name.
     )
     set_exceptions("none") -- To avoid conflicts with /EHa
     set_kind("shared")
-    set_languages("cxx23")
+    set_languages("c++23")
+    set_symbols("debug")
 
     after_build(function (target)
         local plugin_packer = import("scripts.after_build")
