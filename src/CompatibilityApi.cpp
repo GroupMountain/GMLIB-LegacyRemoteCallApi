@@ -51,10 +51,10 @@ void Export_Compatibility_API() {
         }
         return "null";
     });
-    RemoteCall::exportAs("GMLIB_API", "setPlayerNbt", [](std::string uuid, std::string snbt) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "setPlayerNbt", [](std::string uuid, std::string snbt, bool forceCreate) -> bool {
         auto uid = mce::UUID::fromString(uuid);
         auto nbt = CompoundTag::fromSnbt(snbt);
-        return GMLIB_Player::setPlayerNbt(uid, *nbt);
+        return GMLIB_Player::setPlayerNbt(uid, *nbt, forceCreate);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -391,5 +391,28 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getEntityFromUniqueId", [](std::string uniqueId) -> Actor* {
         auto auid = parseScriptUniqueID(uniqueId);
         return ll::service::getLevel()->fetchEntity(auid);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getWorldSpawn", []() -> std::pair<BlockPos, int> {
+        return {GMLIB_Level::getInstance()->getWorldSpawn(), 0};
+    });
+    RemoteCall::exportAs("GMLIB_API", "setWorldSpawn", [](std::pair<BlockPos, int> pos) -> bool {
+        if (pos.second != 0) {
+            return false;
+        }
+        GMLIB_Level::getInstance()->setWorldSpawn(pos.first);
+        return true;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerSpawnPoint", [](Player* pl) -> std::pair<BlockPos, int> {
+        auto player = (GMLIB_Player*)pl;
+        auto res    = player->getSpawnPoint();
+        return {res.first, res.second};
+    });
+    RemoteCall::exportAs("GMLIB_API", "setPlayerSpawnPoint", [](Player* pl, std::pair<BlockPos, int> pos) -> void {
+        auto player = (GMLIB_Player*)pl;
+        player->setSpawnPoint(pos.first, pos.second);
+    });
+    RemoteCall::exportAs("GMLIB_API", "clearPlayerSpawnPoint", [](Player* pl) -> void {
+        auto player = (GMLIB_Player*)pl;
+        player->clearSpawnPoint();
     });
 }
