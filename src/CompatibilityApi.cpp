@@ -1,13 +1,13 @@
 #include "Global.h"
 #include <regex>
 
-bool isNumber(const std::string& str) {
-    std::regex pattern("[-+]?[0-9]*\\.?[0-9]+");
+bool isInteger(const std::string& str) {
+    std::regex pattern("^[+-]?\\d+$");
     return std::regex_match(str, pattern);
 }
 
 ActorUniqueID parseScriptUniqueID(std::string uniqueId) {
-    if (!isNumber(uniqueId)) {
+    if (!isInteger(uniqueId)) {
         return ActorUniqueID::INVALID_ID;
     }
     return ActorUniqueID(std::stoll(uniqueId));
@@ -36,7 +36,12 @@ void Export_Compatibility_API() {
         return level->getServerAverageTps();
     });
     RemoteCall::exportAs("GMLIB_API", "getAllPlayerUuids", []() -> std::vector<std::string> {
-        return GMLIB_Player::getAllUuids();
+        std::vector<std::string> result;
+        std::vector<mce::UUID>   uuids = GMLIB_Player::getAllUuids();
+        for (auto& uuid : uuids) {
+            result.push_back(uuid.asString());
+        }
+        return result;
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerNbt", [](std::string uuid) -> std::string {
         auto uid = mce::UUID::fromString(uuid);
@@ -262,7 +267,7 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "resetEntityScores", [](std::string uniqueId) -> bool {
         auto auid = parseScriptUniqueID(uniqueId);
-        return GMLIB_Scoreboard::getInstance()->resetAllScores(auid);
+        return GMLIB_Scoreboard::getInstance()->resetScore(auid);
     });
     RemoteCall::exportAs("GMLIB_API", "fakePlayerHasScore", [](std::string name, std::string obj) -> bool {
         if (auto result = GMLIB_Scoreboard::getInstance()->getScore(obj, name)) {
@@ -303,7 +308,7 @@ void Export_Compatibility_API() {
         return GMLIB_Scoreboard::getInstance()->resetScore(obj, name);
     });
     RemoteCall::exportAs("GMLIB_API", "resetFakePlayerScores", [](std::string name) -> bool {
-        return GMLIB_Scoreboard::getInstance()->resetAllScores(name);
+        return GMLIB_Scoreboard::getInstance()->resetScore(name);
     });
     RemoteCall::exportAs("GMLIB_API", "addObjective", [](std::string obj) -> bool {
         if (auto res = GMLIB_Scoreboard::getInstance()->getInstance()->addObjective(obj)) {
