@@ -29,4 +29,10 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}-windows-x64-${{ github.sha }}
           path: |
-            bin/
+            bin/DLL/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: PDB
+          path: |
+            bin/PDB/
