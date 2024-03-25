@@ -14,6 +14,16 @@ ActorUniqueID parseScriptUniqueID(std::string uniqueId) {
 }
 
 void Export_Compatibility_API() {
+    RemoteCall::exportAs("GMLIB_API", "unregisterRecipe", [](std::string id) -> bool {
+        auto level = GMLIB_Level::getInstance();
+        if (!level) {
+            return false;
+        }
+        return GMLIB::Mod::CustomRecipe::unregisterRecipe(id);
+    });
+    RemoteCall::exportAs("GMLIB_API", "setCustomPackPath", [](std::string path) -> void {
+        GMLIB::Mod::CustomPacks::addCustomPackPath(path);
+    });
     RemoteCall::exportAs("GMLIB_API", "getServerMspt", []() -> float {
         auto level = GMLIB_Level::getInstance();
         if (!level) {
@@ -162,6 +172,9 @@ void Export_Compatibility_API() {
     );
     RemoteCall::exportAs("GMLIB_API", "chooseResourcePackI18nLanguage", [](std::string code) -> void {
         I18n::chooseLanguage(code);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getResourcePackI18nLanguage", []() -> std::string {
+        return I18n::getCurrentLanguage()->getFullLanguageCode();
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerPosition", [](std::string uuid) -> std::pair<BlockPos, int> {
         auto uid = mce::UUID::fromString(uuid);

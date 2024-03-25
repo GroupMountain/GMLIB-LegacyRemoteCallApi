@@ -105,14 +105,13 @@ void Export_Event_API() {
                     );
                     return true;
                 }
-                case doHash("onTextSend"): {
-                    auto Call = RemoteCall::importAs<bool(std::string author, std::string message)>(eventName, eventId);
-                    eventBus->emplaceListener<GMLIB::Event::PacketEvent::TextPacketSendBeforeEvent>(
-                        [Call](GMLIB::Event::PacketEvent::TextPacketSendBeforeEvent& ev) {
-                            auto pkt    = ev.getPacket();
+                case doHash("onEntityChangeDim"): {
+                    auto Call = RemoteCall::importAs<bool(Actor * entity, int toDimId)>(eventName, eventId);
+                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::ActorChangeDimensionBeforeEvent>(
+                        [Call](GMLIB::Event::EntityEvent::ActorChangeDimensionBeforeEvent& ev) {
                             bool result = true;
                             try {
-                                result = Call(pkt.mAuthor, pkt.mMessage);
+                                result = Call(&ev.self(), ev.getToDimensionId());
                             } catch (...) {}
                             if (!result) {
                                 ev.cancel();
@@ -147,6 +146,29 @@ void Export_Event_API() {
                             auto source = ev.getDamageSource();
                             try {
                                 Call(msg.first, msg.second, &ev.self());
+                            } catch (...) {}
+                        }
+                    );
+                    return true;
+                }
+                case doHash("onMobHurted"): {
+                    auto Call = RemoteCall::importAs<bool(Actor * mob, Actor * source, float damage, int cause)>(
+                        eventName,
+                        eventId
+                    );
+                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::MobHurtAfterEvent>(
+                        [Call](GMLIB::Event::EntityEvent::MobHurtAfterEvent& ev) {
+                            auto&  damageSource = ev.getSource();
+                            Actor* source       = nullptr;
+                            if (damageSource.isEntitySource()) {
+                                auto uniqueId = damageSource.getDamagingEntityUniqueID();
+                                source        = ll::service::getLevel()->fetchEntity(uniqueId);
+                                if (source->getOwner()) {
+                                    source = source->getOwner();
+                                }
+                            }
+                            try {
+                                Call(&ev.self(), source, ev.getDamage(), (int)damageSource.getCause());
                             } catch (...) {}
                         }
                     );
