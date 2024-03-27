@@ -158,8 +158,8 @@ void Export_Compatibility_API() {
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "isVersionMatched", [](int a, int b, int c) -> bool {
-        auto version = SemVersion(a, b, c, "", "");
-        return LIB_VERSION.satisfies(version);
+        auto version = GMLIB::Version(a, b, c, "", "");
+        return version >= LIB_VERSION;
     });
     RemoteCall::exportAs("GMLIB_API", "getVersion_LRCA", []() -> std::string { return LIB_VERSION.asString(); });
     RemoteCall::exportAs("GMLIB_API", "getVersion_GMLIB", []() -> std::string {
