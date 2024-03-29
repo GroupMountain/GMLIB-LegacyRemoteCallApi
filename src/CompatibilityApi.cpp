@@ -171,10 +171,15 @@ void Export_Compatibility_API() {
         [](std::string key, std::vector<std::string> params) -> std::string { return I18n::get(key, params); }
     );
     RemoteCall::exportAs("GMLIB_API", "chooseResourcePackI18nLanguage", [](std::string code) -> void {
-        I18n::chooseLanguage(code);
+        if (GMLIB_Level::getInstance()) {
+            I18n::chooseLanguage(code);
+        }
     });
     RemoteCall::exportAs("GMLIB_API", "getResourcePackI18nLanguage", []() -> std::string {
-        return I18n::getCurrentLanguage()->getFullLanguageCode();
+        if (GMLIB_Level::getInstance()) {
+            return I18n::getCurrentLanguage()->getFullLanguageCode();
+        }
+        return "unknown";
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerPosition", [](std::string uuid) -> std::pair<BlockPos, int> {
         auto uid = mce::UUID::fromString(uuid);
