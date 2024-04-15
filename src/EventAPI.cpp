@@ -174,6 +174,21 @@ void Export_Event_API() {
                     );
                     return true;
                 }
+                case doHash("onEndermanTake"): {
+                    auto Call = RemoteCall::importAs<bool(Actor * mob)>(eventName, eventId);
+                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::EndermanTakeBlockBeforeEvent>(
+                        [Call](GMLIB::Event::EntityEvent::EndermanTakeBlockBeforeEvent& ev) {
+                            bool result = true;
+                            try {
+                                result = Call(&ev.self());
+                            } catch (...) {}
+                            if (!result) {
+                                ev.cancel();
+                            }
+                        }
+                    );
+                    return true;
+                }
                 default:
                     return false;
                 }

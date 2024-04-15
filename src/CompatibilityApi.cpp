@@ -394,7 +394,7 @@ void Export_Compatibility_API() {
         auto                     auids = GMLIB_Scoreboard::getInstance()->getInstance()->getAllEntities();
         std::vector<std::string> result;
         for (auto auid : auids) {
-            result.push_back(std::to_string(auid.get()));
+            result.push_back(std::to_string(auid.id));
         }
         return result;
     });
