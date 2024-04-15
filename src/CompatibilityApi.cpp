@@ -94,7 +94,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "createFloatingText",
         [](std::pair<Vec3, int> pos, std::string text, bool papi) -> int {
-            auto ft = new GMLIB::Server::FloatingText(text, pos.first, pos.second, papi);
+            auto ft = new GMLIB::Server::StaticFloatingText(text, pos.first, pos.second, papi);
             return ft->getRuntimeID();
         }
     );
