@@ -3,6 +3,16 @@
 
 namespace PAPIRemoteCall {
 
+std::string removeBrackets(std::string a1) {
+    a1.erase(a1.find_last_not_of("%") + 1);
+    return a1;
+}
+
+bool isParameters(std::string str) {
+    std::regex reg("[<]([^<>]+)[>]");
+    return std::regex_search(removeBrackets(str), reg);
+}
+
 std::string GetValue(std::string const& from) { return GMLIB::Server::PlaceholderAPI::getValue(from); }
 
 std::string GetValueWithPlayer(std::string const& a1, std::string const& a2) {
@@ -15,12 +25,24 @@ bool registerPlayerPlaceholder(
     std::string const& PAPIName
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
-        auto Call = RemoteCall::importAs<std::string(Player * pl)>(PluginName, FuncName);
-        GMLIB::Server::PlaceholderAPI::registerPlayerPlaceholder(
-            PAPIName,
-            [Call](Player* sp) { return Call(sp); },
-            PluginName
-        );
+        if (isParameters(PAPIName)) {
+            auto Call = RemoteCall::importAs<std::string(Player * pl, std::unordered_map<std::string, std::string>)>(
+                PluginName,
+                FuncName
+            );
+            GMLIB::Server::PlaceholderAPI::registerPlayerPlaceholder(
+                PAPIName,
+                [Call](Player* sp, std::unordered_map<std::string, std::string> map) { return Call(sp, map); },
+                PluginName
+            );
+        } else {
+            auto Call = RemoteCall::importAs<std::string(Player * pl)>(PluginName, FuncName);
+            GMLIB::Server::PlaceholderAPI::registerPlayerPlaceholder(
+                PAPIName,
+                [Call](Player* sp) { return Call(sp); },
+                PluginName
+            );
+        }
         return true;
     }
     return false;
@@ -32,12 +54,22 @@ bool registerServerPlaceholder(
     std::string const& PAPIName
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
-        auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
-        GMLIB::Server::PlaceholderAPI::registerServerPlaceholder(
-            PAPIName,
-            [Call]() { return Call(); },
-            PluginName
-        );
+        if (isParameters(PAPIName)) {
+            auto Call =
+                RemoteCall::importAs<std::string(std::unordered_map<std::string, std::string>)>(PluginName, FuncName);
+            GMLIB::Server::PlaceholderAPI::registerServerPlaceholder(
+                PAPIName,
+                [Call](std::unordered_map<std::string, std::string> map) { return Call(map); },
+                PluginName
+            );
+        } else {
+            auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
+            GMLIB::Server::PlaceholderAPI::registerServerPlaceholder(
+                PAPIName,
+                [Call]() { return Call(); },
+                PluginName
+            );
+        }
         return true;
     }
     return false;
@@ -50,20 +82,22 @@ bool registerStaticPlaceholder(
     int                num
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
-        auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
-        if (num == -1) {
-            GMLIB::Server::PlaceholderAPI::registerStaticPlaceholder(
-                PAPIName,
-                [Call] { return Call(); },
-                PluginName
-            );
-        } else {
-            GMLIB::Server::PlaceholderAPI::registerStaticPlaceholder(
-                PAPIName,
-                num,
-                [Call] { return Call(); },
-                PluginName
-            );
+        if (isParameters(PAPIName)) {
+            auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
+            if (num == -1) {
+                GMLIB::Server::PlaceholderAPI::registerStaticPlaceholder(
+                    PAPIName,
+                    [Call] { return Call(); },
+                    PluginName
+                );
+            } else {
+                GMLIB::Server::PlaceholderAPI::registerStaticPlaceholder(
+                    PAPIName,
+                    num,
+                    [Call] { return Call(); },
+                    PluginName
+                );
+            }
         }
         return true;
     }
