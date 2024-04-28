@@ -168,16 +168,16 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs(
         "GMLIB_API",
         "resourcePackTranslate",
-        [](std::string key, std::vector<std::string> params) -> std::string { return I18n::get(key, params); }
+        [](std::string key, std::vector<std::string> params) -> std::string { return I18nAPI::get(key, params); }
     );
     RemoteCall::exportAs("GMLIB_API", "chooseResourcePackI18nLanguage", [](std::string code) -> void {
         if (GMLIB_Level::getInstance()) {
-            I18n::chooseLanguage(code);
+            I18nAPI::chooseLanguage(code);
         }
     });
     RemoteCall::exportAs("GMLIB_API", "getResourcePackI18nLanguage", []() -> std::string {
-        if (GMLIB_Level::getInstance()) {
-            return I18n::getCurrentLanguage()->getFullLanguageCode();
+        if (auto result = I18nAPI::getCurrentLanguageCode()) {
+            return result.value();
         }
         return "unknown";
     });
