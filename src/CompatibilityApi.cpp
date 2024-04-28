@@ -112,7 +112,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "sendFloatingTextToPlayer", [](int id, Player* pl) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
-            ft->sendToClient(pl);
+            ft->sendToClient(*pl);
             return true;
         }
         return false;
@@ -128,7 +128,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "removeFloatingTextFromPlayer", [](int id, Player* pl) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
-            ft->removeFromClient(pl);
+            ft->removeFromClient(*pl);
             return true;
         }
         return false;
@@ -144,7 +144,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "updateClientFloatingTextData", [](int id, Player* pl) -> bool {
         auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
         if (ft) {
-            ft->updateClient(pl);
+            ft->updateClient(*pl);
             return true;
         }
         return false;

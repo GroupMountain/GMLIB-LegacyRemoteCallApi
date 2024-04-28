@@ -17,7 +17,11 @@ bool LRCA::load() {
     ExportPAPI();
     Export_Event_API();
     logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
-    logger.info("Version: {}", LIB_VERSION.asString());
+    logger.info(
+        "Loaded Version: {} with {}",
+        fmt::format(fg(fmt::color::pink), "GMLIB-" + GMLIB::Version::getLibVersionString()),
+        fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-"+LIB_VERSION.asString())
+    );
     logger.info("Author: GroupMountain");
     logger.info("Repository: https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi");
     return true;

@@ -3,8 +3,9 @@
 
 #include <RemoteCallAPI.h>
 
-#define PLUGIN_NAME "GMLIB-LRCA"
-#define LIB_VERSION GMLIB::Version(0, 12, 0)
+#define PLUGIN_NAME fmt::format(fg(fmt::color::light_green), "GMLIB-LRCA")
+
+#define LIB_VERSION GMLIB::Version(0, 12, 1)
 
 extern ll::Logger logger;
 
