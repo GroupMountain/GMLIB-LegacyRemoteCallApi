@@ -2,16 +2,18 @@
 
 void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", []() -> void {
-        GMLIB_Level::addEducationEditionRequired();
+        GMLIB_Level::tryEnableEducationEdition();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "registerAbilityCommand", []() -> void {
-        GMLIB_Level::forceEnableAbilityCommand();
+        GMLIB_Level::tryRegisterAbilityCommand();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setEnableAchievement", []() -> void {
         GMLIB_Level::setForceAchievementsEnabled();
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "setForceTrustSkins", []() -> void { GMLIB_Level::setForceTrustSkin(); });
-    RemoteCall::exportAs("GMLib_ServerAPI", "enableCoResourcePack", []() -> void { GMLIB_Level::setCoResourcePack(); });
+    RemoteCall::exportAs("GMLib_ServerAPI", "setForceTrustSkins", []() -> void { GMLIB_Level::trustAllSkins(); });
+    RemoteCall::exportAs("GMLib_ServerAPI", "enableCoResourcePack", []() -> void {
+        GMLIB_Level::requireServerResourcePackAndAllowClientResourcePack();
+    });
     RemoteCall::exportAs("GMLib_ServerAPI", "getLevelName", []() -> std::string {
         auto level = GMLIB_Level::getInstance();
         if (!level) {

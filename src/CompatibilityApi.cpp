@@ -53,25 +53,21 @@ void Export_Compatibility_API() {
         }
         return result;
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerNbt", [](std::string uuid) -> std::string {
+    RemoteCall::exportAs("GMLIB_API", "getPlayerNbt", [](std::string uuid) -> std::unique_ptr<CompoundTag> {
         auto uid = mce::UUID::fromString(uuid);
-        auto nbt = GMLIB_Player::getPlayerNbt(uid);
-        if (nbt) {
-            return nbt->toSnbt();
-        }
-        return "null";
+        return std::move(GMLIB_Player::getPlayerNbt(uid));
     });
-    RemoteCall::exportAs("GMLIB_API", "setPlayerNbt", [](std::string uuid, std::string snbt, bool forceCreate) -> bool {
+    RemoteCall::exportAs("GMLIB_API", "setPlayerNbt", [](std::string uuid, CompoundTag* nbt, bool forceCreate) -> bool {
         auto uid = mce::UUID::fromString(uuid);
-        auto nbt = CompoundTag::fromSnbt(snbt);
+        logger.warn(nbt->toSnbt());
         return GMLIB_Player::setPlayerNbt(uid, *nbt, forceCreate);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "setPlayerNbtTags",
-        [](std::string uuid, std::string snbt, std::vector<std::string> tags) -> bool {
+        [](std::string uuid, CompoundTag* nbt, std::vector<std::string> tags) -> bool {
             auto uid = mce::UUID::fromString(uuid);
-            auto nbt = CompoundTag::fromSnbt(snbt);
+            logger.warn(nbt->toSnbt());
             return GMLIB_Player::setPlayerNbtTags(uid, *nbt, tags);
         }
     );
@@ -176,8 +172,8 @@ void Export_Compatibility_API() {
         }
     });
     RemoteCall::exportAs("GMLIB_API", "getResourcePackI18nLanguage", []() -> std::string {
-        if (auto result = I18nAPI::getCurrentLanguageCode()) {
-            return result.value();
+        if (GMLIB_Level::getInstance()) {
+            return I18nAPI::getCurrentLanguageCode();
         }
         return "unknown";
     });
