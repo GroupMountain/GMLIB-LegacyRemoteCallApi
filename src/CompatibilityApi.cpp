@@ -59,7 +59,6 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "setPlayerNbt", [](std::string uuid, CompoundTag* nbt, bool forceCreate) -> bool {
         auto uid = mce::UUID::fromString(uuid);
-        logger.warn(nbt->toSnbt());
         return GMLIB_Player::setPlayerNbt(uid, *nbt, forceCreate);
     });
     RemoteCall::exportAs(
@@ -67,7 +66,6 @@ void Export_Compatibility_API() {
         "setPlayerNbtTags",
         [](std::string uuid, CompoundTag* nbt, std::vector<std::string> tags) -> bool {
             auto uid = mce::UUID::fromString(uuid);
-            logger.warn(nbt->toSnbt());
             return GMLIB_Player::setPlayerNbtTags(uid, *nbt, tags);
         }
     );
