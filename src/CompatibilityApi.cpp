@@ -175,6 +175,31 @@ void Export_Compatibility_API() {
         }
         return "unknown";
     });
+    RemoteCall::exportAs("GMLIB_API", "getSupportedLanguages", []() -> std::vector<std::string> {
+        if (GMLIB_Level::getInstance()) {
+            return I18nAPI::getSupportedLanguageCodes();
+        }
+        return {};
+    });
+    RemoteCall::exportAs("GMLIB_API", "loadLanguage", [](std::string code, std::string lang) -> void {
+        if (GMLIB_Level::getInstance()) {
+            I18nAPI::loadLanguage(code, lang);
+        }
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "updateOrCreateLanguageFile",
+        [](std::string code, std::string lang, std::string path) -> void {
+            if (GMLIB_Level::getInstance()) {
+                I18nAPI::updateOrCreateLanguageFile(path, code, lang);
+            }
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "loadLanguagePath", [](std::string path) -> void {
+        if (GMLIB_Level::getInstance()) {
+            I18nAPI::loadLanguagesFromDirectory(path);
+        }
+    });
     RemoteCall::exportAs("GMLIB_API", "getPlayerPosition", [](std::string uuid) -> std::pair<BlockPos, int> {
         auto uid = mce::UUID::fromString(uuid);
         auto pos = GMLIB_Player::getPlayerPosition(uid);
@@ -426,5 +451,11 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "clearPlayerSpawnPoint", [](Player* pl) -> void {
         auto player = (GMLIB_Player*)pl;
         player->clearSpawnPoint();
+    });
+    RemoteCall::exportAs("GMLIB_API", "mergePatchJson", [](std::string oldJson, std::string patchJson) -> std::string {
+        auto oldData = nlohmann::ordered_json::parse(oldJson);
+        auto newData = nlohmann::ordered_json::parse(patchJson);
+        oldData.merge_patch(newData);
+        return oldData.dump();
     });
 }
