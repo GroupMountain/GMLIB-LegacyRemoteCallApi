@@ -77,12 +77,12 @@ void Export_Compatibility_API() {
         }
         return result;
     });
-    RemoteCall::exportAs("GMLIB_API", "getExperimentTranslatedName", [](int id) -> std::string {
-        auto map = GMLIB_Level::getAllExperimentsTranslateKeys();
-        if (map.count(id)) {
-            return std::string(map[id]);
-        }
-        return "";
+    RemoteCall::exportAs("GMLIB_API", "getExperimentTranslateKey", [](int id) -> std::string {
+        std::string result;
+        try {
+            result = Experiments::getExperimentTextID(AllExperiments(id));
+        } catch (...) {}
+        return result;
     });
     RemoteCall::exportAs(
         "GMLIB_API",
