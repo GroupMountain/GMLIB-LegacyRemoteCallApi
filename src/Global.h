@@ -5,7 +5,7 @@
 
 #define PLUGIN_NAME fmt::format(fg(fmt::color::light_green), "GMLIB-LRCA")
 
-#define LIB_VERSION GMLIB::Version(0, 12, 3)
+#define LIB_VERSION GMLIB::Version(0, 12, 4)
 
 extern ll::Logger logger;
 
