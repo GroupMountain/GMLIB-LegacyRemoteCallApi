@@ -69,6 +69,10 @@ void Export_Compatibility_API() {
             return GMLIB_Player::setPlayerNbtTags(uid, *nbt, tags);
         }
     );
+    RemoteCall::exportAs("GMLIB_API", "deletePlayerNbt", [](std::string uuid) -> bool {
+        auto uid = mce::UUID::fromString(uuid);
+        return GMLIB_Player::deletePlayerNbt(uid);
+    });
     RemoteCall::exportAs("GMLIB_API", "getAllExperiments", []() -> std::vector<int> {
         auto             map = GMLIB_Level::getAllExperiments();
         std::vector<int> result;
