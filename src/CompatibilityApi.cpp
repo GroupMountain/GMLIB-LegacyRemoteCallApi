@@ -539,4 +539,10 @@ void Export_Compatibility_API() {
             return result;
         }
     );
+    RemoteCall::exportAs("GMLIB_API", "getBlockRuntimeId", [](std::string blockName) -> uint {
+        if (auto block = Block::tryGetFromRegistry(blockName)) {
+            return block->getRuntimeId();
+        }
+        return 0;
+    });
 }
