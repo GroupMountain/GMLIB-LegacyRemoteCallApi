@@ -395,8 +395,32 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getAllObjectives", []() -> std::vector<std::string> {
         auto                     objs = GMLIB_Scoreboard::getInstance()->getObjectives();
         std::vector<std::string> result;
-        for (auto obj : objs) {
+        for (auto& obj : objs) {
             result.push_back(obj->getName());
+        }
+        return result;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getAllScoreboardPlayers", []() -> std::vector<std::string> {
+        auto                     uuids = GMLIB_Scoreboard::getInstance()->getAllPlayerUuids();
+        std::vector<std::string> result;
+        for (auto& uuid : uuids) {
+            result.push_back(uuid.asString());
+        }
+        return result;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getAllScoreboardFakePlayers", []() -> std::vector<std::string> {
+        auto                     names = GMLIB_Scoreboard::getInstance()->getAllFakePlayers();
+        std::vector<std::string> result;
+        for (auto& name : names) {
+            result.push_back(name);
+        }
+        return result;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getAllScoreboardEntities", []() -> std::vector<std::string> {
+        auto                     uniqueIds = GMLIB_Scoreboard::getInstance()->getAllEntities();
+        std::vector<std::string> result;
+        for (auto& uniqueId : uniqueIds) {
+            result.push_back(std::to_string(uniqueId.id));
         }
         return result;
     });
@@ -406,21 +430,21 @@ void Export_Compatibility_API() {
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
             std::vector<std::unordered_map<std::string, std::string>> result;
             auto uuids = GMLIB_Scoreboard::getInstance()->getAllPlayerUuids();
-            for (auto uuid : uuids) {
+            for (auto& uuid : uuids) {
                 std::unordered_map<std::string, std::string> data;
                 data["Type"] = "Player";
                 data["Uuid"] = uuid.asString();
                 result.push_back(data);
             }
             auto names = GMLIB_Scoreboard::getInstance()->getAllFakePlayers();
-            for (auto name : names) {
+            for (auto& name : names) {
                 std::unordered_map<std::string, std::string> data;
                 data["Type"] = "FakePlayer";
                 data["Name"] = name;
                 result.push_back(data);
             }
             auto uniqueIds = GMLIB_Scoreboard::getInstance()->getAllEntities();
-            for (auto uniqueId : uniqueIds) {
+            for (auto& uniqueId : uniqueIds) {
                 std::unordered_map<std::string, std::string> data;
                 data["Type"]     = "Entity";
                 data["UniqueId"] = std::to_string(uniqueId.id);
@@ -500,4 +524,19 @@ void Export_Compatibility_API() {
         auto result = GMLIB::UserCache::getUuidByName(name);
         return result ? result.value().asString() : "";
     });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getAllPlayerInfo",
+        []() -> std::vector<std::unordered_map<std::string, std::string>> {
+            std::vector<std::unordered_map<std::string, std::string>> result;
+            GMLIB::UserCache::forEach([&result](const GMLIB::UserCache::UserCacheEntry& entry) {
+                std::unordered_map<std::string, std::string> info;
+                info["Name"] = entry.mName;
+                info["Xuid"] = entry.mXuid;
+                info["Uuid"] = entry.mUuid.asString();
+                result.push_back(info);
+            });
+            return result;
+        }
+    );
 }
