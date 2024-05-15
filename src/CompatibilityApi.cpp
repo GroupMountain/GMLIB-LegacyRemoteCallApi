@@ -469,4 +469,24 @@ void Export_Compatibility_API() {
         oldData.merge_patch(newData);
         return oldData.dump();
     });
+    RemoteCall::exportAs("GMLIB_API", "getXuidByUuid", [](std::string uuid) -> std::string {
+        auto uid = mce::UUID::fromString(uuid);
+        return GMLIB::UserCache::getXuidByUuid(uid).value();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getNameByUuid", [](std::string uuid) -> std::string {
+        auto uid = mce::UUID::fromString(uuid);
+        return GMLIB::UserCache::getNameByUuid(uid).value();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string xuid) -> std::string {
+        return GMLIB::UserCache::getUuidByXuid(xuid).value().asString();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string xuid) -> std::string {
+        return GMLIB::UserCache::getNameByXuid(xuid).value();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getXuidByName", [](std::string name) -> std::string {
+        return GMLIB::UserCache::getXuidByName(name).value();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string name) -> std::string {
+        return GMLIB::UserCache::getUuidByName(name).value().asString();
+    });
 }
