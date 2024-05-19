@@ -1,4 +1,6 @@
+#include "GMLIB/Server/FakeListAPI.h"
 #include "Global.h"
+#include "mc/world/ActorUniqueID.h"
 
 void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", []() -> void {
@@ -51,4 +53,7 @@ void Export_Legacy_GMLib_ServerAPI() {
         }
     );
     RemoteCall::exportAs("GMLib_ServerAPI", "PlayerToEntity", [](Player* player) -> Actor* { return (Actor*)player; });
+    RemoteCall::exportAs("GMLib_ServerAPI", "addFakeList", [](const std::string& xuid,const std::string& name) -> bool { return GMLIB::Server::FakeList::addFakeList(name,xuid,ActorUniqueID(-1)); });
+    RemoteCall::exportAs("GMLib_ServerAPI", "removeFakeList", [](const std::string& nameOrXuid) -> bool { return GMLIB::Server::FakeList::removeFakeList(nameOrXuid); });
+    RemoteCall::exportAs("GMLib_ServerAPI", "removeAllFakeList", []() -> void { return GMLIB::Server::FakeList::removeAllFakeLists(); });
 }
