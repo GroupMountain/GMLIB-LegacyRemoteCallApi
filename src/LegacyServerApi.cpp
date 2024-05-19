@@ -23,7 +23,7 @@ void Export_Legacy_GMLib_ServerAPI() {
         }
         return level->getLevelName();
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "setLevelName", [](std::string name) -> void {
+    RemoteCall::exportAs("GMLib_ServerAPI", "setLevelName", [](std::string const& name) -> void {
         auto level = GMLIB_Level::getInstance();
         if (!level) {
             return;
@@ -33,13 +33,17 @@ void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setFakeSeed", [](int64_t seed) -> void {
         return GMLIB_Level::setFakeSeed(seed);
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "spawnEntity", [](std::pair<Vec3, int> pos, std::string name) -> Actor* {
-        return GMLIB_Spawner::spawnEntity(pos.first, pos.second, name);
-    });
+    RemoteCall::exportAs(
+        "GMLib_ServerAPI",
+        "spawnEntity",
+        [](std::pair<Vec3, int> pos, std::string const& name) -> Actor* {
+            return GMLIB_Spawner::spawnEntity(pos.first, pos.second, name);
+        }
+    );
     RemoteCall::exportAs(
         "GMLib_ServerAPI",
         "shootProjectile",
-        [](Actor* owner, std::string name, float speed, float offset) -> Actor* {
+        [](Actor* owner, std::string const& name, float speed, float offset) -> Actor* {
             auto ac = (GMLIB_Actor*)owner;
             return ac->shootProjectile(name, speed, offset);
         }
@@ -53,7 +57,17 @@ void Export_Legacy_GMLib_ServerAPI() {
         }
     );
     RemoteCall::exportAs("GMLib_ServerAPI", "PlayerToEntity", [](Player* player) -> Actor* { return (Actor*)player; });
-    RemoteCall::exportAs("GMLib_ServerAPI", "addFakeList", [](const std::string& xuid,const std::string& name) -> bool { return GMLIB::Server::FakeList::addFakeList(name,xuid,ActorUniqueID(-1)); });
-    RemoteCall::exportAs("GMLib_ServerAPI", "removeFakeList", [](const std::string& nameOrXuid) -> bool { return GMLIB::Server::FakeList::removeFakeList(nameOrXuid); });
-    RemoteCall::exportAs("GMLib_ServerAPI", "removeAllFakeList", []() -> void { return GMLIB::Server::FakeList::removeAllFakeLists(); });
+    RemoteCall::exportAs(
+        "GMLib_ServerAPI",
+        "addFakeList",
+        [](const std::string& xuid, const std::string& name) -> bool {
+            return GMLIB::Server::FakeList::addFakeList(name, xuid, ActorUniqueID(-1));
+        }
+    );
+    RemoteCall::exportAs("GMLib_ServerAPI", "removeFakeList", [](const std::string& nameOrXuid) -> bool {
+        return GMLIB::Server::FakeList::removeFakeList(nameOrXuid);
+    });
+    RemoteCall::exportAs("GMLib_ServerAPI", "removeAllFakeList", []() -> void {
+        return GMLIB::Server::FakeList::removeAllFakeLists();
+    });
 }

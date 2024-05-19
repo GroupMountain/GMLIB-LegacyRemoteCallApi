@@ -8,7 +8,7 @@ std::string removeBrackets(std::string a1) {
     return a1;
 }
 
-bool isParameters(std::string str) {
+bool isParameters(std::string const& str) {
     std::regex reg("[<]([^<>]+)[>]");
     return std::regex_search(removeBrackets(str), reg);
 }
@@ -64,11 +64,7 @@ bool registerServerPlaceholder(
             );
         } else {
             auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
-            GMLIB::Server::PlaceholderAPI::registerServerPlaceholder(
-                PAPIName,
-                [Call]() { return Call(); },
-                PluginName
-            );
+            GMLIB::Server::PlaceholderAPI::registerServerPlaceholder(PAPIName, [Call]() { return Call(); }, PluginName);
         }
         return true;
     }

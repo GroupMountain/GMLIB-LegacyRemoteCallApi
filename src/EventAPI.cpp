@@ -6,15 +6,16 @@ void Export_Event_API() {
     RemoteCall::exportAs(
         "GMLIB_API",
         "callCustomEvent",
-        [eventBus](std::string eventName, std::string eventId) -> bool {
+        [eventBus](std::string const& eventName, std::string const& eventId) -> bool {
             if (RemoteCall::hasFunc(eventName, eventId)) {
                 switch (doHash(eventName)) {
                 case doHash("onClientLogin"): {
-                    auto Call = RemoteCall::importAs<
-                        bool(std::string realName, std::string uuid, std::string serverXuid, std::string clientXuid)>(
-                        eventName,
-                        eventId
-                    );
+                    auto Call = RemoteCall::importAs<bool(
+                        std::string const& realName,
+                        std::string const& uuid,
+                        std::string const& serverXuid,
+                        std::string const& clientXuid
+                    )>(eventName, eventId);
                     eventBus->emplaceListener<GMLIB::Event::PacketEvent::ClientLoginAfterEvent>(
                         [Call](GMLIB::Event::PacketEvent::ClientLoginAfterEvent& ev) {
                             try {
@@ -136,10 +137,11 @@ void Export_Event_API() {
                     return true;
                 }
                 case doHash("onDeathMessage"): {
-                    auto Call = RemoteCall::importAs<bool(std::string message, std::vector<std::string>, Actor * dead)>(
-                        eventName,
-                        eventId
-                    );
+                    auto Call =
+                        RemoteCall::importAs<bool(std::string const& message, std::vector<std::string>, Actor* dead)>(
+                            eventName,
+                            eventId
+                        );
                     eventBus->emplaceListener<GMLIB::Event::EntityEvent::DeathMessageAfterEvent>(
                         [Call](GMLIB::Event::EntityEvent::DeathMessageAfterEvent& ev) {
                             auto msg    = ev.getDeathMessage();

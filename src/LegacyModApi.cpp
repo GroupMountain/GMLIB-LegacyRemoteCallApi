@@ -2,7 +2,7 @@
 
 std::unordered_set<std::string> HardCodedKeys = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
 
-std::variant<std::string, std::vector<RecipeIngredient>> makeRecipeUnlockingKey(std::string& key) {
+std::variant<std::string, std::vector<RecipeIngredient>> makeRecipeUnlockingKey(std::string const& key) {
     if (HardCodedKeys.count(key)) {
         return key;
     }
@@ -17,11 +17,11 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerShapelessRecipe",
-        [](std::string              recipe_id,
+        [](std::string const&       recipe_id,
            std::vector<std::string> ingredients,
-           std::string              result,
+           std::string const&       result,
            int                      count,
-           std::string              unlock) -> void {
+           std::string const&       unlock) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
@@ -39,12 +39,12 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerShapedRecipe",
-        [](std::string              recipe_id,
+        [](std::string const&       recipe_id,
            std::vector<std::string> shape,
            std::vector<std::string> ingredients,
-           std::string              result,
+           std::string const&       result,
            int                      count,
-           std::string              unlock) -> void {
+           std::string const&       unlock) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
@@ -62,7 +62,10 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerFurnaceRecipe",
-        [](std::string recipe_id, std::string input, std::string output, std::vector<std::string> tags) -> void {
+        [](std::string const&       recipe_id,
+           std::string const&       input,
+           std::string const&       output,
+           std::vector<std::string> tags) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
@@ -75,7 +78,8 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerBrewingMixRecipe",
-        [](std::string recipe_id, std::string input, std::string output, std::string reagent) -> void {
+        [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
+        ) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
@@ -87,7 +91,8 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerBrewingContainerRecipe",
-        [](std::string recipe_id, std::string input, std::string output, std::string reagent) -> void {
+        [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
+        ) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
@@ -101,11 +106,11 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerSmithingTransformRecipe",
-        [](std::string recipe_id,
-           std::string smithing_template,
-           std::string base,
-           std::string addition,
-           std::string result) -> void {
+        [](std::string const& recipe_id,
+           std::string const& smithing_template,
+           std::string const& base,
+           std::string const& addition,
+           std::string const& result) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
@@ -122,7 +127,10 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerSmithingTrimRecipe",
-        [](std::string recipe_id, std::string smithing_template, std::string base, std::string addition) -> void {
+        [](std::string const& recipe_id,
+           std::string const& smithing_template,
+           std::string const& base,
+           std::string const& addition) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
@@ -133,12 +141,12 @@ void Export_Legacy_GMLib_ModAPI() {
     RemoteCall::exportAs(
         "GMLib_ModAPI",
         "registerStoneCutterRecipe",
-        [](std::string recipe_id,
-           std::string input,
-           int         input_data,
-           std::string output,
-           int         output_data,
-           int         output_count) -> void {
+        [](std::string const& recipe_id,
+           std::string const& input,
+           int                input_data,
+           std::string const& output,
+           int                output_data,
+           int                output_count) -> void {
             auto level = GMLIB_Level::getInstance();
             if (!level) {
                 return;
