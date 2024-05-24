@@ -192,4 +192,7 @@ void Export_Legacy_GMLib_ModAPI() {
             return false;
         }
     });
+    RemoteCall::exportAs("GMLib_ModAPI", "setFixI18nEnabled", []() -> void {
+        GMLIB::Mod::VanillaFix::setFixI18nEnabled();
+    });
 }
