@@ -60,7 +60,7 @@ void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs(
         "GMLib_ServerAPI",
         "addFakeList",
-        [](const std::string& xuid, const std::string& name) -> bool {
+        [](const std::string& name, const std::string& xuid) -> bool {
             return GMLIB::Server::FakeList::addFakeList(name, xuid, ActorUniqueID(-1));
         }
     );
