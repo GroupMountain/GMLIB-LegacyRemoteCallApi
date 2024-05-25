@@ -78,10 +78,10 @@ void Export_Compatibility_API() {
         return GMLIB_Player::deletePlayerNbt(uid);
     });
     RemoteCall::exportAs("GMLIB_API", "getAllExperiments", []() -> std::vector<int> {
-        auto             map = GMLIB_Level::getAllExperiments();
+        auto             list = GMLIB_Level::getAllExperiments();
         std::vector<int> result;
-        for (auto& key : map) {
-            result.push_back(key.first);
+        for (auto& key : list) {
+            result.push_back((int)key);
         }
         return result;
     });
@@ -96,65 +96,59 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "createFloatingText",
         [](std::pair<Vec3, int> pos, std::string const& text, bool papi) -> int {
-            auto ft = new GMLIB::Server::StaticFloatingText(text, pos.first, pos.second, papi);
+            auto ft = std::make_shared<GMLIB::Server::StaticFloatingText>(text, pos.first, pos.second, papi);
+            GMLIB::Server::FloatingTextManager::getInstance().add(ft);
             return ft->getRuntimeID();
         }
     );
     RemoteCall::exportAs("GMLIB_API", "setFloatingTextData", [](int id, std::string const& text) -> bool {
-        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
-        if (ft) {
+        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->setText(text);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "deleteFloatingText", [](int id) -> bool {
-        return GMLIB::Server::FloatingText::deleteFloatingText(id);
+        return GMLIB::Server::FloatingTextManager::getInstance().remove(id);
     });
     RemoteCall::exportAs("GMLIB_API", "sendFloatingTextToPlayer", [](int id, Player* pl) -> bool {
-        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
-        if (ft) {
-            ft->sendToClient(*pl);
+        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+            ft->sendTo(*pl);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "sendFloatingText", [](int id) -> bool {
-        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
-        if (ft) {
-            ft->sendToAllClients();
+        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+            ft->sendToClients();
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "removeFloatingTextFromPlayer", [](int id, Player* pl) -> bool {
-        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
-        if (ft) {
-            ft->removeFromClient(*pl);
+        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+            ft->removeFrom(*pl);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "removeFloatingText", [](int id) -> bool {
-        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
-        if (ft) {
-            ft->removeFromAllClients();
+        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+            ft->removeFromClients();
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "updateClientFloatingTextData", [](int id, Player* pl) -> bool {
-        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
-        if (ft) {
-            ft->updateClient(*pl);
+        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+            ft->update(*pl);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "updateAllClientsFloatingTextData", [](int id) -> bool {
-        auto ft = GMLIB::Server::FloatingText::getFloatingText(id);
-        if (ft) {
-            ft->updateAllClients();
+        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+            ft->updateClients();
             return true;
         }
         return false;

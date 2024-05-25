@@ -106,7 +106,7 @@ std::string translateStringWithPlayer(std::string const& str, Player* pl) {
 
 std::string translateString(std::string const& str) { return GMLIB::Server::PlaceholderAPI::translateString(str); }
 
-bool unRegisterPlaceholder(std::string const& str) { return GMLIB::Server::PlaceholderAPI::unRegisterPlaceholder(str); }
+bool unRegisterPlaceholder(std::string const& str) { return GMLIB::Server::PlaceholderAPI::unregisterPlaceholder(str); }
 
 std::vector<std::string> getAllPAPI() { return GMLIB::Server::PlaceholderAPI::getAllPAPI(); }
 

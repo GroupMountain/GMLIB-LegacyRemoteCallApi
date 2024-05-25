@@ -17,18 +17,21 @@ void Export_Legacy_GMLib_ServerAPI() {
         GMLIB_Level::requireServerResourcePackAndAllowClientResourcePack();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "getLevelName", []() -> std::string {
-        auto level = GMLIB_Level::getInstance();
-        if (!level) {
-            return "";
+        if (auto level = GMLIB_Level::getInstance()) {
+            return level->getLevelName();
         }
-        return level->getLevelName();
+        return {};
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setLevelName", [](std::string const& name) -> void {
-        auto level = GMLIB_Level::getInstance();
-        if (!level) {
-            return;
+        if (auto level = GMLIB_Level::getInstance()) {
+            level->setLevelName(name);
         }
-        return level->setLevelName(name);
+    });
+    RemoteCall::exportAs("GMLib_ServerAPI", "getLevelSeed", []() -> std::string {
+        if (auto level = GMLIB_Level::getInstance()) {
+            return std::to_string(level->getSeed());
+        }
+        return {};
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setFakeSeed", [](int64_t seed) -> void {
         return GMLIB_Level::setFakeSeed(seed);
@@ -53,7 +56,7 @@ void Export_Legacy_GMLib_ServerAPI() {
         "throwEntity",
         [](Actor* owner, Actor* actor, float speed, float offset) -> bool {
             auto ac = (GMLIB_Actor*)owner;
-            return ac->throwEntity(actor, speed, offset);
+            return ac->throwEntity(*actor, speed, offset);
         }
     );
     RemoteCall::exportAs("GMLib_ServerAPI", "PlayerToEntity", [](Player* player) -> Actor* { return (Actor*)player; });
