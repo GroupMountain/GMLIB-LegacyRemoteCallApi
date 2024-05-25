@@ -198,7 +198,8 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs(
         "GMLIB_API",
         "updateOrCreateLanguageFile",
-        [](std::string const& code, std::string const& lang, std::string const& path) -> void {
+        [](std::string const& code, std::unordered_map<std::string, std::string> lang, std::string const& path
+        ) -> void {
             if (GMLIB_Level::getInstance()) {
                 I18nAPI::updateOrCreateLanguageFile(path, code, lang);
             }
