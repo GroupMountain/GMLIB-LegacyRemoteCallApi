@@ -604,4 +604,30 @@ void Export_Compatibility_API() {
         }
         return 0;
     });
+    RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKey", [](Block const* block) -> std::string {
+        return block->buildDescriptionId();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemTranslateKey", [](ItemStack* item) -> std::string {
+        return item->getDescriptionId();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityTranslateKey", [](Actor* entity) -> std::string {
+        return entity->getEntityLocNameString();
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "readNbtFromFile",
+        [](std::string const& path, bool isBinary) -> std::unique_ptr<CompoundTag> {
+            if (auto nbt = GMLIB_CompoundTag::readFromFile(path, isBinary)) {
+                return std::make_unique<CompoundTag>(nbt.value());
+            }
+            return nullptr;
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "saveNbtToFile",
+        [](std::string const& path, CompoundTag* nbt, bool isBinary) -> bool {
+            return GMLIB_CompoundTag::saveToFile(path, *nbt, isBinary);
+        }
+    );
 }
