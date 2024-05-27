@@ -3,14 +3,14 @@
 
 ll::Logger logger(PLUGIN_NAME);
 
-namespace GMLIB_LegacyRemoteCallApi {
+namespace GMLIB {
 
-std::unique_ptr<LRCA>& LRCA::getInstance() {
-    static std::unique_ptr<LRCA> instance;
+std::unique_ptr<LegacyRemoteCallApi>& LegacyRemoteCallApi::getInstance() {
+    static std::unique_ptr<LegacyRemoteCallApi> instance;
     return instance;
 }
 
-bool LRCA::load() {
+bool LegacyRemoteCallApi::load() {
     Export_Legacy_GMLib_ModAPI();
     Export_Legacy_GMLib_ServerAPI();
     Export_Compatibility_API();
@@ -20,17 +20,17 @@ bool LRCA::load() {
     logger.info(
         "Loaded Version: {} with {}",
         fmt::format(fg(fmt::color::pink), "GMLIB-" + GMLIB::Version::getLibVersionString()),
-        fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-"+LIB_VERSION.asString())
+        fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-" + LIB_VERSION.asString())
     );
     logger.info("Author: GroupMountain");
     logger.info("Repository: https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi");
     return true;
 }
 
-bool LRCA::enable() { return true; }
+bool LegacyRemoteCallApi::enable() { return true; }
 
-bool LRCA::disable() { return true; }
+bool LegacyRemoteCallApi::disable() { return true; }
 
-} // namespace GMLIB_LegacyRemoteCallApi
+} // namespace GMLIB
 
-LL_REGISTER_PLUGIN(GMLIB_LegacyRemoteCallApi::LRCA, GMLIB_LegacyRemoteCallApi::LRCA::getInstance());
+LL_REGISTER_PLUGIN(GMLIB::LegacyRemoteCallApi, GMLIB::LegacyRemoteCallApi::getInstance());

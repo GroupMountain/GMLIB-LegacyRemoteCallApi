@@ -2,14 +2,14 @@
 #include <ll/api/plugin/NativePlugin.h>
 #include <ll/api/plugin/RegisterHelper.h>
 
-namespace GMLIB_LegacyRemoteCallApi {
+namespace GMLIB {
 
-class LRCA {
+class LegacyRemoteCallApi {
 
 public:
-    static std::unique_ptr<LRCA>& getInstance();
+    static std::unique_ptr<LegacyRemoteCallApi>& getInstance();
 
-    LRCA(ll::plugin::NativePlugin& self) : mSelf(self) {}
+    LegacyRemoteCallApi(ll::plugin::NativePlugin& self) : mSelf(self) {}
 
     [[nodiscard]] ll::plugin::NativePlugin& getSelf() const { return mSelf; }
 
@@ -30,4 +30,4 @@ private:
     ll::plugin::NativePlugin& mSelf;
 };
 
-} // namespace GMLIB_LegacyRemoteCallApi
+} // namespace GMLIB
