@@ -1,4 +1,7 @@
 #include "Global.h"
+#include "RemoteCallAPI.h"
+#include "mc/world/actor/Actor.h"
+#include "mc/world/item/registry/ItemStack.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
@@ -630,4 +633,10 @@ void Export_Compatibility_API() {
             return GMLIB_CompoundTag::saveToFile(path, *nbt, isBinary);
         }
     );
+    RemoteCall::exportAs("GMLIB_API", "getBlockDestroySpeed", [](Block const* block) -> float {
+        return block->getDestroySpeed();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getDestroyBlockSpeed", [](ItemStack const* item,Block const* block) -> float {
+        return item->getDestroySpeed(*block);
+    });
 }
