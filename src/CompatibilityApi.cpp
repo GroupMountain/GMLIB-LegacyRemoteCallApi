@@ -633,7 +633,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getBlockDestroySpeed", [](Block const* block) -> float {
         return block->getDestroySpeed();
     });
-    RemoteCall::exportAs("GMLIB_API", "getDestroyBlockSpeed", [](ItemStack const* item,Block const* block) -> float {
+    RemoteCall::exportAs("GMLIB_API", "getDestroyBlockSpeed", [](ItemStack const* item, Block const* block) -> float {
         return item->getDestroySpeed(*block);
     });
 }
