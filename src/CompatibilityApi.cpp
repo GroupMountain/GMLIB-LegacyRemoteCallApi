@@ -1,7 +1,4 @@
 #include "Global.h"
-#include "mc/world/Pos.h"
-#include "mc/world/level/BlockPos.h"
-#include "mc/world/level/BlockSource.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
@@ -654,5 +651,8 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroySpecial", [](ItemStack const* item, Block const* block) -> bool {
         return item->canDestroySpecial(*block);
+    });
+    RemoteCall::exportAs("GMLIB_API", "blockCanDropWithAnyTool", [](Block const* block) -> bool {
+        return block->canDropWithAnyTool();
     });
 }
