@@ -16,8 +16,8 @@ void Export_Event_API() {
                         std::string const& serverXuid,
                         std::string const& clientXuid
                     )>(eventName, eventId);
-                    eventBus->emplaceListener<GMLIB::Event::PacketEvent::ClientLoginAfterEvent>(
-                        [Call](GMLIB::Event::PacketEvent::ClientLoginAfterEvent& ev) {
+                    eventBus->emplaceListener<Event::PacketEvent::ClientLoginAfterEvent>(
+                        [Call](Event::PacketEvent::ClientLoginAfterEvent& ev) {
                             try {
                                 Call(
                                     ev.getRealName(),
@@ -36,8 +36,8 @@ void Export_Event_API() {
                             eventName,
                             eventId
                         );
-                    eventBus->emplaceListener<GMLIB::Event::LevelEvent::WeatherUpdateBeforeEvent>(
-                        [Call](GMLIB::Event::LevelEvent::WeatherUpdateBeforeEvent& ev) {
+                    eventBus->emplaceListener<Event::LevelEvent::WeatherUpdateBeforeEvent>(
+                        [Call](Event::LevelEvent::WeatherUpdateBeforeEvent& ev) {
                             bool result = true;
                             try {
                                 result = Call(
@@ -56,8 +56,8 @@ void Export_Event_API() {
                 }
                 case doHash("onMobPick"): {
                     auto Call = RemoteCall::importAs<bool(Actor * mob, Actor * item)>(eventName, eventId);
-                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::MobPickupItemBeforeEvent>(
-                        [Call](GMLIB::Event::EntityEvent::MobPickupItemBeforeEvent& ev) {
+                    eventBus->emplaceListener<Event::EntityEvent::MobPickupItemBeforeEvent>(
+                        [Call](Event::EntityEvent::MobPickupItemBeforeEvent& ev) {
                             bool result = true;
                             try {
                                 result = Call(&ev.self(), (Actor*)&ev.getItemActor());
@@ -72,8 +72,8 @@ void Export_Event_API() {
                 case doHash("onItemTrySpawn"): {
                     auto Call = RemoteCall::importAs<
                         bool(const ItemStack* item, std::pair<Vec3, int> position, Actor* spawner)>(eventName, eventId);
-                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::ItemActorSpawnBeforeEvent>(
-                        [Call](GMLIB::Event::EntityEvent::ItemActorSpawnBeforeEvent& ev) {
+                    eventBus->emplaceListener<Event::EntityEvent::ItemActorSpawnBeforeEvent>(
+                        [Call](Event::EntityEvent::ItemActorSpawnBeforeEvent& ev) {
                             auto                 pos    = ev.getPosition();
                             auto                 dimid  = ev.getBlockSource().getDimensionId().id;
                             std::pair<Vec3, int> lsePos = {pos, dimid};
@@ -94,8 +94,8 @@ void Export_Event_API() {
                         eventName,
                         eventId
                     );
-                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::ItemActorSpawnAfterEvent>(
-                        [Call](GMLIB::Event::EntityEvent::ItemActorSpawnAfterEvent& ev) {
+                    eventBus->emplaceListener<Event::EntityEvent::ItemActorSpawnAfterEvent>(
+                        [Call](Event::EntityEvent::ItemActorSpawnAfterEvent& ev) {
                             auto                 pos    = ev.getPosition();
                             auto                 dimid  = ev.getBlockSource().getDimensionId().id;
                             std::pair<Vec3, int> lsePos = {pos, dimid};
@@ -108,8 +108,8 @@ void Export_Event_API() {
                 }
                 case doHash("onEntityChangeDim"): {
                     auto Call = RemoteCall::importAs<bool(Actor * entity, int toDimId)>(eventName, eventId);
-                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::ActorChangeDimensionBeforeEvent>(
-                        [Call](GMLIB::Event::EntityEvent::ActorChangeDimensionBeforeEvent& ev) {
+                    eventBus->emplaceListener<Event::EntityEvent::ActorChangeDimensionBeforeEvent>(
+                        [Call](Event::EntityEvent::ActorChangeDimensionBeforeEvent& ev) {
                             bool result = true;
                             try {
                                 result = Call(&ev.self(), ev.getToDimensionId());
@@ -123,8 +123,8 @@ void Export_Event_API() {
                 }
                 case doHash("onLeaveBed"): {
                     auto Call = RemoteCall::importAs<bool(Player * pl)>(eventName, eventId);
-                    eventBus->emplaceListener<GMLIB::Event::PlayerEvent::PlayerStopSleepBeforeEvent>(
-                        [Call](GMLIB::Event::PlayerEvent::PlayerStopSleepBeforeEvent& ev) {
+                    eventBus->emplaceListener<Event::PlayerEvent::PlayerStopSleepBeforeEvent>(
+                        [Call](Event::PlayerEvent::PlayerStopSleepBeforeEvent& ev) {
                             bool result = true;
                             try {
                                 result = Call(&ev.self());
@@ -142,8 +142,8 @@ void Export_Event_API() {
                             eventName,
                             eventId
                         );
-                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::DeathMessageAfterEvent>(
-                        [Call](GMLIB::Event::EntityEvent::DeathMessageAfterEvent& ev) {
+                    eventBus->emplaceListener<Event::EntityEvent::DeathMessageAfterEvent>(
+                        [Call](Event::EntityEvent::DeathMessageAfterEvent& ev) {
                             auto msg    = ev.getDeathMessage();
                             auto source = ev.getDamageSource();
                             try {
@@ -158,8 +158,8 @@ void Export_Event_API() {
                         eventName,
                         eventId
                     );
-                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::MobHurtAfterEvent>(
-                        [Call](GMLIB::Event::EntityEvent::MobHurtAfterEvent& ev) {
+                    eventBus->emplaceListener<Event::EntityEvent::MobHurtAfterEvent>(
+                        [Call](Event::EntityEvent::MobHurtAfterEvent& ev) {
                             auto&  damageSource = ev.getSource();
                             Actor* source       = nullptr;
                             if (damageSource.isEntitySource()) {
@@ -178,8 +178,8 @@ void Export_Event_API() {
                 }
                 case doHash("onEndermanTake"): {
                     auto Call = RemoteCall::importAs<bool(Actor * mob)>(eventName, eventId);
-                    eventBus->emplaceListener<GMLIB::Event::EntityEvent::EndermanTakeBlockBeforeEvent>(
-                        [Call](GMLIB::Event::EntityEvent::EndermanTakeBlockBeforeEvent& ev) {
+                    eventBus->emplaceListener<Event::EntityEvent::EndermanTakeBlockBeforeEvent>(
+                        [Call](Event::EntityEvent::EndermanTakeBlockBeforeEvent& ev) {
                             bool result = true;
                             try {
                                 result = Call(&ev.self());

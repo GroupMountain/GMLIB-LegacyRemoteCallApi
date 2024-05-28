@@ -3,13 +3,17 @@
 
 #include <RemoteCallAPI.h>
 
+using namespace GMLIB;
+using namespace Server;
+using namespace Mod;
+
 #define PLUGIN_NAME fmt::format(fg(fmt::color::light_green), "GMLIB-LRCA")
 
 #define LIB_VERSION_MAJOR 0
 #define LIB_VERSION_MINOR 12
 #define LIB_VERSION_PATCH 7
 
-#define LIB_VERSION GMLIB::Version(LIB_VERSION_MAJOR, LIB_VERSION_MINOR, LIB_VERSION_PATCH)
+#define LIB_VERSION Version(LIB_VERSION_MAJOR, LIB_VERSION_MINOR, LIB_VERSION_PATCH)
 
 extern ll::Logger logger;
 

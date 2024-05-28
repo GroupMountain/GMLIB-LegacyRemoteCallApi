@@ -19,7 +19,7 @@ bool LegacyRemoteCallApi::load() {
     logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
     logger.info(
         "Loaded Version: {} with {}",
-        fmt::format(fg(fmt::color::pink), "GMLIB-" + GMLIB::Version::getLibVersionString()),
+        fmt::format(fg(fmt::color::pink), "GMLIB-" + Version::getLibVersionString()),
         fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-" + LIB_VERSION.asString())
     );
     logger.info("Author: GroupMountain");
@@ -33,4 +33,4 @@ bool LegacyRemoteCallApi::disable() { return true; }
 
 } // namespace GMLIB
 
-LL_REGISTER_PLUGIN(GMLIB::LegacyRemoteCallApi, GMLIB::LegacyRemoteCallApi::getInstance());
+LL_REGISTER_PLUGIN(LegacyRemoteCallApi, LegacyRemoteCallApi::getInstance());

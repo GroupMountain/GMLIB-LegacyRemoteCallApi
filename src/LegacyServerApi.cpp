@@ -64,13 +64,13 @@ void Export_Legacy_GMLib_ServerAPI() {
         "GMLib_ServerAPI",
         "addFakeList",
         [](const std::string& name, const std::string& xuid) -> bool {
-            return GMLIB::Server::FakeList::addFakeList(name, xuid, ActorUniqueID(-1));
+            return FakeList::addFakeList(name, xuid, ActorUniqueID(-1));
         }
     );
     RemoteCall::exportAs("GMLib_ServerAPI", "removeFakeList", [](const std::string& nameOrXuid) -> bool {
-        return GMLIB::Server::FakeList::removeFakeList(nameOrXuid);
+        return FakeList::removeFakeList(nameOrXuid);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "removeAllFakeList", []() -> void {
-        return GMLIB::Server::FakeList::removeAllFakeLists();
+        return FakeList::removeAllFakeLists();
     });
 }

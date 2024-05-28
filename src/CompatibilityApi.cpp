@@ -19,10 +19,10 @@ void Export_Compatibility_API() {
         if (!level) {
             return false;
         }
-        return GMLIB::Mod::CustomRecipe::unregisterRecipe(id);
+        return CustomRecipe::unregisterRecipe(id);
     });
     RemoteCall::exportAs("GMLIB_API", "setCustomPackPath", [](std::string const& path) -> void {
-        GMLIB::Mod::CustomPacks::addCustomPackPath(path);
+        CustomPacks::addCustomPackPath(path);
     });
     RemoteCall::exportAs("GMLIB_API", "getServerMspt", []() -> float {
         auto level = GMLIB_Level::getInstance();
@@ -96,70 +96,71 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "createFloatingText",
         [](std::pair<Vec3, int> pos, std::string const& text, bool papi) -> int {
-            auto ft = std::make_shared<GMLIB::Server::StaticFloatingText>(text, pos.first, pos.second, papi);
-            GMLIB::Server::FloatingTextManager::getInstance().add(ft);
+            auto& manager = FloatingTextManager::getInstance();
+            auto  ft      = manager.createStatic(text, pos.first, pos.second, papi);
+            manager.add(ft);
             return ft->getRuntimeID();
         }
     );
     RemoteCall::exportAs("GMLIB_API", "setFloatingTextData", [](int id, std::string const& text) -> bool {
-        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->setText(text);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "deleteFloatingText", [](int id) -> bool {
-        return GMLIB::Server::FloatingTextManager::getInstance().remove(id);
+        return FloatingTextManager::getInstance().remove(id);
     });
     RemoteCall::exportAs("GMLIB_API", "sendFloatingTextToPlayer", [](int id, Player* pl) -> bool {
-        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->sendTo(*pl);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "sendFloatingText", [](int id) -> bool {
-        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->sendToClients();
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "removeFloatingTextFromPlayer", [](int id, Player* pl) -> bool {
-        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->removeFrom(*pl);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "removeFloatingText", [](int id) -> bool {
-        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->removeFromClients();
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "updateClientFloatingTextData", [](int id, Player* pl) -> bool {
-        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->update(*pl);
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "updateAllClientsFloatingTextData", [](int id) -> bool {
-        if (auto ft = GMLIB::Server::FloatingTextManager::getInstance().getFloatingText(id)) {
+        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
             ft->updateClients();
             return true;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "isVersionMatched", [](int a, int b, int c) -> bool {
-        auto version = GMLIB::Version(a, b, c, "", "");
+        auto version = Version(a, b, c, "", "");
         return LIB_VERSION >= version;
     });
     RemoteCall::exportAs("GMLIB_API", "getVersion_LRCA", []() -> std::string { return LIB_VERSION.asString(); });
     RemoteCall::exportAs("GMLIB_API", "getVersion_GMLIB", []() -> std::string {
-        return GMLIB::Version::getLibVersionString();
+        return Version::getLibVersionString();
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -555,32 +556,32 @@ void Export_Compatibility_API() {
     );
     RemoteCall::exportAs("GMLIB_API", "getXuidByUuid", [](std::string const& uuid) -> std::string {
         auto uid    = mce::UUID::fromString(uuid);
-        auto result = GMLIB::UserCache::getXuidByUuid(uid);
+        auto result = UserCache::getXuidByUuid(uid);
         return result ? result.value() : "";
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByUuid", [](std::string const& uuid) -> std::string {
         auto uid    = mce::UUID::fromString(uuid);
-        auto result = GMLIB::UserCache::getNameByUuid(uid);
+        auto result = UserCache::getNameByUuid(uid);
         return result ? result.value() : "";
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string const& xuid) -> std::string {
-        auto result = GMLIB::UserCache::getUuidByXuid(xuid);
+        auto result = UserCache::getUuidByXuid(xuid);
         return result ? result.value().asString() : "";
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string const& xuid) -> std::string {
-        auto result = GMLIB::UserCache::getNameByXuid(xuid);
+        auto result = UserCache::getNameByXuid(xuid);
         return result ? result.value() : "";
     });
     RemoteCall::exportAs("GMLIB_API", "getXuidByName", [](std::string const& name) -> std::string {
-        auto result = GMLIB::UserCache::getXuidByName(name);
+        auto result = UserCache::getXuidByName(name);
         return result ? result.value() : "";
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        auto result = GMLIB::UserCache::getUuidByName(name);
+        auto result = UserCache::getUuidByName(name);
         return result ? result.value().asString() : "";
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        auto result = GMLIB::UserCache::getUuidByName(name);
+        auto result = UserCache::getUuidByName(name);
         return result ? result.value().asString() : "";
     });
     RemoteCall::exportAs(
@@ -588,7 +589,7 @@ void Export_Compatibility_API() {
         "getAllPlayerInfo",
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
             std::vector<std::unordered_map<std::string, std::string>> result;
-            GMLIB::UserCache::forEach([&result](const GMLIB::UserCache::UserCacheEntry& entry) {
+            UserCache::forEach([&result](const UserCache::UserCacheEntry& entry) {
                 std::unordered_map<std::string, std::string> info;
                 info["Name"] = entry.mName;
                 info["Xuid"] = entry.mXuid;
