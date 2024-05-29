@@ -637,4 +637,23 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getDestroyBlockSpeed", [](ItemStack const* item, Block const* block) -> float {
         return item->getDestroySpeed(*block);
     });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "playerDestroyBlock",
+        [](Block const* block, std::pair<BlockPos, int> pos, Player* player) -> void {
+            return block->playerDestroy(*player, pos.first);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "itemCanDestroyBlock", [](ItemStack const* item, Block const* block) -> bool {
+        return item->canDestroy(block);
+    });
+    RemoteCall::exportAs("GMLIB_API", "itemCanDestroyInCreative", [](ItemStack const* item) -> bool {
+        return item->getItem()->canDestroyInCreative();
+    });
+    RemoteCall::exportAs("GMLIB_API", "itemCanDestroySpecial", [](ItemStack const* item, Block const* block) -> bool {
+        return item->canDestroySpecial(*block);
+    });
+    RemoteCall::exportAs("GMLIB_API", "blockCanDropWithAnyTool", [](Block const* block) -> bool {
+        return block->canDropWithAnyTool();
+    });
 }
