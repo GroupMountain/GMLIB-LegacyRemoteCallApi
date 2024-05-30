@@ -655,4 +655,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "blockCanDropWithAnyTool", [](Block const* block) -> bool {
         return block->canDropWithAnyTool();
     });
+    RemoteCall::exportAs("GMLIB_API", "blockIsAlwaysDestroyable", [](Block const* block) -> bool {
+        return block->getMaterial().isAlwaysDestroyable();
+    });
 }
