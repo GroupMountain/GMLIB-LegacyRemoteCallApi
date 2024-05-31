@@ -1,6 +1,4 @@
 #include "Global.h"
-#include "mc/world/item/ItemStackBase.h"
-#include "mc/world/item/enchanting/Enchant.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
