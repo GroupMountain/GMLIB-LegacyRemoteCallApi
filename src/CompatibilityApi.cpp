@@ -1,4 +1,6 @@
 #include "Global.h"
+#include "mc/world/item/ItemStackBase.h"
+#include "mc/world/item/enchanting/Enchant.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
@@ -667,5 +669,8 @@ void Export_Compatibility_API() {
     );
     RemoteCall::exportAs("GMLIB_API", "playerAttack", [](Player* player, Actor* entity) -> bool {
         return player->attack(*entity, ActorDamageCause::EntityAttack);
+    });
+    RemoteCall::exportAs("GMLIB_API", "playerPullInEntity", [](Player* player, Actor* entity) -> bool {
+        return player->pullInEntity(*entity);
     });
 }
