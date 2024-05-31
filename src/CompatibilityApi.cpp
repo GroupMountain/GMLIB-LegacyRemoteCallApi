@@ -671,4 +671,10 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "playerPullInEntity", [](Player* player, Actor* entity) -> bool {
         return player->pullInEntity(*entity);
     });
+    RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKeyFromName", [](std::string const& blockName) -> std::string {
+        if (auto block = Block::tryGetFromRegistry(blockName)) {
+            return block->buildDescriptionId();
+        }
+        return blockName;
+    });
 }
