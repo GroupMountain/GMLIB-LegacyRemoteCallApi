@@ -676,6 +676,6 @@ void Export_Compatibility_API() {
         if (auto block = Block::tryGetFromRegistry(blockName)) {
             return block->buildDescriptionId();
         }
-        return blockName;
+        return "tile.unknown.name";
     });
 }
