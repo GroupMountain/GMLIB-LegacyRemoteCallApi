@@ -659,4 +659,23 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "blockIsAlwaysDestroyable", [](Block const* block) -> bool {
         return block->getMaterial().isAlwaysDestroyable();
     });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "blockPlayerWillDestroy",
+        [](Block const* block, Player* player, std::pair<BlockPos, int> pos) -> bool {
+            return block->playerWillDestroy(*player, pos.first);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "playerAttack", [](Player* player, Actor* entity) -> bool {
+        return player->attack(*entity, ActorDamageCause::EntityAttack);
+    });
+    RemoteCall::exportAs("GMLIB_API", "playerPullInEntity", [](Player* player, Actor* entity) -> bool {
+        return player->pullInEntity(*entity);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKeyFromName", [](std::string const& blockName) -> std::string {
+        if (auto block = Block::tryGetFromRegistry(blockName)) {
+            return block->buildDescriptionId();
+        }
+        return blockName;
+    });
 }
