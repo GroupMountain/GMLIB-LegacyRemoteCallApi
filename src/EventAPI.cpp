@@ -10,22 +10,28 @@ void Export_Event_API() {
             if (RemoteCall::hasFunc(eventName, eventId)) {
                 switch (doHash(eventName)) {
                 case doHash("onClientLogin"): {
-                    auto Call = RemoteCall::importAs<bool(
+                    auto Call = RemoteCall::importAs<std::string(
                         std::string const& realName,
                         std::string const& uuid,
                         std::string const& serverXuid,
-                        std::string const& clientXuid
+                        std::string const& clientXuid,
+                        std::string const& IpAndPort
                     )>(eventName, eventId);
                     eventBus->emplaceListener<Event::PacketEvent::ClientLoginAfterEvent>(
                         [Call](Event::PacketEvent::ClientLoginAfterEvent& ev) {
+                            std::string result;
                             try {
-                                Call(
+                                result=Call(
                                     ev.getRealName(),
                                     ev.getUuid().asString(),
                                     ev.getServerAuthXuid(),
-                                    ev.getClientAuthXuid()
+                                    ev.getClientAuthXuid(),
+                                    ev.getIpAndPort()
                                 );
                             } catch (...) {}
+                            if(result!=""){
+                                ev.disConnectClient(result);
+                            }
                         }
                     );
                     return true;
