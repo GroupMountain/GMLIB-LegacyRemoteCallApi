@@ -21,7 +21,7 @@ void Export_Event_API() {
                         [Call](Event::PacketEvent::ClientLoginAfterEvent& ev) {
                             std::string result;
                             try {
-                                result=Call(
+                                result = Call(
                                     ev.getRealName(),
                                     ev.getUuid().asString(),
                                     ev.getServerAuthXuid(),
@@ -29,7 +29,7 @@ void Export_Event_API() {
                                     ev.getIpAndPort()
                                 );
                             } catch (...) {}
-                            if(result!=""){
+                            if (result != "") {
                                 ev.disConnectClient(result);
                             }
                         }
