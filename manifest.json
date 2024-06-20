@@ -1,9 +1,10 @@
 {
     "name": "${pluginName}",
     "entry": "${pluginFile}",
-    "version": "0.12.8",
+    "version": "0.13.0",
     "author": "GroupMountain",
     "type": "native",
+    "passive": true,
     "dependencies": [
         {
             "name": "GMLIB"
