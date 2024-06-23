@@ -599,8 +599,8 @@ void Export_Compatibility_API() {
             return result;
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "getBlockRuntimeId", [](std::string const& blockName) -> uint {
-        if (auto block = Block::tryGetFromRegistry(blockName)) {
+    RemoteCall::exportAs("GMLIB_API", "getBlockRuntimeId", [](std::string const& blockName, short legacyData) -> uint {
+        if (auto block = Block::tryGetFromRegistry(blockName, legacyData)) {
             return block->getRuntimeId();
         }
         return 0;
@@ -648,7 +648,10 @@ void Export_Compatibility_API() {
         return item->canDestroy(block);
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroyInCreative", [](ItemStack const* item) -> bool {
-        return item->getItem()->canDestroyInCreative();
+        if (auto itemDef = item->getItem()) {
+            return itemDef->canDestroyInCreative();
+        }
+        return false;
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroySpecial", [](ItemStack const* item, Block const* block) -> bool {
         return item->canDestroySpecial(*block);
@@ -677,5 +680,67 @@ void Export_Compatibility_API() {
             return block->buildDescriptionId();
         }
         return "tile.unknown.name";
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getBlockLightEmission",
+        [](std::string const& blockName, short legacyData) -> char {
+            if (auto block = Block::tryGetFromRegistry(blockName, legacyData)) {
+                return (char)block->getLightEmission().value;
+            }
+            return -1;
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getGameRules",
+        []() -> std::vector<std::unordered_map<std::string, std::string>> {
+            auto gameRules = ll::service::getLevel()->getGameRules().getRules();
+            std::vector<std::unordered_map<std::string, std::string>> result;
+            for (auto& gameRule : gameRules) {
+                std::unordered_map<std::string, std::string> data;
+                data["Name"] = gameRule.getName();
+                switch (gameRule.getType()) {
+                case GameRule::Type::Bool:
+                    data["Type"]  = "Bool";
+                    data["Value"] = std::to_string(gameRule.getBool());
+                    break;
+                case GameRule::Type::Float:
+                    data["Type"]  = "Float";
+                    data["Value"] = std::to_string(gameRule.getFloat());
+                    break;
+                case GameRule::Type::Int:
+                    data["Type"]  = "Int";
+                    data["Value"] = std::to_string(gameRule.getInt());
+                    break;
+                case GameRule::Type::Invalid:
+                    break;
+                }
+                result.push_back(data);
+            }
+            return result;
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "getLegalEnchants", [](ItemStack const* item) -> std::vector<int> {
+        return EnchantUtils::getLegalEnchants(item->getItem());
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "applyEnchant",
+        [](ItemStack const* item, int id, int level, bool allowNonVanilla) -> bool {
+            return EnchantUtils::applyEnchant((ItemStackBase&)*item, (Enchant::Type)id, level, allowNonVanilla);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack const* item) -> void {
+        EnchantUtils::removeEnchants((ItemStack&)*item);
+    });
+    RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack const* item, int id) -> bool {
+        return EnchantUtils::hasEnchant((Enchant::Type)id, (ItemStackBase&)*item);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEnchantLevel", [](ItemStack const* item, int id) -> int {
+        return EnchantUtils::getEnchantLevel((Enchant::Type)id, (ItemStackBase&)*item);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEnchantNameAndLevel", [](int id, int level) -> std::string {
+        return EnchantUtils::getEnchantNameAndLevel((Enchant::Type)id, level);
     });
 }
