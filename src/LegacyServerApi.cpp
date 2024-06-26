@@ -1,6 +1,8 @@
 #include "GMLIB/Server/FakeListAPI.h"
+#include "GMLIB/Server/LevelAPI.h"
 #include "Global.h"
 #include "mc/world/ActorUniqueID.h"
+#include <variant>
 
 void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", []() -> void {
@@ -72,5 +74,8 @@ void Export_Legacy_GMLib_ServerAPI() {
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "removeAllFakeList", []() -> void {
         return FakeList::removeAllFakeLists();
+    });
+    RemoteCall::exportAs("GMLib_ServerAPI", "getMaxPlayers", []() -> int {
+        return ll::memory::dAccess<int>(ll::service::getServerNetworkHandler().as_ptr(), 200);
     });
 }

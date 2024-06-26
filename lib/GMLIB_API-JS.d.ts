@@ -348,7 +348,18 @@ declare class Minecraft {
     ): number;
 
     /** 获取游戏规则列表 */
-    static getGameRules(): { Name: string; Value: boolean | number; }[]
+    static getGameRules(): { Name: string; Value: boolean | number; }[];
+
+    /** 获取附魔名字和等级 */
+    static getEnchantNameAndLevel(
+        /** 附魔ID */
+        id: number,
+        /** 附魔的等级 */
+        level: number
+    ): string;
+
+    /** 获取最大玩家数 */
+    static getMaxPlayers(): number;
 }
 
 /** 合成表类 */
@@ -1002,6 +1013,14 @@ interface Player {
 
     /** (GMLIB)清除玩家重生点 */
     clearSpawnPoint(): void;
+
+    /** 丢出玩家物品 */
+    dropItem(
+        /** 物品对象 */
+        item: Item,
+        /** 随机丢出位置 */
+        randomly: boolean | undefined
+    ): boolean;
 }
 
 interface Entity {
@@ -1072,7 +1091,7 @@ interface Block {
     /** (GMLIB)方块是否不需要工具采集 */
     isAlwaysDestroyable(): boolean;
 
-    /** (GMLIB) */
+    /** (GMLIB)检测方块是否能被玩家挖掘(比如插件拦截) */
     playerWillDestroy(
         /** 挖掘的玩家对象 */
         player: Player

@@ -743,4 +743,9 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getEnchantNameAndLevel", [](int id, int level) -> std::string {
         return EnchantUtils::getEnchantNameAndLevel((Enchant::Type)id, level);
     });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "dropPlayerItem",
+        [](Player* player, ItemStack const* item, bool randomly) -> bool { return player->drop(*item, randomly); }
+    );
 }

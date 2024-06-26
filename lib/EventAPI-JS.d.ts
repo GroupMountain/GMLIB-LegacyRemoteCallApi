@@ -191,4 +191,38 @@ declare class Event2 {
             entity: Entity
         ) => void
     ): boolean;
+
+    /** 尝试物品物品请求 */
+    static listen(
+        /** 事件名 */
+        event: "handleRequestTryAction",
+        /** 回调函数 */
+        listener: (
+            /** 请求的玩家对象 */
+            Player: Player,
+            /** 请求的操作 */
+            actionType: number,
+            /** 请求的槽位 */
+            slot: number,
+            /** 容器的ID */
+            containerNetId: number
+        ) => boolean | void
+    ): boolean;
+
+    /** 处理物品请求后(不可拦截) */
+    static listen(
+        /** 事件名 */
+        event: "handleRequestAction",
+        /** 回调函数 */
+        listener: (
+            /** 请求的玩家对象 */
+            Player: Player,
+            /** 请求的操作 */
+            actionType: number,
+            /** 请求的槽位 */
+            slot: number,
+            /** 容器的ID */
+            containerNetId: number
+        ) => void
+    ): boolean;
 }
