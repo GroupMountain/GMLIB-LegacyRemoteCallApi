@@ -1,5 +1,4 @@
 #include "Global.h"
-#include "Event/HandleRequestAction/HandleRequestAction.h"
 using namespace ll::hash_utils;
 
 void Export_Event_API() {
@@ -246,46 +245,6 @@ void Export_Event_API() {
                         } catch (...) {}
                     }
                 );
-                return true;
-            }
-            case doHash("handleRequestTryAction"): {
-                auto Call =
-                    RemoteCall::importAs<bool(Player * player, int requestAction, int slot, int containerNetId)>(
-                        eventName,
-                        eventId
-                    );
-                eventBus->emplaceListener<HandleRequestActionBeforeEvent>([Call](HandleRequestActionBeforeEvent& ev) {
-                    bool result = true;
-                    try {
-                        result = Call(
-                            ev.self(),
-                            (int)ev.getRequestAction().getActionType(),
-                            (int)ev.getRequestAction().getSrc().mSlot,
-                            (int)ev.getRequestAction().getSrc().mOpenContainerNetId
-                        );
-                    } catch (...) {}
-                    if (!result) {
-                        ev.cancel();
-                    }
-                });
-                return true;
-            }
-            case doHash("handleRequestAction"): {
-                auto Call =
-                    RemoteCall::importAs<bool(Player * player, int requestAction, int slot, int containerNetId)>(
-                        eventName,
-                        eventId
-                    );
-                eventBus->emplaceListener<HandleRequestActionAfterEvent>([Call](HandleRequestActionAfterEvent& ev) {
-                    try {
-                        Call(
-                            ev.self(),
-                            (int)ev.getRequestAction().getActionType(),
-                            (int)ev.getRequestAction().getSrc().mSlot,
-                            (int)ev.getRequestAction().getSrc().mOpenContainerNetId
-                        );
-                    } catch (...) {}
-                });
                 return true;
             }
             default:

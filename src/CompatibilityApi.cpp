@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "mc/deps/core/string/HashedString.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
@@ -721,28 +722,51 @@ void Export_Compatibility_API() {
             return result;
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "getLegalEnchants", [](ItemStack const* item) -> std::vector<int> {
-        return EnchantUtils::getLegalEnchants(item->getItem());
+    RemoteCall::exportAs("GMLIB_API", "getLegalEnchants", [](ItemStack const* item) -> std::vector<std::string> {
+        std::vector<int>         enchants = EnchantUtils::getLegalEnchants(item->getItem());
+        std::vector<std::string> result;
+        for (auto& enchant : enchants) {
+            result.push_back(Enchant::getEnchant((Enchant::Type)enchant)->getStringId());
+        }
+        return result;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEnchantTypeNameFromId", [](int id) -> std::string {
+        if (auto enchant = Enchant::getEnchant((Enchant::Type)id)) {
+            return enchant->getStringId();
+        }
+        return "";
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "applyEnchant",
-        [](ItemStack const* item, int id, int level, bool allowNonVanilla) -> bool {
-            return EnchantUtils::applyEnchant((ItemStackBase&)*item, (Enchant::Type)id, level, allowNonVanilla);
+        [](ItemStack const* item, std::string const& typeName, int level, bool allowNonVanilla) -> bool {
+            return EnchantUtils::applyEnchant(
+                (ItemStackBase&)*item,
+                Enchant::getEnchantTypeFromName(HashedString(typeName)),
+                level,
+                allowNonVanilla
+            );
         }
     );
     RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack const* item) -> void {
         EnchantUtils::removeEnchants((ItemStack&)*item);
     });
-    RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack const* item, int id) -> bool {
-        return EnchantUtils::hasEnchant((Enchant::Type)id, (ItemStackBase&)*item);
+    RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack const* item, std::string const& typeName) -> bool {
+        return EnchantUtils::hasEnchant(Enchant::getEnchantTypeFromName(HashedString(typeName)), (ItemStackBase&)*item);
     });
-    RemoteCall::exportAs("GMLIB_API", "getEnchantLevel", [](ItemStack const* item, int id) -> int {
-        return EnchantUtils::getEnchantLevel((Enchant::Type)id, (ItemStackBase&)*item);
+    RemoteCall::exportAs("GMLIB_API", "getEnchantLevel", [](ItemStack const* item, std::string const& typeName) -> int {
+        return EnchantUtils::getEnchantLevel(
+            Enchant::getEnchantTypeFromName(HashedString(typeName)),
+            (ItemStackBase&)*item
+        );
     });
-    RemoteCall::exportAs("GMLIB_API", "getEnchantNameAndLevel", [](int id, int level) -> std::string {
-        return EnchantUtils::getEnchantNameAndLevel((Enchant::Type)id, level);
-    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getEnchantNameAndLevel",
+        [](std::string const& typeName, int level) -> std::string {
+            return EnchantUtils::getEnchantNameAndLevel(Enchant::getEnchantTypeFromName(HashedString(typeName)), level);
+        }
+    );
     RemoteCall::exportAs(
         "GMLIB_API",
         "dropPlayerItem",

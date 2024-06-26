@@ -352,11 +352,17 @@ declare class Minecraft {
 
     /** 获取附魔名字和等级 */
     static getEnchantNameAndLevel(
-        /** 附魔ID */
-        id: number,
+        /** 附魔命名空间 */
+        typeName: string,
         /** 附魔的等级 */
         level: number
     ): string;
+
+    /** 通过附魔ID获取附魔命名空间 */
+    static getMaxPlayers(
+        /** 附魔ID */
+        id: number
+    ): string | null;
 
     /** 获取最大玩家数 */
     static getMaxPlayers(): number;
@@ -1130,12 +1136,12 @@ interface Item {
     ): boolean;
 
     /** 获取物品可以拥有的附魔 */
-    getLegalEnchants(): number[]
+    getLegalEnchants(): string[]
 
     /** 添加附魔 */
     applyEnchant(
-        /** 附魔ID */
-        id: number,
+        /** 附魔的命名空间 */
+        typeName: string,
         /** 附魔等级 */
         level: number,
         /** 允许非原版附魔 */
@@ -1147,13 +1153,13 @@ interface Item {
 
     /** 判断是否拥有附魔 */
     hasEnchant(
-        /** 附魔ID */
-        id: number
+        /** 附魔的命名空间 */
+        typeName: string
     ): boolean;
 
     /** 获取附魔等级 */
     getEnchantLevel(
-        /** 附魔ID */
-        id: number
+        /** 附魔的命名空间 */
+        typeName: string
     ): number;
 }
