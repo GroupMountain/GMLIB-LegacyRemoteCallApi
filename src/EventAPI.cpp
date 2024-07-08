@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "mc/world/ActorUniqueID.h"
 using namespace ll::hash_utils;
 
 void Export_Event_API() {
@@ -222,27 +223,69 @@ void Export_Event_API() {
                 return true;
             }
             case doHash("ProjectileTryCreate"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob)>(eventName, eventId);
+                auto Call = RemoteCall::importAs<bool(Actor * mob, int64 uniqueId)>(eventName, eventId);
                 eventBus->emplaceListener<Event::EntityEvent::ProjectileCreateBeforeEvent>(
                     [Call](Event::EntityEvent::ProjectileCreateBeforeEvent& ev) {
                         bool result = true;
                         try {
-                            result = Call(&ev.self());
+                            auto uid = ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1;
+                            result   = Call(&ev.self(), uid);
                         } catch (...) {}
                         if (!result) {
                             ev.cancel();
                         }
                     }
                 );
-                return true;    
+                return true;
             }
             case doHash("ProjectileCreate"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob)>(eventName, eventId);
+                auto Call = RemoteCall::importAs<bool(Actor * mob, int64 uniqueId)>(eventName, eventId);
                 eventBus->emplaceListener<Event::EntityEvent::ProjectileCreateAfterEvent>(
                     [Call](Event::EntityEvent::ProjectileCreateAfterEvent& ev) {
                         try {
-                            Call(&ev.self());
+                            auto uid = ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1;
+                            Call(&ev.self(), uid);
                         } catch (...) {}
+                    }
+                );
+                return true;
+            }
+            case doHash("SpawnWanderingTrader"): {
+                auto Call = RemoteCall::importAs<bool(std::pair<BlockPos, int> pos)>(eventName, eventId);
+                eventBus->emplaceListener<Event::EntityEvent::SpawnWanderingTraderBeforeEvent>(
+                    [Call](Event::EntityEvent::SpawnWanderingTraderBeforeEvent& ev) {
+                        bool result = true;
+                        try {
+                            result = Call({ev.getPos(), 0});
+                        } catch (...) {}
+                        if (!result) {
+                            ev.cancel();
+                        }
+                    }
+                );
+                return true;
+            }
+            case doHash("HandleRequestAction"): {
+                auto Call = RemoteCall::importAs<
+                    bool(Player * player, std::string const& actionType, std::string const& ContainerNetId, int slot)>(
+                    eventName,
+                    eventId
+                );
+                eventBus->emplaceListener<Event::PlayerEvent::HandleRequestActionBeforeEvent>(
+                    [Call](Event::PlayerEvent::HandleRequestActionBeforeEvent& ev) {
+                        bool result = true;
+                        try {
+                            auto requestAction = (ItemStackRequestActionTransferBase*)&ev.getRequestAction();
+                            result             = Call(
+                                &ev.self(),
+                                magic_enum::enum_name(requestAction->mActionType).data(),
+                                magic_enum::enum_name(requestAction->getSrc().mOpenContainerNetId).data(),
+                                requestAction->getSrc().mSlot
+                            );
+                        } catch (...) {}
+                        if (!result) {
+                            ev.cancel();
+                        }
                     }
                 );
                 return true;

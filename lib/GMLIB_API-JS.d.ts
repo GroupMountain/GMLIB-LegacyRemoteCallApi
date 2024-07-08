@@ -276,12 +276,12 @@ declare class Minecraft {
 
     /** 根据UniqueId获取玩家对象 */
     static getPlayerFromUniqueId(
-        uniqueId: string
+        uniqueId: string | number
     ): Player;
 
     /** 根据UniqueId获取实体对象 */
     static getEntityFromUniqueId(
-        uniqueId: string
+        uniqueId: string | number
     ): Entity;
 
     /** 获取方块runtimeId */

@@ -177,7 +177,9 @@ declare class Event {
         /** 回调函数 */
         listener: (
             /** 弹射物实体对象 */
-            entity: Entity
+            entity: Entity,
+            /** 创建弹射的实体的uniqueID */
+            uniqueId: number
         ) => boolean | void
     ): boolean;
 
@@ -188,7 +190,37 @@ declare class Event {
         /** 回调函数 */
         listener: (
             /** 弹射物实体对象 */
-            entity: Entity
+            entity: Entity,
+            /** 创建弹射的实体的uniqueID */
+            uniqueId: number
         ) => void
+    ): boolean;
+
+    /** 生成流浪商人 */
+    static listen(
+        /** 事件名 */
+        event: "SpawnWanderingTrader",
+        /** 回调函数 */
+        listener: (
+            /** 生成的坐标 */
+            pos: IntPos
+        ) => boolean | void
+    ): boolean;
+
+    /** 处理物品请求 */
+    static listen(
+        /** 事件名 */
+        event: "HandleRequestAction",
+        /** 回调函数 */
+        listener: (
+            /** 请求玩家 */
+            player: Player,
+            /** 请求类型 */
+            actionType: string,
+            /** 容器ID */
+            ContainerNetId: string,
+            /** 请求的槽位 */
+            slot: number
+        ) => boolean | void
     ): boolean;
 }
