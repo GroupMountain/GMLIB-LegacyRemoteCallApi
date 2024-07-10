@@ -1,5 +1,4 @@
 #include "Global.h"
-#include "mc/deps/core/string/HashedString.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
@@ -732,7 +731,7 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getEnchantTypeNameFromId", [](int id) -> std::string {
         if (auto enchant = Enchant::getEnchant((Enchant::Type)id)) {
-            return enchant->getStringId();
+            return std::string(enchant->getStringId());
         }
         return "";
     });
@@ -772,4 +771,13 @@ void Export_Compatibility_API() {
         "dropPlayerItem",
         [](Player* player, ItemStack const* item, bool randomly) -> bool { return player->drop(*item, randomly); }
     );
+    RemoteCall::exportAs("GMLIB_API", "getPlayerRuntimeId", [](Player* player) -> uint64 {
+        return player->getRuntimeID().id;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityRuntimeId", [](Actor* entity) -> uint64 {
+        return entity->getRuntimeID().id;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityNameTag", [](Actor* entity) -> std::string {
+        return entity->getNameTag();
+    });
 }
