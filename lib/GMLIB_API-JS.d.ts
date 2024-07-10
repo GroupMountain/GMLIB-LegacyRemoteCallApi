@@ -1027,6 +1027,9 @@ interface Player {
         /** 随机丢出位置 */
         randomly: boolean | undefined
     ): boolean;
+
+    /** (GMLIB)获取玩家的rumtimeId */
+    getRuntimeId(): number;
 }
 
 interface Entity {
@@ -1070,6 +1073,12 @@ interface Entity {
         /** 实体对象 */
         entity: Entity
     ): boolean;
+
+    /** (GMLIB)获取实体的rumtimeId */
+    getRuntimeId(): number;
+
+    /** (GMLIB)获取实体的命名 */
+    getNameTag(): string;
 }
 
 interface Block {
