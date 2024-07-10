@@ -780,4 +780,22 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getEntityNameTag", [](Actor* entity) -> std::string {
         return entity->getNameTag();
     });
+    RemoteCall::exportAs("GMLIB_API", "ItemisUnbreakable", [](ItemStack const* item) -> bool {
+        return ((GMLIB_ItemStack*)item)->isUnbreakable();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemUnbreakable", [](ItemStack const* item, bool value) -> void {
+        ((GMLIB_ItemStack*)item)->setUnbreakable(value);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemShouldKeepOnDeath", [](ItemStack const* item) -> bool {
+        return ((GMLIB_ItemStack*)item)->getShouldKeepOnDeath();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemShouldKeepOnDeath", [](ItemStack const* item, bool value) -> void {
+        ((GMLIB_ItemStack*)item)->setShouldKeepOnDeath(true);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemLockMode", [](ItemStack const* item) -> int {
+        return (int)((GMLIB_ItemStack*)item)->getItemLockMode();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemLockMode", [](ItemStack const* item, int value) -> void {
+        ((GMLIB_ItemStack*)item)->setItemLockMode((ItemLockMode)value);
+    });
 }

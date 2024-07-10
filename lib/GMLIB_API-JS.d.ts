@@ -785,6 +785,7 @@ declare class JsonConfig {
     ): void;
 }
 
+/** JSON语言文件 */
 declare class JsonLanguage extends JsonConfig {
     /** 创建或打开一个 Json 语言文件 */
     constructor(
@@ -803,6 +804,7 @@ declare class JsonLanguage extends JsonConfig {
     ): string;
 }
 
+/** JSON版翻译类 */
 declare class JsonI18n {
     /** 加载翻译数据目录 */
     constructor(
@@ -895,6 +897,7 @@ declare class Version {
     static getGmlibVersion(): Version;
 }
 
+/** 翻译API类 */
 declare class I18nAPI {
     private constructor();
 
@@ -955,6 +958,7 @@ declare class I18nAPI {
     ): void;
 }
 
+/** 玩家信息存储类 */
 declare class UserCache {
     private constructor();
 
@@ -1020,7 +1024,7 @@ interface Player {
     /** (GMLIB)清除玩家重生点 */
     clearSpawnPoint(): void;
 
-    /** 丢出玩家物品 */
+    /** (GMLIB)丢出玩家物品 */
     dropItem(
         /** 物品对象 */
         item: Item,
@@ -1144,10 +1148,10 @@ interface Item {
         block: Block
     ): boolean;
 
-    /** 获取物品可以拥有的附魔 */
+    /** (GMLIB)获取物品可以拥有的附魔 */
     getLegalEnchants(): string[]
 
-    /** 添加附魔 */
+    /** (GMLIB)添加附魔 */
     applyEnchant(
         /** 附魔的命名空间 */
         typeName: string,
@@ -1157,18 +1161,45 @@ interface Item {
         allowNonVanilla: boolean | null
     ): boolean;
 
-    /** 删除所有附魔 */
+    /** (GMLIB)删除所有附魔 */
     removeEnchants(): void;
 
-    /** 判断是否拥有附魔 */
+    /** (GMLIB)判断是否拥有附魔 */
     hasEnchant(
         /** 附魔的命名空间 */
         typeName: string
     ): boolean;
 
-    /** 获取附魔等级 */
+    /** (GMLIB)获取附魔等级 */
     getEnchantLevel(
         /** 附魔的命名空间 */
         typeName: string
     ): number;
+
+    /** (GMLIB)物品是否拥有不可破坏标签 */
+    isUnbreakable(): boolean;
+
+    /** (GMLIB)设置物品不可破坏标签 */
+    setUnbreakable(
+        /** 是否不可破坏 */
+        unbreakable: boolean
+    ): void;
+
+    /** (GMLIB)物品是否拥有死亡不掉落标签 */
+    getShouldKeepOnDeath(): boolean;
+
+    /** (GMLIB)设置物品死亡不掉落标签 */
+    setShouldKeepOnDeath(
+        /** 物品是否死亡不掉落 */
+        value: boolean
+    ): void;
+
+    /** (GMLIB)获取物品的锁定模式 0:无 1:锁定在格子里 2:锁定在背包里 */
+    getItemLockMode(): 0 | 1 | 2;
+
+    /** (GMLIB)设置物品的锁定模式 0:无 1:锁定在格子里 2:锁定在背包里 */
+    setItemLockMode(
+        /** 锁定模式 */
+        mode: 0 | 1 | 2
+    ): void;
 }
