@@ -1211,4 +1211,22 @@ interface Item {
         /** 要设置的惩罚等级 */
         cost: number
     ): void;
+
+    /** (GMLIB)获取冒险模式下能破坏的方块 */
+    getCanDestroy(): string[];
+
+    /** (GMLIB)设置冒险模式下能破坏的方块 */
+    setCanDestroy(
+        /** 能破坏的方块 */
+        blocks: string[]
+    ): void;
+
+    /** (GMLIB)获取冒险模式下能放置在什么方块上 */
+    getCanPlaceOn(): string[];
+
+    /** (GMLIB)设置冒险模式下能放置在什么方块上 */
+    getCanPlaceOn(
+        /** 能放置的方块 */
+        blocks: string[]
+    ): void;
 }

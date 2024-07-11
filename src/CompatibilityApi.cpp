@@ -804,4 +804,32 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "setItemRepairCost", [](ItemStack const* item, int cost) -> void {
         ((ItemStackBase*)item)->setRepairCost(cost);
     });
+    RemoteCall::exportAs("GMLIB_API", "getItemCanDestroy", [](ItemStack const* item) -> std::vector<std::string> {
+        std::vector<std::string> result = {};
+        for (auto& block : ((GMLIB_ItemStack*)item)->getCanDestroy()) {
+            result.push_back(block->getTypeName());
+        }
+        return result;
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "setItemCanDestroy",
+        [](ItemStack const* item, std::vector<std::string> blocks) -> void {
+            ((GMLIB_ItemStack*)item)->setCanDestroy(blocks);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "getItemCanPlaceOn", [](ItemStack const* item) -> std::vector<std::string> {
+        std::vector<std::string> result = {};
+        for (auto& block : ((GMLIB_ItemStack*)item)->getCanPlaceOn()) {
+            result.push_back(block->getTypeName());
+        }
+        return result;
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "setItemCanPlaceOn",
+        [](ItemStack const* item, std::vector<std::string> blocks) -> void {
+            ((GMLIB_ItemStack*)item)->setCanPlaceOn(blocks);
+        }
+    );
 }
