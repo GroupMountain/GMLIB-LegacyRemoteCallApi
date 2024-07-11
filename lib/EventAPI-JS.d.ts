@@ -1,5 +1,3 @@
-/// <reference path="d:\dts/dts/helperlib/src/index.d.ts"/> 
-
 /** 事件监听接口 */
 declare class Event {
     /** 生物捡起物品 */

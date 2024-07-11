@@ -798,4 +798,10 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "setItemLockMode", [](ItemStack const* item, int value) -> void {
         ((GMLIB_ItemStack*)item)->setItemLockMode((ItemLockMode)value);
     });
+    RemoteCall::exportAs("GMLIB_API", "getItemRepairCost", [](ItemStack const* item) -> int {
+        return item->getBaseRepairCost();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemRepairCost", [](ItemStack const* item, int cost) -> void {
+        ((ItemStackBase*)item)->setRepairCost(cost);
+    });
 }

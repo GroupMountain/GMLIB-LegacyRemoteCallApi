@@ -1202,4 +1202,13 @@ interface Item {
         /** 锁定模式 */
         mode: 0 | 1 | 2
     ): void;
+
+    /** (GMLIB)获取物品的惩罚等级 */
+    getRepairCost(): number;
+
+    /** (GMLIB)设置物品的惩罚等级 */
+    setRepairCost(
+        /** 要设置的惩罚等级 */
+        cost: number
+    ): void;
 }
