@@ -255,7 +255,7 @@ void Export_Event_API() {
                     [Call](Event::EntityEvent::SpawnWanderingTraderBeforeEvent& ev) {
                         bool result = true;
                         try {
-                            result = Call({ev.getPos(), 0});
+                            result = Call({ev.getPos(), ev.getRegion().getDimensionId()});
                         } catch (...) {}
                         if (!result) {
                             ev.cancel();
