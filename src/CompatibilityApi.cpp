@@ -1,5 +1,6 @@
 #include "Global.h"
 #include <regex>
+#include <vector>
 
 bool isInteger(const std::string& str) {
     std::regex pattern("^[+-]?\\d+$");
@@ -790,7 +791,7 @@ void Export_Compatibility_API() {
         return ((GMLIB_ItemStack*)item)->getShouldKeepOnDeath();
     });
     RemoteCall::exportAs("GMLIB_API", "setItemShouldKeepOnDeath", [](ItemStack const* item, bool value) -> void {
-        ((GMLIB_ItemStack*)item)->setShouldKeepOnDeath(true);
+        ((GMLIB_ItemStack*)item)->setShouldKeepOnDeath(value);
     });
     RemoteCall::exportAs("GMLIB_API", "getItemLockMode", [](ItemStack const* item) -> int {
         return (int)((GMLIB_ItemStack*)item)->getItemLockMode();
