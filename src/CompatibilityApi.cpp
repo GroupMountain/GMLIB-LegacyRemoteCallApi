@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "mc/enums/AbilitiesIndex.h"
 #include <regex>
 #include <vector>
 
@@ -833,4 +834,13 @@ void Export_Compatibility_API() {
             ((GMLIB_ItemStack*)item)->setCanPlaceOn(blocks);
         }
     );
+    RemoteCall::exportAs("GMLIB_API", "getPlayerHungry", [](Player* player) -> float {
+        return player->getMutableAttribute(Player::HUNGER)->getCurrentValue();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerArmorCoverPercentage", [](Player* player) -> float {
+        return player->getArmorCoverPercentage();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerArmorValue", [](Player* player) -> int {
+        return player->getArmorValue();
+    });
 }

@@ -1229,4 +1229,13 @@ interface Item {
         /** 能放置的方块 */
         blocks: string[]
     ): void;
+
+    /** (GMLIB)获取玩家饱食度 */
+    getHungry(): number;
+
+    /** (GMLIB)获取玩家盔甲覆盖百分比 */
+    getArmorCoverPercentage(): number;
+
+    /** (GMLIB)获取玩家盔甲值 */
+    getArmorValue(): number;
 }
