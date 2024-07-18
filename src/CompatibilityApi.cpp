@@ -1,5 +1,9 @@
 #include "Global.h"
+#include "magic_enum.hpp"
+#include "mc/entity/systems/common/ServerCameraStateSystem.h"
 #include "mc/enums/AbilitiesIndex.h"
+#include "mc/scripting/modules/minecraft/ScriptCameraSetLocationOptions.h"
+#include "mc/world/actor/common/CameraInstruction.h"
 #include <regex>
 #include <vector>
 
@@ -843,4 +847,5 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getPlayerArmorValue", [](Player* player) -> int {
         return player->getArmorValue();
     });
+    RemoteCall::exportAs("GMLIB_API", "getEntityOwnerUniqueId", [](Actor* entity) -> int64 { return entity->getOwnerId().id; });
 }

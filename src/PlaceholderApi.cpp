@@ -1,3 +1,4 @@
+#include "GMLIB/Server/PlaceholderAPI.h"
 #include "Global.h"
 #include <regex>
 
@@ -25,6 +26,7 @@ bool registerPlayerPlaceholder(
     std::string const& PAPIName
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
+        PlaceholderAPI::unregisterPlaceholder(PAPIName);
         if (isParameters(PAPIName)) {
             auto Call = RemoteCall::importAs<std::string(Player * pl, std::unordered_map<std::string, std::string>)>(
                 PluginName,
@@ -54,6 +56,7 @@ bool registerServerPlaceholder(
     std::string const& PAPIName
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
+        PlaceholderAPI::unregisterPlaceholder(PAPIName);
         if (isParameters(PAPIName)) {
             auto Call =
                 RemoteCall::importAs<std::string(std::unordered_map<std::string, std::string>)>(PluginName, FuncName);
@@ -78,6 +81,7 @@ bool registerStaticPlaceholder(
     int                num
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
+        PlaceholderAPI::unregisterPlaceholder(PAPIName);
         if (isParameters(PAPIName)) {
             auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
             if (num == -1) {

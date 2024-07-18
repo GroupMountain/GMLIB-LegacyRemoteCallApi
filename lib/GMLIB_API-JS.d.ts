@@ -1083,6 +1083,9 @@ interface Entity {
 
     /** (GMLIB)获取实体的命名 */
     getNameTag(): string;
+
+    /** 获取实体的主人 */
+    getEntityOwner(): Entity | null;
 }
 
 interface Block {
