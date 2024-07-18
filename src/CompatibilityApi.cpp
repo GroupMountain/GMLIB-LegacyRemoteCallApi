@@ -1,11 +1,5 @@
 #include "Global.h"
-#include "magic_enum.hpp"
-#include "mc/entity/systems/common/ServerCameraStateSystem.h"
-#include "mc/enums/AbilitiesIndex.h"
-#include "mc/scripting/modules/minecraft/ScriptCameraSetLocationOptions.h"
-#include "mc/world/actor/common/CameraInstruction.h"
 #include <regex>
-#include <vector>
 
 bool isInteger(const std::string& str) {
     std::regex pattern("^[+-]?\\d+$");
