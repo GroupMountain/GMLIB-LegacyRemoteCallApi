@@ -760,7 +760,7 @@ declare class JsonConfig {
     ): void;
 
     /** 获取所有数据 */
-    getData(): Record<string,any>;
+    getData(): Record<string, any>;
 
     /** 读取数据 */
     get<T>(
@@ -1034,6 +1034,15 @@ interface Player {
 
     /** (GMLIB)获取玩家的rumtimeId */
     getRuntimeId(): number;
+
+    /** (GMLIB)获取玩家饱食度 */
+    getHungry(): number;
+
+    /** (GMLIB)获取玩家盔甲覆盖百分比 */
+    getArmorCoverPercentage(): number;
+
+    /** (GMLIB)获取玩家盔甲值 */
+    getArmorValue(): number;
 }
 
 interface Entity {
@@ -1233,12 +1242,15 @@ interface Item {
         blocks: string[]
     ): void;
 
-    /** (GMLIB)获取玩家饱食度 */
-    getHungry(): number;
+    /** 获取物品分类名称 */
+    getCategoryName(): string;
 
-    /** (GMLIB)获取玩家盔甲覆盖百分比 */
-    getArmorCoverPercentage(): number;
+    /** 获取物品的命名 */
+    getCustomName(): string;
 
-    /** (GMLIB)获取玩家盔甲值 */
-    getArmorValue(): number;
+    /** 获取物品的BUFF效果名称 */
+    getEffecName(): string;
+
+    /** 物品是否为食物 */
+    isFood(): boolean;
 }

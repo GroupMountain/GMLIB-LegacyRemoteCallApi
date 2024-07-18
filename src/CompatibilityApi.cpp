@@ -847,4 +847,19 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getEntityOwnerUniqueId", [](Actor* entity) -> int64 {
         return entity->getOwnerId().id;
     });
+    RemoteCall::exportAs("GMLIB_API", "getItemCategoryName", [](ItemStack const* item) -> std::string {
+        return item->getCategoryName();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemCustomName", [](ItemStack const* item) -> std::string {
+        return item->getCustomName();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemEffecName", [](ItemStack const* item) -> std::string {
+        return item->getEffectName();
+    });
+    RemoteCall::exportAs("GMLIB_API", "itemIsFood", [](ItemStack const* item) -> bool {
+        if (auto itemDef = item->getItem()) {
+            return itemDef->isFood();
+        }
+        return false;
+    });
 }
