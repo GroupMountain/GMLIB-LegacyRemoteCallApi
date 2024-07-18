@@ -63,7 +63,7 @@ declare class Event {
     /** 掉落物生成完毕(不可以拦截) */
     static listen(
         /** 事件名 */
-        event: "onItemTrySpawn",
+        event: "onItemSpawned",
         /** 回调函数 */
         listener: (
             /** 物品对象 */

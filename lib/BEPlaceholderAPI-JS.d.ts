@@ -4,7 +4,9 @@ declare class PAPI {
         /** PAPI调用函数 */
         func: (
             /** 玩家对象 */
-            player: Player
+            player: Player,
+            /** 变量参数 */
+            param: null | object.<string, string>
         ) => string,
         /** 插件名字 */
         pluginsName: string,
@@ -15,7 +17,10 @@ declare class PAPI {
     /** 注册一个服务器PAPI变量 */
     static registerServerPlaceholder(
         /** PAPI调用函数 */
-        func: () => string,
+        func: (
+            /** 变量参数 */
+            param: null | object.<string, string>
+        ) => string,
         /** 插件名字 */
         pluginsName: string,
         /** PAPI变量 */

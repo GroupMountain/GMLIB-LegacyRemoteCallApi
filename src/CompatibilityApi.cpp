@@ -740,7 +740,7 @@ void Export_Compatibility_API() {
         "applyEnchant",
         [](ItemStack const* item, std::string const& typeName, int level, bool allowNonVanilla) -> bool {
             return EnchantUtils::applyEnchant(
-                (ItemStackBase&)*item,
+                *(const_cast<ItemStack*>(item)),
                 Enchant::getEnchantTypeFromName(HashedString(typeName)),
                 level,
                 allowNonVanilla
@@ -751,12 +751,15 @@ void Export_Compatibility_API() {
         EnchantUtils::removeEnchants((ItemStack&)*item);
     });
     RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack const* item, std::string const& typeName) -> bool {
-        return EnchantUtils::hasEnchant(Enchant::getEnchantTypeFromName(HashedString(typeName)), (ItemStackBase&)*item);
+        return EnchantUtils::hasEnchant(
+            Enchant::getEnchantTypeFromName(HashedString(typeName)),
+            *(const_cast<ItemStack*>(item))
+        );
     });
     RemoteCall::exportAs("GMLIB_API", "getEnchantLevel", [](ItemStack const* item, std::string const& typeName) -> int {
         return EnchantUtils::getEnchantLevel(
             Enchant::getEnchantTypeFromName(HashedString(typeName)),
-            (ItemStackBase&)*item
+            *(const_cast<ItemStack*>(item))
         );
     });
     RemoteCall::exportAs(
@@ -802,7 +805,7 @@ void Export_Compatibility_API() {
         return item->getBaseRepairCost();
     });
     RemoteCall::exportAs("GMLIB_API", "setItemRepairCost", [](ItemStack const* item, int cost) -> void {
-        ((ItemStackBase*)item)->setRepairCost(cost);
+        (*(const_cast<ItemStack*>(item))).setRepairCost(cost);
     });
     RemoteCall::exportAs("GMLIB_API", "getItemCanDestroy", [](ItemStack const* item) -> std::vector<std::string> {
         std::vector<std::string> result = {};
@@ -841,5 +844,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getPlayerArmorValue", [](Player* player) -> int {
         return player->getArmorValue();
     });
-    RemoteCall::exportAs("GMLIB_API", "getEntityOwnerUniqueId", [](Actor* entity) -> int64 { return entity->getOwnerId().id; });
+    RemoteCall::exportAs("GMLIB_API", "getEntityOwnerUniqueId", [](Actor* entity) -> int64 {
+        return entity->getOwnerId().id;
+    });
 }

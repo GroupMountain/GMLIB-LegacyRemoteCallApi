@@ -219,7 +219,7 @@ declare class Minecraft {
     static spawnEntity(
         /** 生成坐标 */
         pos: FloatPos,
-        /** 实体命名空间 */
+        /** 实体命名空间ID */
         name: string
     ): Entity;
 
@@ -227,7 +227,7 @@ declare class Minecraft {
     static shootProjectile(
         /** 实体对象 */
         entity: Entity,
-        /** 投射物命名空间 */
+        /** 投射物命名空间ID */
         proj: string,
         /** 速度 */
         speed: number,
@@ -286,7 +286,7 @@ declare class Minecraft {
 
     /** 获取方块runtimeId */
     static getBlockRuntimeId(
-        /** 方块命名空间 */
+        /** 方块命名空间ID */
         block: string,
         /** 方块的特殊值 */
         legacyData: Number | undefined
@@ -330,18 +330,18 @@ declare class Minecraft {
         isBinary: boolean | undefined
     ): NbtCompound;
 
-    /** 根据命名空间获取翻译键名 */
+    /** 根据命名空间ID获取翻译键名 */
     static getBlockTranslateKeyFromName(
-        /** 方块命名空间 */
+        /** 方块命名空间ID */
         name: string
     ): string;
 
-    /** 获取存档种子号 */
+    /** 获取存档种子 */
     static getLevelSeed(): string;
 
     /** 获取方块亮度 */
     static getBlockLightEmission(
-        /** 方块的命名空间 */
+        /** 方块的命名空间ID */
         block: string,
         /** 方块的特殊值 */
         legacyData: number
@@ -352,13 +352,13 @@ declare class Minecraft {
 
     /** 获取附魔名字和等级 */
     static getEnchantNameAndLevel(
-        /** 附魔命名空间 */
+        /** 附魔命名空间ID */
         typeName: string,
         /** 附魔的等级 */
         level: number
     ): string;
 
-    /** 通过附魔ID获取附魔命名空间 */
+    /** 通过附魔ID获取附魔命名空间ID */
     static getMaxPlayers(
         /** 附魔ID */
         id: number
@@ -468,7 +468,7 @@ declare class Recipes {
         result: string,
         /** 合成结果的数量 */
         count: number | undefined,
-        /** 解锁条件(也可以填物品命名空间) */
+        /** 解锁条件(也可以填物品命名空间ID) */
         unlock: "AlwaysUnlocked" | "PlayerHasManyItems" | "PlayerInWater" | "None" | undefined
     ): boolean;
 
@@ -482,7 +482,7 @@ declare class Recipes {
         result: string,
         /** 合成结果的数量 */
         count: number | undefined,
-        /** 解锁条件(也可以填物品命名空间) */
+        /** 解锁条件(也可以填物品命名空间ID) */
         unlock: "AlwaysUnlocked" | "PlayerHasManyItems" | "PlayerInWater" | "None" | undefined
     ): boolean;
 }
@@ -760,15 +760,15 @@ declare class JsonConfig {
     ): void;
 
     /** 获取所有数据 */
-    getData(): object;
+    getData(): Record<string,any>;
 
     /** 读取数据 */
-    get(
+    get<T>(
         /** 键名 */
         key: string,
         /** 不存在返回值 */
-        defaultValue: any
-    ): any;
+        defaultValue: T
+    ): T;
 
     /** 设置数据 */
     set(
@@ -1039,7 +1039,7 @@ interface Player {
 interface Entity {
     /** (GMLIB)射弹投射物 */
     shootProjectile(
-        /** 投射物命名空间 */
+        /** 投射物命名空间ID */
         proj: string,
         /** 速度 */
         speed: number | undefined,
@@ -1156,7 +1156,7 @@ interface Item {
 
     /** (GMLIB)添加附魔 */
     applyEnchant(
-        /** 附魔的命名空间 */
+        /** 附魔的命名空间ID */
         typeName: string,
         /** 附魔等级 */
         level: number,
@@ -1169,13 +1169,13 @@ interface Item {
 
     /** (GMLIB)判断是否拥有附魔 */
     hasEnchant(
-        /** 附魔的命名空间 */
+        /** 附魔的命名空间ID */
         typeName: string
     ): boolean;
 
     /** (GMLIB)获取附魔等级 */
     getEnchantLevel(
-        /** 附魔的命名空间 */
+        /** 附魔的命名空间ID */
         typeName: string
     ): number;
 
