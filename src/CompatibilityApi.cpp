@@ -1,5 +1,9 @@
 #include "Global.h"
+#include "magic_enum.hpp"
+#include "mc/network/packet/InventorySlotPacket.h"
+#include <map>
 #include <regex>
+#include <vector>
 
 bool isInteger(const std::string& str) {
     std::regex pattern("^[+-]?\\d+$");
@@ -867,4 +871,11 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getPlayerUIItem", [](Player* player, int slot) -> ItemStack* {
         return const_cast<ItemStack*>(&player->getPlayerUIItem((PlayerUISlot)slot));
     });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "sendInventorySlotPacket",
+        [](Player* player, int containerId, int slot, ItemStack* item) -> void {
+            InventorySlotPacket((ContainerID)containerId, slot, *item).sendTo(*player);
+        }
+    );
 }

@@ -1057,6 +1057,16 @@ interface Player {
         /** 槽位 */
         slot: number
     ): Item;
+
+    /** (GMLIB)发送更新更新物品数据包 */
+    sendInventorySlotPacket(
+        /** 容器ID */
+        containerId: number,
+        /** 槽位 */
+        slot: number,
+        /** 物品 */
+        item: Item
+    ): void;
 }
 
 interface Entity {
