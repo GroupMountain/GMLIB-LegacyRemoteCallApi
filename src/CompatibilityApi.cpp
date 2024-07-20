@@ -862,4 +862,10 @@ void Export_Compatibility_API() {
         }
         return false;
     });
+    RemoteCall::exportAs("GMLIB_API", "setPlayerUIItem", [](Player* player, int slot, ItemStack const* item) -> void {
+        player->setPlayerUIItem((PlayerUISlot)slot, *item);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerUIItem", [](Player* player, int slot) -> void {
+        player->getPlayerUIItem((PlayerUISlot)slot);
+    });
 }

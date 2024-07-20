@@ -1043,6 +1043,20 @@ interface Player {
 
     /** (GMLIB)获取玩家盔甲值 */
     getArmorValue(): number;
+
+    /** (GMLIB)设置玩家UI栏物品 */
+    setPlayerUIItem(
+        /** 槽位 */
+        slot: number,
+        /** 物品 */
+        item: Item
+    ): void;
+
+    /** (GMLIB)获取玩家UI栏物品 */
+    setPlayerUIItem(
+        /** 槽位 */
+        slot: number
+    ): Item;
 }
 
 interface Entity {
