@@ -510,8 +510,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getPlayerFromUuid", [](std::string const& uuid) -> Player* {
-        auto uid = mce::UUID::fromString(uuid);
-        return ll::service::getLevel()->getPlayer(uuid);
+        return ll::service::getLevel()->getPlayer(mce::UUID::fromString(uuid));
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerFromUniqueId", [](std::string const& uniqueId) -> Actor* {
         auto auid = parseScriptUniqueID(uniqueId);
