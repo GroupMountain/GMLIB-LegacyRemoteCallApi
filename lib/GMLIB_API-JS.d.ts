@@ -1053,7 +1053,7 @@ interface Player {
     ): void;
 
     /** (GMLIB)获取玩家UI栏物品 */
-    setPlayerUIItem(
+    getPlayerUIItem(
         /** 槽位 */
         slot: number
     ): Item;

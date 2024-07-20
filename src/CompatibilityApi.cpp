@@ -865,7 +865,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "setPlayerUIItem", [](Player* player, int slot, ItemStack const* item) -> void {
         player->setPlayerUIItem((PlayerUISlot)slot, *item);
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerUIItem", [](Player* player, int slot) -> void {
-        player->getPlayerUIItem((PlayerUISlot)slot);
+    RemoteCall::exportAs("GMLIB_API", "getPlayerUIItem", [](Player* player, int slot) -> ItemStack* {
+        return const_cast<ItemStack*>(&player->getPlayerUIItem((PlayerUISlot)slot));
     });
 }
