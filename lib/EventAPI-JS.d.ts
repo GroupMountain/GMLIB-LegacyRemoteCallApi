@@ -215,10 +215,23 @@ declare class Event {
             player: Player,
             /** 请求类型 */
             actionType: string,
-            /** 容器ID */
+            /** 容器类型 */
             ContainerNetId: string,
             /** 请求的槽位 */
             slot: number
         ) => boolean | void
+    ): boolean;
+
+    /** 发送容器关闭数据包后(不可拦截) */
+    static listen(
+        /** 事件名 */
+        event: "SendContainerClosePacket",
+        /** 回调函数 */
+        listener: (
+            /** 要被关闭的玩家 */
+            player: Player,
+            /** 容器类型 */
+            ContainerNetId: string
+        ) => void
     ): boolean;
 }

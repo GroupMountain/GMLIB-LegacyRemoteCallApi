@@ -289,6 +289,22 @@ void Export_Event_API() {
                 );
                 return true;
             }
+            case doHash("SendContainerClosePacket"): {
+                auto Call =
+                    RemoteCall::importAs<bool(Player * player, std::string const& ContainerNetId)>(eventName, eventId);
+                eventBus->emplaceListener<Event::PacketEvent::ContainerClosePacketSendAfterEvent>(
+                    [Call](Event::PacketEvent::ContainerClosePacketSendAfterEvent& ev) {
+                        try {
+                            Call(
+                                ev.getServerNetworkHandler()
+                                    .getServerPlayer(ev.getNetworkIdentifier(), ev.getPacket().mClientSubId),
+                                magic_enum::enum_name(ev.getPacket().mContainerId).data()
+                            );
+                        } catch (...) {}
+                    }
+                );
+                return true;
+            }
             default:
                 return false;
             }
