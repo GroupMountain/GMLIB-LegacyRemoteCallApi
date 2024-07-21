@@ -266,7 +266,7 @@ void Export_Event_API() {
             }
             case doHash("HandleRequestAction"): {
                 auto Call = RemoteCall::importAs<
-                    bool(Player * player, std::string const& actionType, std::string const& ContainerNetId, int slot)>(
+                    bool(Player * player, std::string const& actionType, int ContainerNetId, int slot)>(
                     eventName,
                     eventId
                 );
@@ -278,7 +278,7 @@ void Export_Event_API() {
                             result             = Call(
                                 &ev.self(),
                                 magic_enum::enum_name(requestAction->mActionType).data(),
-                                magic_enum::enum_name(requestAction->getSrc().mOpenContainerNetId).data(),
+                                (int)requestAction->getSrc().mOpenContainerNetId,
                                 requestAction->getSrc().mSlot
                             );
                         } catch (...) {}
