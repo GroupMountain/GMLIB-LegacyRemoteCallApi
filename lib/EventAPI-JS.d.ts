@@ -215,8 +215,8 @@ declare class Event {
             player: Player,
             /** 请求类型 */
             actionType: string,
-            /** 容器ID */
-            containerId: number,
+            /** 容器枚举名 */
+            containerNetId: string,
             /** 请求的槽位 */
             slot: number
         ) => boolean | void

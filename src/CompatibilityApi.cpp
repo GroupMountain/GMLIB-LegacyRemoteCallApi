@@ -1,6 +1,7 @@
 #include "Global.h"
 #include "magic_enum.hpp"
 #include "mc/network/packet/InventorySlotPacket.h"
+#include "mc/world/Container.h"
 #include <map>
 #include <regex>
 #include <vector>
@@ -876,6 +877,13 @@ void Export_Compatibility_API() {
         "sendInventorySlotPacket",
         [](Player* player, int containerId, int slot, ItemStack* item) -> void {
             InventorySlotPacket((ContainerID)containerId, slot, *item).sendTo(*player);
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getContainerType",
+        [](Container* container) -> std::string {
+            return magic_enum::enum_name(container->getContainerType()).data();
         }
     );
 }

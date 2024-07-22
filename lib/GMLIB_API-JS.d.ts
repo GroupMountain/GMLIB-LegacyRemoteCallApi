@@ -1266,15 +1266,20 @@ interface Item {
         blocks: string[]
     ): void;
 
-    /** 获取物品分类名称 */
+    /** (GMLIB)获取物品分类名称 */
     getCategoryName(): string;
 
-    /** 获取物品的命名 */
+    /** (GMLIB)获取物品的命名 */
     getCustomName(): string;
 
-    /** 获取物品的BUFF效果名称 */
+    /** (GMLIB)获取物品的BUFF效果名称 */
     getEffecName(): string;
 
-    /** 物品是否为食物 */
+    /** (GMLIB)物品是否为食物 */
     isFood(): boolean;
+}
+
+interface Container {
+    /** (GMLIB)获取容器类型 */
+    getContainerType(): string
 }
