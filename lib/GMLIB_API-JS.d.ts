@@ -151,7 +151,7 @@ declare class Minecraft {
         /** 要设置的NBT数据 */
         nbt: NbtCompound,
         /** 要覆盖的NBT标签 */
-        tags: string
+        tags: string[]
     ): boolean;
 
     /** 删除玩家NBT */
@@ -366,6 +366,12 @@ declare class Minecraft {
 
     /** 获取最大玩家数 */
     static getMaxPlayers(): number;
+
+    /** 玩家是否拥有NBT */
+    static hasPlayerNbt(
+        /** 玩家的uuid */
+        uuid: string
+    ): boolean;
 }
 
 /** 合成表类 */

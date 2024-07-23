@@ -879,11 +879,11 @@ void Export_Compatibility_API() {
             InventorySlotPacket((ContainerID)containerId, slot, *item).sendTo(*player);
         }
     );
-    RemoteCall::exportAs(
-        "GMLIB_API",
-        "getContainerType",
-        [](Container* container) -> std::string {
-            return magic_enum::enum_name(container->getContainerType()).data();
-        }
-    );
+    RemoteCall::exportAs("GMLIB_API", "getContainerType", [](Container* container) -> std::string {
+        return magic_enum::enum_name(container->getContainerType()).data();
+    });
+    RemoteCall::exportAs("GMLIB_API", "hasPlayerNbt", [](std::string const& uuid) -> bool {
+        auto uid = mce::UUID::fromString(uuid);
+        return GMLIB_Player::getPlayerNbt(uid) ? true : false;
+    });
 }
