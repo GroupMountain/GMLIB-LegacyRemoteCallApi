@@ -1,10 +1,5 @@
 #include "Global.h"
-#include "magic_enum.hpp"
-#include "mc/network/packet/InventorySlotPacket.h"
-#include "mc/world/Container.h"
-#include <map>
 #include <regex>
-#include <vector>
 
 bool isInteger(const std::string& str) {
     std::regex pattern("^[+-]?\\d+$");

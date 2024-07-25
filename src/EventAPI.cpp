@@ -265,21 +265,31 @@ void Export_Event_API() {
                 return true;
             }
             case doHash("HandleRequestAction"): {
-                auto Call = RemoteCall::importAs<
-                    bool(Player * player, std::string const& actionType, std::string const& containerNetId, int slot)>(
-                    eventName,
-                    eventId
-                );
+                auto Call = RemoteCall::importAs<bool(
+                    Player * player,
+                    std::string const& actionType,
+                    int                count,
+                    std::string const& sourceContainerNetId,
+                    int                sourceSlot,
+                    std::string const& destinationContainerNetId,
+                    int                destinationSlot
+                )>(eventName, eventId);
                 eventBus->emplaceListener<Event::PlayerEvent::HandleRequestActionBeforeEvent>(
                     [Call](Event::PlayerEvent::HandleRequestActionBeforeEvent& ev) {
                         bool result = true;
                         try {
                             auto requestAction = (ItemStackRequestActionTransferBase*)&ev.getRequestAction();
-                            result             = Call(
+                            auto source        = requestAction->getSrc();
+                            // TODO: The next version of LeviLamina changes to a member function
+                            auto destination = ll::memory::dAccess<ItemStackRequestSlotInfo>(requestAction, 56);
+                            result           = Call(
                                 &ev.self(),
                                 magic_enum::enum_name(requestAction->mActionType).data(),
-                                magic_enum::enum_name(requestAction->getSrc().mOpenContainerNetId).data(),
-                                requestAction->getSrc().mSlot
+                                ll::memory::dAccess<uchar>(requestAction, 18),
+                                magic_enum::enum_name(source.mOpenContainerNetId).data(),
+                                source.mSlot,
+                                magic_enum::enum_name(destination.mOpenContainerNetId).data(),
+                                destination.mSlot
                             );
                         } catch (...) {}
                         if (!result) {

@@ -123,7 +123,7 @@ declare class Event {
             /** 死亡信息键名 */
             deathMsgKey: string,
             /** 死亡信息翻译参数 */
-            deathMsgParams: Array.<string>,
+            deathMsgParams: string[],
             /** 死亡实体的实体对象 */
             entity: Entity
         ) => void
@@ -215,10 +215,16 @@ declare class Event {
             player: Player,
             /** 请求类型 */
             actionType: string,
-            /** 容器枚举名 */
-            containerNetId: string,
-            /** 请求的槽位 */
-            slot: number
+            /** 请求数量 */
+            count: number,
+            /** 第一个格子的容器类型 */
+            sourceContainerNetId: string,
+            /** 第一个格子的槽位 */
+            sourceSlot: number,
+            /** 第二个格子的容器类型 */
+            destinationContainerNetId: string,
+            /** 第二个格子的槽位 */
+            destinationSlot: number
         ) => boolean | void
     ): boolean;
 
