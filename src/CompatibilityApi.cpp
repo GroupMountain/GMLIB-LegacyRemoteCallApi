@@ -870,7 +870,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs(
         "GMLIB_API",
         "sendInventorySlotPacket",
-        [](Player* player, int containerId, int slot, ItemStack* item) -> void {
+        [](Player* player, int containerId, int slot, ItemStack const* item) -> void {
             InventorySlotPacket((ContainerID)containerId, slot, *item).sendTo(*player);
         }
     );
@@ -880,5 +880,8 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "hasPlayerNbt", [](std::string const& uuid) -> bool {
         auto uid = mce::UUID::fromString(uuid);
         return GMLIB_Player::getPlayerNbt(uid) ? true : false;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemMaxCount", [](ItemStack const* item) -> int {
+        return item->getMaxStackSize();
     });
 }

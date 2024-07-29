@@ -1283,6 +1283,9 @@ interface Item {
 
     /** (GMLIB)物品是否为食物 */
     isFood(): boolean;
+
+    /** (GMLIB)获取物品最大堆叠数量 */
+    getMaxCount(): number;
 }
 
 interface Container {
