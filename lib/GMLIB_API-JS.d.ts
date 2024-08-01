@@ -1097,12 +1097,6 @@ interface Player {
         /** 方块对象 */
         block: Block
     ): number;
-
-    /** (GMLIB)玩家是否拥有buff效果 */
-    hasEffect(
-        /** 效果ID */
-        effectId: number
-    ): boolean;
 }
 
 interface Entity {
@@ -1160,6 +1154,12 @@ interface Entity {
     hasFamily(
         /** 实体族 */
         family: string
+    ): boolean;
+
+    /** (GMLIB)实体是否拥有buff效果 */
+    hasEffect(
+        /** 效果ID */
+        effectId: number
     ): boolean;
 
     /** (GMLIB)获取buff信息 */
