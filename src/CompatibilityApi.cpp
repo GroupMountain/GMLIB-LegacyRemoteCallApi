@@ -890,50 +890,50 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getPlayerDestroyBlockProgress", [](Player* player, Block const* block) -> float {
         return player->getDestroyProgress(*block);
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectVisible", [](Player* player, int effectId) -> bool {
-        if (auto effect = player->getEffect(effectId)) {
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectVisible", [](Actor* entity, int effectId) -> bool {
+        if (auto effect = entity->getEffect(effectId)) {
             return effect->mEffectVisible;
         }
         return 0;
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDuration", [](Player* player, int effectId) -> int {
-        if (auto effect = player->getEffect(effectId)) {
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDuration", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
             return effect->mDuration;
         }
         return 0;
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDurationEasy", [](Player* player, int effectId) -> int {
-        if (auto effect = player->getEffect(effectId)) {
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationEasy", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
             return effect->mDurationEasy;
         }
         return 0;
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDurationHard", [](Player* player, int effectId) -> int {
-        if (auto effect = player->getEffect(effectId)) {
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationHard", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
             return effect->mDurationHard;
         }
         return 0;
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDurationNormal", [](Player* player, int effectId) -> int {
-        if (auto effect = player->getEffect(effectId)) {
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationNormal", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
             return effect->mDurationNormal;
         }
         return 0;
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectAmplifier", [](Player* player, int effectId) -> int {
-        if (auto effect = player->getEffect(effectId)) {
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmplifier", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
             return effect->mAmplifier;
         }
         return 0;
     });
-    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectAmbient", [](Player* player, int effectId) -> bool {
-        if (auto effect = player->getEffect(effectId)) {
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmbient", [](Actor* entity, int effectId) -> bool {
+        if (auto effect = entity->getEffect(effectId)) {
             return effect->mAmbient;
         }
         return 0;
     });
-    RemoteCall::exportAs("GMLIB_API", "playerHasEffect", [](Player* player, int effectId) -> int {
-        return player->hasEffect(*MobEffect::getById(effectId));
+    RemoteCall::exportAs("GMLIB_API", "entityHasEffect", [](Actor* entity, int effectId) -> int {
+        return entity->hasEffect(*MobEffect::getById(effectId));
     });
     RemoteCall::exportAs("GMLIB_API", "getGameDifficulty", []() -> int {
         if (auto level = ll::service::getLevel()) {

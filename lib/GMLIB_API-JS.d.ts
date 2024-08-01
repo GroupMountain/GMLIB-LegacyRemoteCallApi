@@ -1103,49 +1103,6 @@ interface Player {
         /** 效果ID */
         effectId: number
     ): boolean;
-
-    /** (GMLIB)获取buff信息 */
-    getEffectInfo(
-        /** 效果ID */
-        effectId: number
-    ): {
-        /** 效果ID */
-        Id: number,
-        /** 效果等级 */
-        Amplifier: number,
-        /** 持续时间 */
-        Duration: number,
-        /** 简单难度下的持续时间 */
-        DurationEasy: number,
-        /** 普通难度下的持续时间 */
-        DurationNormal: number,
-        /** 困难难度下的持续时间 */
-        DurationHard: number,
-        /** 是否为信标给予 */
-        Ambient: boolean,
-        /** 是否显示粒子效果 */
-        ShowParticles: boolean
-    } | null;
-
-    /** (GMLIB)获取所有buff信息 */
-    getAllEffectsInfo(): {
-        /** 效果ID */
-        Id: number,
-        /** 效果等级 */
-        Amplifier: number,
-        /** 持续时间 */
-        Duration: number,
-        /** 简单难度下的持续时间 */
-        DurationEasy: number,
-        /** 普通难度下的持续时间 */
-        DurationNormal: number,
-        /** 困难难度下的持续时间 */
-        DurationHard: number,
-        /** 是否为信标给予 */
-        Ambient: boolean,
-        /** 是否显示粒子效果 */
-        ShowParticles: boolean
-    }[];
 }
 
 interface Entity {
@@ -1204,6 +1161,49 @@ interface Entity {
         /** 实体族 */
         family: string
     ): boolean;
+
+    /** (GMLIB)获取buff信息 */
+    getEffectInfo(
+        /** 效果ID */
+        effectId: number
+    ): {
+        /** 效果ID */
+        Id: number,
+        /** 效果等级 */
+        Amplifier: number,
+        /** 持续时间 */
+        Duration: number,
+        /** 简单难度下的持续时间 */
+        DurationEasy: number,
+        /** 普通难度下的持续时间 */
+        DurationNormal: number,
+        /** 困难难度下的持续时间 */
+        DurationHard: number,
+        /** 是否为信标给予 */
+        Ambient: boolean,
+        /** 是否显示粒子效果 */
+        ShowParticles: boolean
+    } | null;
+
+    /** (GMLIB)获取所有buff信息 */
+    getAllEffectsInfo(): {
+        /** 效果ID */
+        Id: number,
+        /** 效果等级 */
+        Amplifier: number,
+        /** 持续时间 */
+        Duration: number,
+        /** 简单难度下的持续时间 */
+        DurationEasy: number,
+        /** 普通难度下的持续时间 */
+        DurationNormal: number,
+        /** 困难难度下的持续时间 */
+        DurationHard: number,
+        /** 是否为信标给予 */
+        Ambient: boolean,
+        /** 是否显示粒子效果 */
+        ShowParticles: boolean
+    }[];
 }
 
 interface Block {
