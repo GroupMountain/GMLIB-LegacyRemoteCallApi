@@ -1,8 +1,4 @@
 #include "Global.h"
-#include "ll/api/service/Bedrock.h"
-#include "magic_enum.hpp"
-#include "mc/deps/core/string/HashedString.h"
-#include "mc/world/effect/MobEffect.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {

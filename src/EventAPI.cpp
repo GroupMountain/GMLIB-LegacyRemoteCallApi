@@ -314,6 +314,17 @@ void Export_Event_API() {
                 );
                 return true;
             }
+            case doHash("onServerStopping"): {
+                auto Call = RemoteCall::importAs<bool()>(eventName, eventId);
+                eventBus->emplaceListener<ll::event::server::ServerStoppingEvent>(
+                    [Call](ll::event::server::ServerStoppingEvent& ev) {
+                        try {
+                            Call();
+                        } catch (...) {}
+                    }
+                );
+                return true;
+            }
             default:
                 return false;
             }

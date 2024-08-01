@@ -240,4 +240,12 @@ declare class Event {
             containerId: number
         ) => void
     ): boolean;
+
+    /** 关闭服务器(不可拦截) */
+    static listen(
+        /** 事件名 */
+        event: "onServerStopping",
+        /** 回调函数 */
+        listener: () => void
+    ): boolean;
 }
