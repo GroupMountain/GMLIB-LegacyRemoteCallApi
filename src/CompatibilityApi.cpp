@@ -936,14 +936,6 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "entityHasEffect", [](Actor* entity, int effectId) -> int {
         return entity->hasEffect(*MobEffect::getById(effectId));
     });
-    RemoteCall::exportAs("GMLIB_API", "getEntityAllEffects", [](Actor* entity) -> std::vector<int> {
-        auto             effects = entity->getAllEffects();
-        std::vector<int> results = {};
-        for (auto effect : effects) {
-            results.push_back((int)effect.mId);
-        }
-        return results;
-    });
     RemoteCall::exportAs("GMLIB_API", "getGameDifficulty", []() -> int {
         if (auto level = ll::service::getLevel()) {
             return (int)level->getDifficulty();
