@@ -160,7 +160,7 @@ declare class Event {
     /** 末影龙重生事件 */
     static listen(
         /** 事件名 */
-        event: "DragonRespawn",
+        event: "onDragonRespawn",
         /** 回调函数 */
         listener: (
             /** 末影龙重生后的UniqueID */
@@ -171,7 +171,7 @@ declare class Event {
     /** 弹射物实体尝试创建 */
     static listen(
         /** 事件名 */
-        event: "ProjectileTryCreate",
+        event: "onProjectileTryCreate",
         /** 回调函数 */
         listener: (
             /** 弹射物实体对象 */
@@ -184,7 +184,7 @@ declare class Event {
     /** 弹射物实体成功后(不可拦截) */
     static listen(
         /** 事件名 */
-        event: "ProjectileCreate",
+        event: "onProjectileCreate",
         /** 回调函数 */
         listener: (
             /** 弹射物实体对象 */
@@ -197,7 +197,7 @@ declare class Event {
     /** 生成流浪商人 */
     static listen(
         /** 事件名 */
-        event: "SpawnWanderingTrader",
+        event: "onSpawnWanderingTrader",
         /** 回调函数 */
         listener: (
             /** 生成的坐标 */
@@ -208,7 +208,7 @@ declare class Event {
     /** 处理物品请求 */
     static listen(
         /** 事件名 */
-        event: "HandleRequestAction",
+        event: "onHandleRequestAction",
         /** 回调函数 */
         listener: (
             /** 请求玩家 */
@@ -231,7 +231,7 @@ declare class Event {
     /** 发送容器关闭数据包后(不可拦截) */
     static listen(
         /** 事件名 */
-        event: "SendContainerClosePacket",
+        event: "onSendContainerClosePacket",
         /** 回调函数 */
         listener: (
             /** 要被关闭的玩家 */

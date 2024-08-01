@@ -1073,6 +1073,12 @@ interface Player {
         /** 物品 */
         item: Item
     ): void;
+
+    /** (GMLIB)获取玩家破坏方块所需时间 */
+    getDestroyProgress(
+        /** 方块对象 */
+        block: Block
+    ): number;
 }
 
 interface Entity {
@@ -1123,8 +1129,14 @@ interface Entity {
     /** (GMLIB)获取实体的命名 */
     getNameTag(): string;
 
-    /** 获取实体的主人 */
+    /** (GMLIB)获取实体的主人 */
     getEntityOwner(): Entity | null;
+
+    /** (GMLIB)实体是否包含在某类里 */
+    hasFamily(
+        /** 实体族 */
+        family: string
+    ): boolean;
 }
 
 interface Block {

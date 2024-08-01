@@ -1,4 +1,6 @@
 #include "Global.h"
+#include "magic_enum.hpp"
+#include "mc/deps/core/string/HashedString.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
@@ -883,5 +885,11 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getItemMaxCount", [](ItemStack const* item) -> int {
         return item->getMaxStackSize();
+    });
+    RemoteCall::exportAs("GMLIB_API", "entityHasFamily", [](Actor* entity, std::string const& family) -> bool {
+        return entity->hasFamily(HashedString(family));
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerDestroyBlockProgress", [](Player* player, Block const* block) -> float {
+        return player->getDestroyProgress(*block);
     });
 }

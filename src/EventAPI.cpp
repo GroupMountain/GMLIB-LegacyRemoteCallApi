@@ -206,7 +206,7 @@ void Export_Event_API() {
                 );
                 return true;
             }
-            case doHash("DragonRespawn"): {
+            case doHash("onDragonRespawn"): {
                 auto Call = RemoteCall::importAs<bool(int64 enderDragonUniqueID)>(eventName, eventId);
                 eventBus->emplaceListener<Event::EntityEvent::DragonRespawnBeforeEvent>(
                     [Call](Event::EntityEvent::DragonRespawnBeforeEvent& ev) {
@@ -221,7 +221,7 @@ void Export_Event_API() {
                 );
                 return true;
             }
-            case doHash("ProjectileTryCreate"): {
+            case doHash("onProjectileTryCreate"): {
                 auto Call = RemoteCall::importAs<bool(Actor * mob, int64 uniqueId)>(eventName, eventId);
                 eventBus->emplaceListener<Event::EntityEvent::ProjectileCreateBeforeEvent>(
                     [Call](Event::EntityEvent::ProjectileCreateBeforeEvent& ev) {
@@ -237,7 +237,7 @@ void Export_Event_API() {
                 );
                 return true;
             }
-            case doHash("ProjectileCreate"): {
+            case doHash("onProjectileCreate"): {
                 auto Call = RemoteCall::importAs<bool(Actor * mob, int64 uniqueId)>(eventName, eventId);
                 eventBus->emplaceListener<Event::EntityEvent::ProjectileCreateAfterEvent>(
                     [Call](Event::EntityEvent::ProjectileCreateAfterEvent& ev) {
@@ -249,7 +249,7 @@ void Export_Event_API() {
                 );
                 return true;
             }
-            case doHash("SpawnWanderingTrader"): {
+            case doHash("onSpawnWanderingTrader"): {
                 auto Call = RemoteCall::importAs<bool(std::pair<BlockPos, int> pos)>(eventName, eventId);
                 eventBus->emplaceListener<Event::EntityEvent::SpawnWanderingTraderBeforeEvent>(
                     [Call](Event::EntityEvent::SpawnWanderingTraderBeforeEvent& ev) {
@@ -264,7 +264,7 @@ void Export_Event_API() {
                 );
                 return true;
             }
-            case doHash("HandleRequestAction"): {
+            case doHash("onHandleRequestAction"): {
                 auto Call = RemoteCall::importAs<bool(
                     Player * player,
                     std::string const& actionType,
@@ -299,7 +299,7 @@ void Export_Event_API() {
                 );
                 return true;
             }
-            case doHash("SendContainerClosePacket"): {
+            case doHash("onSendContainerClosePacket"): {
                 auto Call = RemoteCall::importAs<bool(Player * player, int ContainerNetId)>(eventName, eventId);
                 eventBus->emplaceListener<Event::PacketEvent::ContainerClosePacketSendAfterEvent>(
                     [Call](Event::PacketEvent::ContainerClosePacketSendAfterEvent& ev) {
