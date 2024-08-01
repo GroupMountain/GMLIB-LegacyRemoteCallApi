@@ -1,6 +1,8 @@
 #include "Global.h"
+#include "ll/api/service/Bedrock.h"
 #include "magic_enum.hpp"
 #include "mc/deps/core/string/HashedString.h"
+#include "mc/world/effect/MobEffect.h"
 #include <regex>
 
 bool isInteger(const std::string& str) {
@@ -891,5 +893,72 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerDestroyBlockProgress", [](Player* player, Block const* block) -> float {
         return player->getDestroyProgress(*block);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectVisible", [](Player* player, int effectId) -> bool {
+        if (auto effect = player->getEffect(effectId)) {
+            return effect->mEffectVisible;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDuration", [](Player* player, int effectId) -> int {
+        if (auto effect = player->getEffect(effectId)) {
+            return effect->mDuration;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDurationEasy", [](Player* player, int effectId) -> int {
+        if (auto effect = player->getEffect(effectId)) {
+            return effect->mDurationEasy;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDurationHard", [](Player* player, int effectId) -> int {
+        if (auto effect = player->getEffect(effectId)) {
+            return effect->mDurationHard;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectDurationNormal", [](Player* player, int effectId) -> int {
+        if (auto effect = player->getEffect(effectId)) {
+            return effect->mDurationNormal;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectAmplifier", [](Player* player, int effectId) -> int {
+        if (auto effect = player->getEffect(effectId)) {
+            return effect->mAmplifier;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerEffectAmbient", [](Player* player, int effectId) -> bool {
+        if (auto effect = player->getEffect(effectId)) {
+            return effect->mAmbient;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "playerHasEffect", [](Player* player, int effectId) -> int {
+        return player->hasEffect(*MobEffect::getById(effectId));
+    });
+    RemoteCall::exportAs("GMLIB_API", "getGameDifficulty", []() -> int {
+        if (auto level = ll::service::getLevel()) {
+            return (int)level->getDifficulty();
+        }
+        return -1;
+    });
+    RemoteCall::exportAs("GMLIB_API", "setGameDifficulty", [](int difficulty) -> void {
+        if (auto level = ll::service::getLevel()) {
+            level->setDifficulty((Difficulty)difficulty);
+        }
+    });
+    RemoteCall::exportAs("GMLIB_API", "getDefaultGameMode", []() -> int {
+        if (auto level = ll::service::getLevel()) {
+            return (int)level->getDefaultGameType();
+        }
+        return -1;
+    });
+    RemoteCall::exportAs("GMLIB_API", "setDefaultGameMode", [](int gameMode) -> void {
+        if (auto level = ll::service::getLevel()) {
+            level->setDefaultGameType((GameType)gameMode);
+        }
     });
 }

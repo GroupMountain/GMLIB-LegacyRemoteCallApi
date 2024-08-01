@@ -372,6 +372,24 @@ declare class Minecraft {
         /** 玩家的uuid */
         uuid: string
     ): boolean;
+
+    /** 获取游戏难度 */
+    static getGameDifficulty(): -1 | 0 | 1 | 2 | 3;
+
+    /** 设置游戏难度 */
+    static setGameDifficulty(
+        /** 游戏难度 */
+        difficulty: 0 | 1 | 2 | 3
+    ): void;
+
+    /** 获取默认游戏模式 */
+    static getDefaultGameMode(): -1 | 0 | 1 | 2 | 5 | 6;
+
+    /** 设置默认游戏模式 */
+    static setDefaultGameMode(
+        /** 游戏模式 */
+        gameMode: 0 | 1 | 2 | 5 | 6
+    ): void;
 }
 
 /** 合成表类 */
@@ -1079,6 +1097,55 @@ interface Player {
         /** 方块对象 */
         block: Block
     ): number;
+
+    /** (GMLIB)玩家是否拥有buff效果 */
+    hasEffect(
+        /** 效果ID */
+        effectId: number
+    ): boolean;
+
+    /** (GMLIB)获取buff信息 */
+    getEffectInfo(
+        /** 效果ID */
+        effectId: number
+    ): {
+        /** 效果ID */
+        Id: number,
+        /** 效果等级 */
+        Amplifier: number,
+        /** 持续时间 */
+        Duration: number,
+        /** 简单难度下的持续时间 */
+        DurationEasy: number,
+        /** 普通难度下的持续时间 */
+        DurationNormal: number,
+        /** 困难难度下的持续时间 */
+        DurationHard: number,
+        /** 是否为信标给予 */
+        Ambient: boolean,
+        /** 是否显示粒子效果 */
+        ShowParticles: boolean
+    } | null;
+
+    /** (GMLIB)获取所有buff信息 */
+    getAllEffectsInfo(): {
+        /** 效果ID */
+        Id: number,
+        /** 效果等级 */
+        Amplifier: number,
+        /** 持续时间 */
+        Duration: number,
+        /** 简单难度下的持续时间 */
+        DurationEasy: number,
+        /** 普通难度下的持续时间 */
+        DurationNormal: number,
+        /** 困难难度下的持续时间 */
+        DurationHard: number,
+        /** 是否为信标给予 */
+        Ambient: boolean,
+        /** 是否显示粒子效果 */
+        ShowParticles: boolean
+    }[];
 }
 
 interface Entity {
