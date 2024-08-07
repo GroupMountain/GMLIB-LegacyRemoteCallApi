@@ -15,9 +15,7 @@ bool isParameters(std::string const& str) {
 
 std::string GetValue(std::string const& from) { return PlaceholderAPI::getValue(from); }
 
-std::string GetValueWithPlayer(std::string const& a1, std::string const& a2) {
-    return PlaceholderAPI::getValue(a1, ll::service::bedrock::getLevel()->getPlayer(a2));
-}
+std::string GetValueWithPlayer(std::string const& key, Player* player) { return PlaceholderAPI::getValue(key, player); }
 
 bool registerPlayerPlaceholder(
     std::string const& PluginName,
