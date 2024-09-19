@@ -1,5 +1,6 @@
 #include "Global.h"
 #include <regex>
+#include <vector>
 
 bool isInteger(const std::string& str) {
     std::regex pattern("^[+-]?\\d+$");
@@ -510,8 +511,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getPlayerFromUuid", [](std::string const& uuid) -> Player* {
-        auto uid = mce::UUID::fromString(uuid);
-        return ll::service::getLevel()->getPlayer(uuid);
+        return ll::service::getLevel()->getPlayer(mce::UUID::fromString(uuid));
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerFromUniqueId", [](std::string const& uniqueId) -> Actor* {
         auto auid = parseScriptUniqueID(uniqueId);
@@ -599,8 +599,8 @@ void Export_Compatibility_API() {
             return result;
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "getBlockRuntimeId", [](std::string const& blockName) -> uint {
-        if (auto block = Block::tryGetFromRegistry(blockName)) {
+    RemoteCall::exportAs("GMLIB_API", "getBlockRuntimeId", [](std::string const& blockName, short legacyData) -> uint {
+        if (auto block = Block::tryGetFromRegistry(blockName, legacyData)) {
             return block->getRuntimeId();
         }
         return 0;
@@ -648,7 +648,10 @@ void Export_Compatibility_API() {
         return item->canDestroy(block);
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroyInCreative", [](ItemStack const* item) -> bool {
-        return item->getItem()->canDestroyInCreative();
+        if (auto itemDef = item->getItem()) {
+            return itemDef->canDestroyInCreative();
+        }
+        return false;
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroySpecial", [](ItemStack const* item, Block const* block) -> bool {
         return item->canDestroySpecial(*block);
@@ -677,5 +680,282 @@ void Export_Compatibility_API() {
             return block->buildDescriptionId();
         }
         return "tile.unknown.name";
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getBlockLightEmission",
+        [](std::string const& blockName, short legacyData) -> char {
+            if (auto block = Block::tryGetFromRegistry(blockName, legacyData)) {
+                return (char)block->getLightEmission().value;
+            }
+            return -1;
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getGameRules",
+        []() -> std::vector<std::unordered_map<std::string, std::string>> {
+            auto gameRules = ll::service::getLevel()->getGameRules().getRules();
+            std::vector<std::unordered_map<std::string, std::string>> result;
+            for (auto& gameRule : gameRules) {
+                std::unordered_map<std::string, std::string> data;
+                data["Name"] = gameRule.getName();
+                switch (gameRule.getType()) {
+                case GameRule::Type::Bool:
+                    data["Type"]  = "Bool";
+                    data["Value"] = std::to_string(gameRule.getBool());
+                    break;
+                case GameRule::Type::Float:
+                    data["Type"]  = "Float";
+                    data["Value"] = std::to_string(gameRule.getFloat());
+                    break;
+                case GameRule::Type::Int:
+                    data["Type"]  = "Int";
+                    data["Value"] = std::to_string(gameRule.getInt());
+                    break;
+                case GameRule::Type::Invalid:
+                    break;
+                }
+                result.push_back(data);
+            }
+            return result;
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "getLegalEnchants", [](ItemStack const* item) -> std::vector<std::string> {
+        std::vector<int>         enchants = EnchantUtils::getLegalEnchants(item->getItem());
+        std::vector<std::string> result;
+        for (auto& enchant : enchants) {
+            result.push_back(Enchant::getEnchant((Enchant::Type)enchant)->getStringId());
+        }
+        return result;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEnchantTypeNameFromId", [](int id) -> std::string {
+        if (auto enchant = Enchant::getEnchant((Enchant::Type)id)) {
+            return std::string(enchant->getStringId());
+        }
+        return "";
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "applyEnchant",
+        [](ItemStack const* item, std::string const& typeName, int level, bool allowNonVanilla) -> bool {
+            return EnchantUtils::applyEnchant(
+                *(const_cast<ItemStack*>(item)),
+                Enchant::getEnchantTypeFromName(HashedString(typeName)),
+                level,
+                allowNonVanilla
+            );
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack const* item) -> void {
+        EnchantUtils::removeEnchants((ItemStack&)*item);
+    });
+    RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack const* item, std::string const& typeName) -> bool {
+        return EnchantUtils::hasEnchant(
+            Enchant::getEnchantTypeFromName(HashedString(typeName)),
+            *(const_cast<ItemStack*>(item))
+        );
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEnchantLevel", [](ItemStack const* item, std::string const& typeName) -> int {
+        return EnchantUtils::getEnchantLevel(
+            Enchant::getEnchantTypeFromName(HashedString(typeName)),
+            *(const_cast<ItemStack*>(item))
+        );
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getEnchantNameAndLevel",
+        [](std::string const& typeName, int level) -> std::string {
+            return EnchantUtils::getEnchantNameAndLevel(Enchant::getEnchantTypeFromName(HashedString(typeName)), level);
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "dropPlayerItem",
+        [](Player* player, ItemStack const* item, bool randomly) -> bool { return player->drop(*item, randomly); }
+    );
+    RemoteCall::exportAs("GMLIB_API", "getPlayerRuntimeId", [](Player* player) -> uint64 {
+        return player->getRuntimeID().id;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityRuntimeId", [](Actor* entity) -> uint64 {
+        return entity->getRuntimeID().id;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityNameTag", [](Actor* entity) -> std::string {
+        return entity->getNameTag();
+    });
+    RemoteCall::exportAs("GMLIB_API", "ItemisUnbreakable", [](ItemStack const* item) -> bool {
+        return ((GMLIB_ItemStack*)item)->isUnbreakable();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemUnbreakable", [](ItemStack const* item, bool value) -> void {
+        ((GMLIB_ItemStack*)item)->setUnbreakable(value);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemShouldKeepOnDeath", [](ItemStack const* item) -> bool {
+        return ((GMLIB_ItemStack*)item)->getShouldKeepOnDeath();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemShouldKeepOnDeath", [](ItemStack const* item, bool value) -> void {
+        ((GMLIB_ItemStack*)item)->setShouldKeepOnDeath(value);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemLockMode", [](ItemStack const* item) -> int {
+        return (int)((GMLIB_ItemStack*)item)->getItemLockMode();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemLockMode", [](ItemStack const* item, int value) -> void {
+        ((GMLIB_ItemStack*)item)->setItemLockMode((ItemLockMode)value);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemRepairCost", [](ItemStack const* item) -> int {
+        return item->getBaseRepairCost();
+    });
+    RemoteCall::exportAs("GMLIB_API", "setItemRepairCost", [](ItemStack const* item, int cost) -> void {
+        (*(const_cast<ItemStack*>(item))).setRepairCost(cost);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemCanDestroy", [](ItemStack const* item) -> std::vector<std::string> {
+        std::vector<std::string> result = {};
+        for (auto& block : ((GMLIB_ItemStack*)item)->getCanDestroy()) {
+            result.push_back(block->getTypeName());
+        }
+        return result;
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "setItemCanDestroy",
+        [](ItemStack const* item, std::vector<std::string> blocks) -> void {
+            ((GMLIB_ItemStack*)item)->setCanDestroy(blocks);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "getItemCanPlaceOn", [](ItemStack const* item) -> std::vector<std::string> {
+        std::vector<std::string> result = {};
+        for (auto& block : ((GMLIB_ItemStack*)item)->getCanPlaceOn()) {
+            result.push_back(block->getTypeName());
+        }
+        return result;
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "setItemCanPlaceOn",
+        [](ItemStack const* item, std::vector<std::string> blocks) -> void {
+            ((GMLIB_ItemStack*)item)->setCanPlaceOn(blocks);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "getPlayerHungry", [](Player* player) -> float {
+        return player->getMutableAttribute(Player::HUNGER)->getCurrentValue();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerArmorCoverPercentage", [](Player* player) -> float {
+        return player->getArmorCoverPercentage();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerArmorValue", [](Player* player) -> int {
+        return player->getArmorValue();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityOwnerUniqueId", [](Actor* entity) -> int64 {
+        return entity->getOwnerId().id;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemCategoryName", [](ItemStack const* item) -> std::string {
+        return item->getCategoryName();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemCustomName", [](ItemStack const* item) -> std::string {
+        return item->getCustomName();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemEffecName", [](ItemStack const* item) -> std::string {
+        return item->getEffectName();
+    });
+    RemoteCall::exportAs("GMLIB_API", "itemIsFood", [](ItemStack const* item) -> bool {
+        if (auto itemDef = item->getItem()) {
+            return itemDef->isFood();
+        }
+        return false;
+    });
+    RemoteCall::exportAs("GMLIB_API", "setPlayerUIItem", [](Player* player, int slot, ItemStack const* item) -> void {
+        player->setPlayerUIItem((PlayerUISlot)slot, *item);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerUIItem", [](Player* player, int slot) -> ItemStack* {
+        return const_cast<ItemStack*>(&player->getPlayerUIItem((PlayerUISlot)slot));
+    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "sendInventorySlotPacket",
+        [](Player* player, int containerId, int slot, ItemStack const* item) -> void {
+            InventorySlotPacket((ContainerID)containerId, slot, *item).sendTo(*player);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_API", "getContainerType", [](Container* container) -> std::string {
+        return magic_enum::enum_name(container->getContainerType()).data();
+    });
+    RemoteCall::exportAs("GMLIB_API", "hasPlayerNbt", [](std::string const& uuid) -> bool {
+        auto uid = mce::UUID::fromString(uuid);
+        return GMLIB_Player::getPlayerNbt(uid) ? true : false;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getItemMaxCount", [](ItemStack const* item) -> int {
+        return item->getMaxStackSize();
+    });
+    RemoteCall::exportAs("GMLIB_API", "entityHasFamily", [](Actor* entity, std::string const& family) -> bool {
+        return entity->hasFamily(HashedString(family));
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerDestroyBlockProgress", [](Player* player, Block const* block) -> float {
+        return player->getDestroyProgress(*block);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectVisible", [](Actor* entity, int effectId) -> bool {
+        if (auto effect = entity->getEffect(effectId)) {
+            return effect->mEffectVisible;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDuration", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
+            return effect->mDuration;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationEasy", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
+            return effect->mDurationEasy;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationHard", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
+            return effect->mDurationHard;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationNormal", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
+            return effect->mDurationNormal;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmplifier", [](Actor* entity, int effectId) -> int {
+        if (auto effect = entity->getEffect(effectId)) {
+            return effect->mAmplifier;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmbient", [](Actor* entity, int effectId) -> bool {
+        if (auto effect = entity->getEffect(effectId)) {
+            return effect->mAmbient;
+        }
+        return 0;
+    });
+    RemoteCall::exportAs("GMLIB_API", "entityHasEffect", [](Actor* entity, int effectId) -> int {
+        return entity->hasEffect(*MobEffect::getById(effectId));
+    });
+    RemoteCall::exportAs("GMLIB_API", "getGameDifficulty", []() -> int {
+        if (auto level = ll::service::getLevel()) {
+            return (int)level->getDifficulty();
+        }
+        return -1;
+    });
+    RemoteCall::exportAs("GMLIB_API", "setGameDifficulty", [](int difficulty) -> void {
+        if (auto level = ll::service::getLevel()) {
+            level->setDifficulty((Difficulty)difficulty);
+        }
+    });
+    RemoteCall::exportAs("GMLIB_API", "getDefaultGameMode", []() -> int {
+        if (auto level = ll::service::getLevel()) {
+            return (int)level->getDefaultGameType();
+        }
+        return -1;
+    });
+    RemoteCall::exportAs("GMLIB_API", "setDefaultGameMode", [](int gameMode) -> void {
+        if (auto level = ll::service::getLevel()) {
+            level->setDefaultGameType((GameType)gameMode);
+        }
     });
 }
