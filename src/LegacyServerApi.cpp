@@ -38,7 +38,7 @@ void Export_Legacy_GMLib_ServerAPI() {
         "GMLib_ServerAPI",
         "spawnEntity",
         [](std::pair<Vec3, int> pos, std::string const& name) -> Actor* {
-            return GMLIB_Spawner::spawnEntity(pos.first, pos.second, name);
+            return GMLIB_Spawner::spawnEntity(pos.first, pos.second, name).as_ptr();
         }
     );
     RemoteCall::exportAs(
@@ -46,7 +46,7 @@ void Export_Legacy_GMLib_ServerAPI() {
         "shootProjectile",
         [](Actor* owner, std::string const& name, float speed, float offset) -> Actor* {
             auto ac = (GMLIB_Actor*)owner;
-            return ac->shootProjectile(name, speed, offset);
+            return ac->shootProjectile(name, speed, offset).as_ptr();
         }
     );
     RemoteCall::exportAs(
