@@ -8,7 +8,7 @@ if not has_config("vs_runtime") then
 end
 
 -- Option 1: Use the latest version of LeviLamina released on GitHub.
-add_requires("levilamina")
+add_requires("levilaminalibrary")
 add_requires("legacyremotecall")
 add_requires("gmlib")
 
@@ -59,7 +59,7 @@ target("GMLIB-LegacyRemoteCallApi") -- Change this to your plugin name.
         "src"
     )
     add_packages(
-        "levilamina",
+        "levilaminalibrary",
         "legacyremotecall",
         "gmlib"
     )
