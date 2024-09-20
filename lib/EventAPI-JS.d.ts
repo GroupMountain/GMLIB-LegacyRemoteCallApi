@@ -13,7 +13,7 @@ declare class Event {
         ) => boolean | void
     ): boolean;
 
-    /** 客户端登录后事件(不可以拦截) */
+    /** 客户端登录后事件 */
     static listen(
         /** 事件名 */
         event: "onClientLogin",
@@ -27,7 +27,7 @@ declare class Event {
             serverXuid: string,
             /** 玩家在客户端的xuid */
             clientXuid: string
-        ) => void
+        ) => bool
     ): boolean;
 
     /** 天气改变事件事件 */
@@ -55,8 +55,8 @@ declare class Event {
             item: Item,
             /** 尝试生成的坐标对象 */
             pos: FloatPos,
-            /** 创建掉落物的实体对象 */
-            spawnerEntity: Entity
+            /** 创建掉落物的实体uniqueId */
+            spawnerUniqueId: number
         ) => boolean | void
     ): boolean;
 
@@ -72,15 +72,15 @@ declare class Event {
             entity: Entity,
             /** 实体生成的坐标 */
             pos: FloatPos,
-            /** 创建掉落物的实体对象 */
-            spawnerEntity: Entity
+            /** 创建掉落物的实体uniqueId */
+            spawnerUniqueId: number
         ) => void
     ): boolean;
 
     /** 实体切换维度 */
     static listen(
         /** 事件名 */
-        event: "onEntityChangeDim",
+        event: "onEntityTryChangeDim",
         /** 回调函数 */
         listener: (
             /** 切换维度的实体对象 */
@@ -93,7 +93,7 @@ declare class Event {
     /** 实体切换维度后(不可拦截) */
     static listen(
         /** 事件名 */
-        event: "onEntityChangeDimAfter",
+        event: "onEntityChangeDim",
         /** 回调函数 */
         listener: (
             /** 切换维度的实体对象 */

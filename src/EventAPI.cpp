@@ -1,329 +1,212 @@
 #include "Global.h"
 using namespace ll::hash_utils;
 
+#define REGISTER_EVENT_LISTEN(eventType, callFunction, eventParams, cancelFunction, otherFunction)                     \
+    if (eventListeners.contains(eventName + "_" + eventId))                                                            \
+        eventBus.removeListener(eventListeners.at(eventName + "_" + eventId));                                         \
+    eventListeners[eventName + "_" + eventId] =                                                                        \
+        eventBus.emplaceListener<eventType>([eventName, eventId, &eventBus](eventType& ev) -> void {                   \
+            if (!RemoteCall::hasFunc(eventName, eventId)) {                                                            \
+                eventBus.removeListener(eventListeners.at(eventName + "_" + eventId));                                 \
+                eventListeners.erase(eventName + "_" + eventId);                                                       \
+                return;                                                                                                \
+            }                                                                                                          \
+            bool result = true;                                                                                        \
+            try {                                                                                                      \
+                otherFunction;                                                                                         \
+                result = RemoteCall::importAs<bool callFunction>(eventName, eventId) eventParams;                      \
+            } catch (std::exception & e) {                                                                             \
+                if (std::string(e.what()) != "bad variant access") {                                                   \
+                    logger.error("Exception in event listener: {0}", e.what());                                        \
+                    logger.error("Event: {0}, Id: {1}", eventName, eventId);                                           \
+                }                                                                                                      \
+            }                                                                                                          \
+            if (!result) cancelFunction;                                                                               \
+        });                                                                                                            \
+    return true;
+
+std::unordered_map<std::string, ll::event::ListenerPtr> eventListeners;
+
 void Export_Event_API() {
-    auto eventBus = &ll::event::EventBus::getInstance();
+    auto& eventBus = ll::event::EventBus::getInstance();
     RemoteCall::exportAs(
         "GMLIB_API",
         "callCustomEvent",
-        [eventBus](std::string const& eventName, std::string const& eventId) -> bool {
+        [&eventBus](std::string const& eventName, std::string const& eventId) -> bool {
             if (!RemoteCall::hasFunc(eventName, eventId)) return false;
             switch (doHash(eventName)) {
             case doHash("onClientLogin"): {
-                auto Call = RemoteCall::importAs<bool(
-                    std::string const& realName,
-                    std::string const& uuid,
-                    std::string const& serverXuid,
-                    std::string const& clientXuid
-                )>(eventName, eventId);
-                eventBus->emplaceListener<Event::PacketEvent::ClientLoginAfterEvent>(
-                    [Call](Event::PacketEvent::ClientLoginAfterEvent& ev) {
-                        try {
-                            Call(
-                                ev.getRealName(),
-                                ev.getUuid().asString(),
-                                ev.getServerAuthXuid(),
-                                ev.getClientAuthXuid()
-                            );
-                        } catch (...) {}
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::PacketEvent::ClientLoginAfterEvent,
+                    (std::string const& realName,
+                     std::string const& uuid,
+                     std::string const& serverXuid,
+                     std::string const& clientXuid),
+                    (ev.getRealName(), ev.getUuid().asString(), ev.getServerAuthXuid(), ev.getClientAuthXuid()),
+                    ev.disConnectClient(),
                 );
-                return true;
             }
             case doHash("onWeatherChange"): {
-                auto Call =
-                    RemoteCall::importAs<bool(int lightningLevel, int rainLevel, int lightningLast, int rainLast)>(
-                        eventName,
-                        eventId
-                    );
-                eventBus->emplaceListener<Event::LevelEvent::WeatherUpdateBeforeEvent>(
-                    [Call](Event::LevelEvent::WeatherUpdateBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call(
-                                ev.getLightningLevel(),
-                                ev.getRainLevel(),
-                                ev.getLightningLastTick(),
-                                ev.getRainingLastTick()
-                            );
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::LevelEvent::WeatherUpdateBeforeEvent,
+                    (int lightningLevel, int rainLevel, int lightningLast, int rainLast),
+                    (ev.getLightningLevel(), ev.getRainLevel(), ev.getLightningLastTick(), ev.getRainingLastTick()),
+                    ev.cancel(),
                 );
-                return true;
             }
             case doHash("onMobPick"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob, Actor * item)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::MobPickupItemBeforeEvent>(
-                    [Call](Event::EntityEvent::MobPickupItemBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call(&ev.self(), (Actor*)&ev.getItemActor());
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::MobPickupItemBeforeEvent,
+                    (Actor * mob, Actor * item),
+                    (&ev.self(), (Actor*)&ev.getItemActor()),
+                    ev.cancel(),
                 );
-                return true;
             }
             case doHash("onItemTrySpawn"): {
-                auto Call =
-                    RemoteCall::importAs<bool(const ItemStack* item, std::pair<Vec3, int> position, Actor* spawner)>(
-                        eventName,
-                        eventId
-                    );
-                eventBus->emplaceListener<Event::EntityEvent::ItemActorSpawnBeforeEvent>(
-                    [Call](Event::EntityEvent::ItemActorSpawnBeforeEvent& ev) {
-                        auto                 pos    = ev.getPosition();
-                        auto                 dimid  = ev.getBlockSource().getDimensionId().id;
-                        std::pair<Vec3, int> lsePos = {pos, dimid};
-                        bool                 result = true;
-                        try {
-                            result = Call(&ev.getItem(), lsePos, ev.getSpawner());
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::ItemActorSpawnBeforeEvent,
+                    (const ItemStack* item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
+                    (&ev.getItem(),
+                     {ev.getPosition(), ev.getBlockSource().getDimensionId().id},
+                     ev.getSpawner().has_value() ? ev.getSpawner()->getOrCreateUniqueID().id : -1),
+                    ev.cancel(),
                 );
-                return true;
             }
             case doHash("onItemSpawned"): {
-                auto Call = RemoteCall::importAs<
-                    bool(const ItemStack* item, Actor* itemActor, std::pair<Vec3, int> position, Actor* spawner)>(
-                    eventName,
-                    eventId
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::ItemActorSpawnAfterEvent,
+                    (const ItemStack* item, Actor* itemActor, std::pair<Vec3, int> position, int64 spawnerUniqueId),
+                    (&ev.getItem(),
+                     (Actor*)&ev.getItemActor(),
+                     {ev.getPosition(), ev.getBlockSource().getDimensionId().id},
+                     ev.getSpawner().has_value() ? ev.getSpawner()->getOrCreateUniqueID().id : -1),
+                    logger.error("Event \"onItemSpawned\" cannot be intercepted"),
                 );
-                eventBus->emplaceListener<Event::EntityEvent::ItemActorSpawnAfterEvent>(
-                    [Call](Event::EntityEvent::ItemActorSpawnAfterEvent& ev) {
-                        auto                 pos    = ev.getPosition();
-                        auto                 dimid  = ev.getBlockSource().getDimensionId().id;
-                        std::pair<Vec3, int> lsePos = {pos, dimid};
-                        try {
-                            Call(&ev.getItem(), (Actor*)&ev.getItemActor(), lsePos, ev.getSpawner());
-                        } catch (...) {}
-                    }
-                );
-                return true;
             }
-            case doHash("onEntityChangeDim"): {
-                auto Call = RemoteCall::importAs<bool(Actor * entity, int toDimId)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::ActorChangeDimensionBeforeEvent>(
-                    [Call](Event::EntityEvent::ActorChangeDimensionBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call(&ev.self(), ev.getToDimensionId());
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+            case doHash("onEntityTryChangeDim"): {
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::ActorChangeDimensionBeforeEvent,
+                    (Actor * entity, int toDimId),
+                    (&ev.self(), ev.getToDimensionId()),
+                    ev.cancel(),
                 );
-                return true;
             }
             case doHash("onLeaveBed"): {
-                auto Call = RemoteCall::importAs<bool(Player * pl)>(eventName, eventId);
-                eventBus->emplaceListener<Event::PlayerEvent::PlayerStopSleepBeforeEvent>(
-                    [Call](Event::PlayerEvent::PlayerStopSleepBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call(&ev.self());
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::PlayerEvent::PlayerStopSleepBeforeEvent,
+                    (Player * pl),
+                    (&ev.self()),
+                    ev.cancel(),
                 );
-                return true;
             }
             case doHash("onDeathMessage"): {
-                auto Call =
-                    RemoteCall::importAs<bool(std::string const& message, std::vector<std::string>, Actor* dead)>(
-                        eventName,
-                        eventId
-                    );
-                eventBus->emplaceListener<Event::EntityEvent::DeathMessageAfterEvent>(
-                    [Call](Event::EntityEvent::DeathMessageAfterEvent& ev) {
-                        auto msg    = ev.getDeathMessage();
-                        auto source = ev.getDamageSource();
-                        try {
-                            Call(msg.first, msg.second, &ev.self());
-                        } catch (...) {}
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::DeathMessageAfterEvent,
+                    (std::string const& message, std::vector<std::string>, Actor* dead),
+                    (ev.getDeathMessage().first, ev.getDeathMessage().second, &ev.self()),
+                    logger.error("Event \"onDeathMessage\" cannot be intercepted"),
                 );
-                return true;
             }
             case doHash("onMobHurted"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob, Actor * source, float damage, int cause)>(
-                    eventName,
-                    eventId
-                );
-                eventBus->emplaceListener<Event::EntityEvent::MobHurtAfterEvent>(
-                    [Call](Event::EntityEvent::MobHurtAfterEvent& ev) {
-                        auto&  damageSource = ev.getSource();
-                        Actor* source       = nullptr;
-                        if (damageSource.isEntitySource()) {
-                            auto uniqueId = damageSource.getDamagingEntityUniqueID();
-                            source        = ll::service::getLevel()->fetchEntity(uniqueId);
-                            if (source->getOwner()) {
-                                source = source->getOwner();
-                            }
-                        }
-                        try {
-                            Call(&ev.self(), source, ev.getDamage(), (int)damageSource.getCause());
-                        } catch (...) {}
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::MobHurtAfterEvent,
+                    (Actor * mob, Actor * source, float damage, int cause),
+                    (&ev.self(), source, ev.getDamage(), (int)damageSource.getCause()),
+                    logger.error("Event \"onMobHurted\" cannot be intercepted"),
+                    auto& damageSource = ev.getSource();
+                    Actor* source      = nullptr;
+                    if (damageSource.isEntitySource()) {
+                        auto uniqueId = damageSource.getDamagingEntityUniqueID();
+                        source        = ll::service::getLevel()->fetchEntity(uniqueId);
+                        if (source->getOwner()) source = source->getOwner();
                     }
                 );
-                return true;
             }
             case doHash("onEndermanTake"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::EndermanTakeBlockBeforeEvent>(
-                    [Call](Event::EntityEvent::EndermanTakeBlockBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call(&ev.self());
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::EndermanTakeBlockBeforeEvent,
+                    (Actor * mob),
+                    (&ev.self()),
+                    ev.cancel(),
                 );
-                return true;
             }
-            case doHash("onEntityChangeDimAfter"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob, int fromDimId)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::ActorChangeDimensionAfterEvent>(
-                    [Call](Event::EntityEvent::ActorChangeDimensionAfterEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call(&ev.self(), ev.getFromDimensionId());
-                        } catch (...) {}
-                    }
+            case doHash("onEntityChangeDim"): {
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::ActorChangeDimensionAfterEvent,
+                    (Actor * mob, int fromDimId),
+                    (&ev.self(), ev.getFromDimensionId()),
+                    logger.error("Event \"onEntityChangeDim\" cannot be intercepted"),
                 );
-                return true;
             }
             case doHash("onDragonRespawn"): {
-                auto Call = RemoteCall::importAs<bool(int64 enderDragonUniqueID)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::DragonRespawnBeforeEvent>(
-                    [Call](Event::EntityEvent::DragonRespawnBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call(ev.getEnderDragon().id);
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
-                );
-                return true;
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::DragonRespawnBeforeEvent,
+                    (int64 enderDragonUniqueID),
+                    (ev.getEnderDragon().id),
+                    ev.cancel(),
+                )
             }
             case doHash("onProjectileTryCreate"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob, int64 uniqueId)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::ProjectileCreateBeforeEvent>(
-                    [Call](Event::EntityEvent::ProjectileCreateBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            auto uid = ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1;
-                            result   = Call(&ev.self(), uid);
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::ProjectileCreateBeforeEvent,
+                    (Actor * mob, int64 uniqueId),
+                    (&ev.self(), ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1),
+                    ev.cancel(),
                 );
-                return true;
             }
             case doHash("onProjectileCreate"): {
-                auto Call = RemoteCall::importAs<bool(Actor * mob, int64 uniqueId)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::ProjectileCreateAfterEvent>(
-                    [Call](Event::EntityEvent::ProjectileCreateAfterEvent& ev) {
-                        try {
-                            auto uid = ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1;
-                            Call(&ev.self(), uid);
-                        } catch (...) {}
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::ProjectileCreateAfterEvent,
+                    (Actor * mob, int64 uniqueId),
+                    (&ev.self(), ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1),
+                    logger.error("Event \"onProjectileCreate\" cannot be intercepted"),
                 );
-                return true;
             }
             case doHash("onSpawnWanderingTrader"): {
-                auto Call = RemoteCall::importAs<bool(std::pair<BlockPos, int> pos)>(eventName, eventId);
-                eventBus->emplaceListener<Event::EntityEvent::SpawnWanderingTraderBeforeEvent>(
-                    [Call](Event::EntityEvent::SpawnWanderingTraderBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            result = Call({ev.getPos(), ev.getRegion().getDimensionId()});
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(
+                    Event::EntityEvent::SpawnWanderingTraderBeforeEvent,
+                    (std::pair<BlockPos, int> pos),
+                    ({ev.getPos(), ev.getRegion().getDimensionId()}),
+                    ev.cancel(),
                 );
-                return true;
             }
             case doHash("onHandleRequestAction"): {
-                auto Call = RemoteCall::importAs<bool(
-                    Player * player,
-                    std::string const& actionType,
-                    int                count,
-                    std::string const& sourceContainerNetId,
-                    int                sourceSlot,
-                    std::string const& destinationContainerNetId,
-                    int                destinationSlot
-                )>(eventName, eventId);
-                eventBus->emplaceListener<Event::PlayerEvent::HandleRequestActionBeforeEvent>(
-                    [Call](Event::PlayerEvent::HandleRequestActionBeforeEvent& ev) {
-                        bool result = true;
-                        try {
-                            auto requestAction = (ItemStackRequestActionTransferBase*)&ev.getRequestAction();
-                            auto source        = requestAction->getSrc();
-                            // TODO: The next version of LeviLamina changes to a member function
-                            auto destination = ll::memory::dAccess<ItemStackRequestSlotInfo>(requestAction, 56);
-                            result           = Call(
-                                &ev.self(),
-                                magic_enum::enum_name(requestAction->mActionType).data(),
-                                ll::memory::dAccess<uchar>(requestAction, 18),
-                                magic_enum::enum_name(source.mOpenContainerNetId).data(),
-                                source.mSlot,
-                                magic_enum::enum_name(destination.mOpenContainerNetId).data(),
-                                destination.mSlot
-                            );
-                        } catch (...) {}
-                        if (!result) {
-                            ev.cancel();
-                        }
-                    }
+                REGISTER_EVENT_LISTEN(Event::PlayerEvent::HandleRequestActionBeforeEvent,
+                                      (Player * player,
+                                       std::string const& actionType,
+                                       int                count,
+                                       std::string const& sourceContainerNetId,
+                                       int                sourceSlot,
+                                       std::string const& destinationContainerNetId,
+                                       int                destinationSlot),
+                                      ((Player*)&ev.self(),
+                                       magic_enum::enum_name(requestAction->mActionType).data(),
+                                       (int)requestAction->mAmount,
+                                       magic_enum::enum_name(requestAction->mSrc.mOpenContainerNetId).data(),
+                                       (int)requestAction->mSrc.mSlot,
+                                       magic_enum::enum_name(requestAction->mDst.mOpenContainerNetId).data(),
+                                       (int)requestAction->mDst.mSlot),
+                                      ev.cancel(),
+                                      auto requestAction = (ItemStackRequestActionTransferBase*)&ev.getRequestAction();
                 );
-                return true;
             }
             case doHash("onSendContainerClosePacket"): {
-                auto Call = RemoteCall::importAs<bool(Player * player, int ContainerNetId)>(eventName, eventId);
-                eventBus->emplaceListener<Event::PacketEvent::ContainerClosePacketSendAfterEvent>(
-                    [Call](Event::PacketEvent::ContainerClosePacketSendAfterEvent& ev) {
-                        try {
-                            Call(
-                                ev.getServerNetworkHandler()
-                                    .getServerPlayer(ev.getNetworkIdentifier(), ev.getPacket().mClientSubId),
-                                (int)ev.getPacket().mContainerId
-                            );
-                        } catch (...) {}
-                    }
-                );
-                return true;
+                REGISTER_EVENT_LISTEN(
+                    Event::PacketEvent::ContainerClosePacketSendAfterEvent,
+                    (Player * player, int ContainerNetId),
+                    (ev.getServerNetworkHandler()
+                         .getServerPlayer(ev.getNetworkIdentifier(), ev.getPacket().mClientSubId),
+                     (int)ev.getPacket().mContainerId),
+                    logger.error("Event \"onSendContainerClosePacket\" cannot be intercepted"),
+                )
             }
             case doHash("onServerStopping"): {
-                auto Call = RemoteCall::importAs<bool()>(eventName, eventId);
-                eventBus->emplaceListener<ll::event::server::ServerStoppingEvent>(
-                    [Call](ll::event::server::ServerStoppingEvent& ev) {
-                        try {
-                            Call();
-                        } catch (...) {}
-                    }
+                REGISTER_EVENT_LISTEN(
+                    ll::event::server::ServerStoppingEvent,
+                    (),
+                    (),
+                    logger.error("Event \"onServerStopping\" cannot be intercepted"),
                 );
-                return true;
             }
             default:
                 return false;
