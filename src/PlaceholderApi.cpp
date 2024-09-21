@@ -36,11 +36,7 @@ bool registerPlayerPlaceholder(
             );
         } else {
             auto Call = RemoteCall::importAs<std::string(Player * pl)>(PluginName, FuncName);
-            PlaceholderAPI::registerPlayerPlaceholder(
-                PAPIName,
-                [Call](Player* sp) { return Call(sp); },
-                PluginName
-            );
+            PlaceholderAPI::registerPlayerPlaceholder(PAPIName, [Call](Player* sp) { return Call(sp); }, PluginName);
         }
         return true;
     }
@@ -82,18 +78,9 @@ bool registerStaticPlaceholder(
         if (isParameters(PAPIName)) {
             auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
             if (num == -1) {
-                PlaceholderAPI::registerStaticPlaceholder(
-                    PAPIName,
-                    [Call] { return Call(); },
-                    PluginName
-                );
+                PlaceholderAPI::registerStaticPlaceholder(PAPIName, [Call] { return Call(); }, PluginName);
             } else {
-                PlaceholderAPI::registerStaticPlaceholder(
-                    PAPIName,
-                    num,
-                    [Call] { return Call(); },
-                    PluginName
-                );
+                PlaceholderAPI::registerStaticPlaceholder(PAPIName, num, [Call] { return Call(); }, PluginName);
             }
         }
         return true;

@@ -115,13 +115,7 @@ void Export_Legacy_GMLib_ModAPI() {
             if (!level) {
                 return;
             }
-            JsonRecipe::registerSmithingTransformRecipe(
-                recipe_id,
-                smithing_template,
-                base,
-                addition,
-                result
-            );
+            JsonRecipe::registerSmithingTransformRecipe(recipe_id, smithing_template, base, addition, result);
         }
     );
     RemoteCall::exportAs(
@@ -192,7 +186,5 @@ void Export_Legacy_GMLib_ModAPI() {
         }
         return false;
     });
-    RemoteCall::exportAs("GMLib_ModAPI", "setFixI18nEnabled", []() -> void {
-        VanillaFix::setFixI18nEnabled();
-    });
+    RemoteCall::exportAs("GMLib_ModAPI", "setFixI18nEnabled", []() -> void { VanillaFix::setFixI18nEnabled(); });
 }
