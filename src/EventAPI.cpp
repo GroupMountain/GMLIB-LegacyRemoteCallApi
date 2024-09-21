@@ -7,9 +7,6 @@ private:
     std::unordered_map<int64, ll::event::ListenerPtr> mEventListeners;
 
 public:
-    LegacyScriptEventManager() {};
-    ~LegacyScriptEventManager() {};
-
     std::string getNextEventId() {
         mNextEventId++;
         return "GMLIB_EVENT_" + std::to_string(mNextEventId);
@@ -24,6 +21,7 @@ public:
         mEventListeners.erase(doHash(scriptEventId));
     }
 
+public:
     static LegacyScriptEventManager& getInstance() {
         static std::unique_ptr<LegacyScriptEventManager> instance;
         if (!instance) {
