@@ -12,7 +12,7 @@ public:
 
     std::string getNextEventId() {
         mNextEventId++;
-        return std::to_string(mNextEventId);
+        return "GMLIB_EVENT_" + std::to_string(mNextEventId);
     }
 
     void emplaceListener(std::string const& scriptEventId, ll::event::ListenerPtr listenerPtr) {
@@ -24,18 +24,21 @@ public:
         mEventListeners.erase(scriptEventId);
     }
 
-    static std::unique_ptr<LegacyScriptEventManager>& getInstance() {
+    static LegacyScriptEventManager& getInstance() {
         static std::unique_ptr<LegacyScriptEventManager> instance;
-        return instance;
+        if (!instance) {
+            instance = std::make_unique<LegacyScriptEventManager>();
+        }
+        return *instance;
     }
 };
 
 #define REGISTER_EVENT_LISTEN(eventType, callFunction, eventParams, cancelFunction, otherFunction)                     \
-    eventManager->emplaceListener(                                                                                     \
+    eventManager.emplaceListener(                                                                                      \
         eventId,                                                                                                       \
         eventBus.emplaceListener<eventType>([eventName, eventId, &eventBus, &eventManager](eventType& ev) -> void {    \
             if (!RemoteCall::hasFunc(eventName, eventId)) {                                                            \
-                eventManager->removeListener(eventId);                                                                 \
+                eventManager.removeListener(eventId);                                                                  \
                 return;                                                                                                \
             }                                                                                                          \
             bool result = true;                                                                                        \
@@ -50,7 +53,7 @@ public:
 
 void Export_Event_API() {
     RemoteCall::exportAs("GMLIB_Event_API", "getNextScriptEventId", []() -> std::string {
-        return LegacyScriptEventManager::getInstance()->getNextEventId();
+        return LegacyScriptEventManager::getInstance().getNextEventId();
     });
     auto& eventBus     = ll::event::EventBus::getInstance();
     auto& eventManager = LegacyScriptEventManager::getInstance();
