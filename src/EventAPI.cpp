@@ -3,8 +3,8 @@ using namespace ll::hash_utils;
 
 class LegacyScriptEventManager {
 private:
-    int64                                                   mNextEventId = 0;
-    std::unordered_map<std::string, ll::event::ListenerPtr> mEventListeners;
+    int64                                             mNextEventId = 0;
+    std::unordered_map<int64, ll::event::ListenerPtr> mEventListeners;
 
 public:
     LegacyScriptEventManager() {};
@@ -16,12 +16,12 @@ public:
     }
 
     void emplaceListener(std::string const& scriptEventId, ll::event::ListenerPtr listenerPtr) {
-        mEventListeners[scriptEventId] = listenerPtr;
+        mEventListeners[doHash(scriptEventId)] = listenerPtr;
     }
 
     void removeListener(std::string const& scriptEventId) {
-        ll::event::EventBus::getInstance().removeListener(mEventListeners[scriptEventId]);
-        mEventListeners.erase(scriptEventId);
+        ll::event::EventBus::getInstance().removeListener(mEventListeners[doHash(scriptEventId)]);
+        mEventListeners.erase(doHash(scriptEventId));
     }
 
     static LegacyScriptEventManager& getInstance() {
