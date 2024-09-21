@@ -13,7 +13,7 @@ declare class Event {
         ) => boolean | void
     ): boolean;
 
-    /** 客户端登录后事件 */
+    /** 客户端登录后事件(不可以拦截) */
     static listen(
         /** 事件名 */
         event: "onClientLogin",
@@ -27,7 +27,7 @@ declare class Event {
             serverXuid: string,
             /** 玩家在客户端的xuid */
             clientXuid: string
-        ) => bool
+        ) => void
     ): boolean;
 
     /** 天气改变事件事件 */

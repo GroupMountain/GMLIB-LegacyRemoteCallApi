@@ -1,38 +1,63 @@
 #include "Global.h"
 using namespace ll::hash_utils;
 
+class LegacyScriptEventManager {
+private:
+    int64                                                   mNextEventId = 0;
+    std::unordered_map<std::string, ll::event::ListenerPtr> mEventListeners;
+
+public:
+    LegacyScriptEventManager() {};
+    ~LegacyScriptEventManager() {};
+
+    std::string getNextEventId() {
+        mNextEventId++;
+        return std::to_string(mNextEventId);
+    }
+
+    void emplaceListener(std::string const& scriptEventId, ll::event::ListenerPtr listenerPtr) {
+        mEventListeners[scriptEventId] = listenerPtr;
+    }
+
+    void removeListener(std::string const& scriptEventId) {
+        ll::event::EventBus::getInstance().removeListener(mEventListeners[scriptEventId]);
+        mEventListeners.erase(scriptEventId);
+    }
+
+    static std::unique_ptr<LegacyScriptEventManager>& getInstance() {
+        static std::unique_ptr<LegacyScriptEventManager> instance;
+        return instance;
+    }
+};
+
 #define REGISTER_EVENT_LISTEN(eventType, callFunction, eventParams, cancelFunction, otherFunction)                     \
-    if (eventListeners.contains(eventName + "_" + eventId))                                                            \
-        eventBus.removeListener(eventListeners.at(eventName + "_" + eventId));                                         \
-    eventListeners[eventName + "_" + eventId] =                                                                        \
-        eventBus.emplaceListener<eventType>([eventName, eventId, &eventBus](eventType& ev) -> void {                   \
+    eventManager->emplaceListener(                                                                                     \
+        eventId,                                                                                                       \
+        eventBus.emplaceListener<eventType>([eventName, eventId, &eventBus, &eventManager](eventType& ev) -> void {    \
             if (!RemoteCall::hasFunc(eventName, eventId)) {                                                            \
-                eventBus.removeListener(eventListeners.at(eventName + "_" + eventId));                                 \
-                eventListeners.erase(eventName + "_" + eventId);                                                       \
+                eventManager->removeListener(eventId);                                                                 \
                 return;                                                                                                \
             }                                                                                                          \
             bool result = true;                                                                                        \
             try {                                                                                                      \
                 otherFunction;                                                                                         \
                 result = RemoteCall::importAs<bool callFunction>(eventName, eventId) eventParams;                      \
-            } catch (std::exception & e) {                                                                             \
-                if (std::string(e.what()) != "bad variant access") {                                                   \
-                    logger.error("Exception in event listener: {0}", e.what());                                        \
-                    logger.error("Event: {0}, Id: {1}", eventName, eventId);                                           \
-                }                                                                                                      \
-            }                                                                                                          \
+            } catch (...) {}                                                                                           \
             if (!result) cancelFunction;                                                                               \
-        });                                                                                                            \
+        })                                                                                                             \
+    );                                                                                                                 \
     return true;
 
-std::unordered_map<std::string, ll::event::ListenerPtr> eventListeners;
-
 void Export_Event_API() {
-    auto& eventBus = ll::event::EventBus::getInstance();
+    RemoteCall::exportAs("GMLIB_Event_API", "getNextScriptEventId", []() -> std::string {
+        return LegacyScriptEventManager::getInstance()->getNextEventId();
+    });
+    auto& eventBus     = ll::event::EventBus::getInstance();
+    auto& eventManager = LegacyScriptEventManager::getInstance();
     RemoteCall::exportAs(
-        "GMLIB_API",
+        "GMLIB_Event_API",
         "callCustomEvent",
-        [&eventBus](std::string const& eventName, std::string const& eventId) -> bool {
+        [&eventBus, &eventManager](std::string const& eventName, std::string const& eventId) -> bool {
             if (!RemoteCall::hasFunc(eventName, eventId)) return false;
             switch (doHash(eventName)) {
             case doHash("onClientLogin"): {
@@ -43,7 +68,7 @@ void Export_Event_API() {
                      std::string const& serverXuid,
                      std::string const& clientXuid),
                     (ev.getRealName(), ev.getUuid().asString(), ev.getServerAuthXuid(), ev.getClientAuthXuid()),
-                    ev.disConnectClient(),
+                    logger.error("Event \"onClientLogin\" cannot be intercepted"),
                 );
             }
             case doHash("onWeatherChange"): {
