@@ -958,4 +958,43 @@ void Export_Compatibility_API() {
             level->setDefaultGameType((GameType)gameMode);
         }
     });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "registerCustomShapelessRecipe",
+        [](std::string const& recipe_id, std::vector<std::string> ingredients, ItemStack* result) -> void {
+            auto level = GMLIB_Level::getInstance();
+            if (!level) {
+                return;
+            }
+            std::vector<Recipes::Type> types;
+            char                       rt = 'A';
+            for (auto& ing : ingredients) {
+                auto key = Recipes::Type(ing, rt, 1, 0);
+                types.push_back(key);
+                rt++;
+            }
+            CustomRecipe::registerShapelessCraftingTableRecipe(recipe_id, types, *result);
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "registerCustomShapedRecipe",
+        [](std::string const&       recipe_id,
+           std::vector<std::string> shape,
+           std::vector<std::string> ingredients,
+           ItemStack*               result) -> void {
+            auto level = GMLIB_Level::getInstance();
+            if (!level) {
+                return;
+            }
+            std::vector<Recipes::Type> types;
+            char                       rt = 'A';
+            for (auto& ing : ingredients) {
+                auto key = Recipes::Type(ing, rt, 1, 0);
+                types.push_back(key);
+                rt++;
+            }
+            CustomRecipe::registerShapedCraftingTableRecipe(recipe_id, shape, types, *result);
+        }
+    );
 }

@@ -509,6 +509,28 @@ declare class Recipes {
         /** 解锁条件(也可以填物品命名空间ID) */
         unlock: "AlwaysUnlocked" | "PlayerHasManyItems" | "PlayerInWater" | "None" | undefined
     ): boolean;
+
+    /** 注册自定义有序合成表 */
+    static registerCustomShapedRecipe(
+        /** 合成表唯一标识符 */
+        recipeId: string,
+        /** 合成表摆放方式，数组元素为字符串 */
+        shape: [string, string, string],
+        /** 材料数组 */
+        ingredients: string[],
+        /** 合成结果 */
+        result: Item
+    ): boolean;
+
+    /** 注册自定义无序合成表 */
+    static registerCustomShapelessRecipe(
+        /** 合成表唯一标识符 */
+        recipeId: string,
+        /** 合成材料 */
+        ingredients: string[],
+        /** 合成结果 */
+        result: Item
+    ): boolean;
 }
 
 /** 实验性功能类 */
