@@ -13,7 +13,7 @@ public:
     }
 
     void emplaceListener(std::string const& scriptEventId, ll::event::ListenerPtr listenerPtr) {
-        mEventListeners[doHash(scriptEventId)] = listenerPtr;
+        mEventListeners[doHash(scriptEventId)] = std::move(listenerPtr);
     }
 
     void removeListener(std::string const& scriptEventId) {

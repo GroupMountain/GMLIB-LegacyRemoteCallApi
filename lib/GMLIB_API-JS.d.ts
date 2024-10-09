@@ -1054,6 +1054,202 @@ declare class UserCache {
     static getAllPlayerInfo(): { Xuid: String; Uuid: string; Name: string; }[]
 }
 
+/** 二进制流数据包类 */
+declare class GMLIB_BinaryStream {
+    constructor();
+
+    /** 发送数据包 */
+    sendTo(
+        /** 要发送数据包的玩家对象 */
+        player: Player,
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): void;
+
+    /** 发送数据包到玩家数组 */
+    sendToPlayers(
+        /** 要发送数据包的玩家对象数组 */
+        players: Player[],
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): void;
+
+    /** 发送数据包到所有玩家 */
+    sendToAll(
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): void;
+
+    /** 发送数据包到维度 */
+    sendToDimension(
+        /** 维度ID */
+        dimid: number,
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): void;
+
+    /** 销毁数据包 */
+    destroy(): void;
+
+    /** 重置数据包 */
+    reset(): void;
+
+    /** 写入数据包头部 */
+    writePacketHeader(
+        /** 数据包ID */
+        id: number
+    ): void;
+
+    /** 写入UUID */
+    writeUuid(
+        /** UUID */
+        value: string
+    ): void;
+
+    /** 写入物品 */
+    writeItem(
+        /** 物品对象 */
+        value: Item
+    ): void;
+
+    /** 写入NBT */
+    writeCompoundTag(
+        /** NBT */
+        value: NbtCompound
+    ): void;
+
+    /** */
+    writeDataItem(
+        /** 数据项 */
+        value: { "id": number, "type": number, "value": string | IntPos | FloatPos | number | NbtCompound }[]
+    ): void;
+
+    writeActorLink(
+        /** 数据项 */
+        value: {"mA":number,"mB":number,"mType":number,"mImmediate":boolean,"mPassengerInitiated":boolean}
+    ): void;
+
+    /** 写入浮点数坐标对象 */
+    writeVec3(
+        /** 浮点数坐标对象 */
+        value: FloatPos
+    ) : void;
+
+    /** 写入整数坐标对象 */
+    writeBlockPos(
+        /** 整数坐标对象 */
+        value: IntPos
+    ) : void;
+
+    /** 写入方向角对象 */
+    writeVec2(
+        /** 方向角对象 */
+        value: DirectionAngle
+    ) : void;
+
+    /** 写入字符串 */
+    writeString(
+        /** 字符串 */
+        value: string
+    ): void;
+
+    /** 写入布尔值 */
+    writeBool(
+        /** 布尔值 */
+        value: boolean
+    ): void;
+
+    /** 写入字节 */
+    writeByte(
+        /** 字节 */
+        value: number
+    ): void;
+
+    /** 写入(双精度)浮点数 */
+    writeDouble(
+        /** 浮点数 */
+        value: number
+    ): void;
+
+    /** 写入(单精度)浮点数 */
+    writeFloat(
+        /** 浮点数 */
+        value: number
+    ): void;
+
+    /**  */
+    writeSignedBigEndianInt(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeSignedInt(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /** 写入 */
+    writeSignedInt64(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeSignedShort(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeUnsignedChar(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeUnsignedInt(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeUnsignedInt64(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeUnsignedShort(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeUnsignedVarInt(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeUnsignedVarInt64(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeVarInt(
+        /** 数值 */
+        value: number
+    ): void;
+
+    /**  */
+    writeVarInt64(
+        /** 数值 */
+        value: number
+    ): void;
+}
+
 interface Player {
     /** (GMLIB)转换成实体对象 */
     toEntity(): Entity;
