@@ -4,7 +4,7 @@ using namespace ll::hash_utils;
 class LegacyScriptEventManager {
 private:
     int64                                             mNextEventId = 0;
-    std::unordered_map<int64, ll::event::ListenerPtr> mEventListeners;
+    std::unordered_map<uint64, ll::event::ListenerPtr> mEventListeners;
 
 public:
     std::string getNextEventId() {
@@ -47,7 +47,7 @@ public:
             if (!result) cancelFunction;                                                                               \
         })                                                                                                             \
     );                                                                                                                 \
-    return true
+    return true;
 
 void Export_Event_API() {
     RemoteCall::exportAs("GMLIB_Event_API", "getNextScriptEventId", []() -> std::string {
@@ -70,7 +70,7 @@ void Export_Event_API() {
                      std::string const& clientXuid),
                     (ev.getRealName(), ev.getUuid().asString(), ev.getServerAuthXuid(), ev.getClientAuthXuid()),
                     logger.error("Event \"onClientLogin\" cannot be intercepted"),
-                );
+                )
             }
             case doHash("onWeatherChange"): {
                 REGISTER_EVENT_LISTEN(
@@ -78,7 +78,7 @@ void Export_Event_API() {
                     (int lightningLevel, int rainLevel, int lightningLast, int rainLast),
                     (ev.getLightningLevel(), ev.getRainLevel(), ev.getLightningLastTick(), ev.getRainingLastTick()),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onMobPick"): {
                 REGISTER_EVENT_LISTEN(
@@ -86,7 +86,7 @@ void Export_Event_API() {
                     (Actor * mob, Actor * item),
                     (&ev.self(), (Actor*)&ev.getItemActor()),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onItemTrySpawn"): {
                 REGISTER_EVENT_LISTEN(
@@ -96,7 +96,7 @@ void Export_Event_API() {
                      {ev.getPosition(), ev.getBlockSource().getDimensionId().id},
                      ev.getSpawner().has_value() ? ev.getSpawner()->getOrCreateUniqueID().id : -1),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onItemSpawned"): {
                 REGISTER_EVENT_LISTEN(
@@ -107,7 +107,7 @@ void Export_Event_API() {
                      {ev.getPosition(), ev.getBlockSource().getDimensionId().id},
                      ev.getSpawner().has_value() ? ev.getSpawner()->getOrCreateUniqueID().id : -1),
                     logger.error("Event \"onItemSpawned\" cannot be intercepted"),
-                );
+                )
             }
             case doHash("onEntityTryChangeDim"): {
                 REGISTER_EVENT_LISTEN(
@@ -115,7 +115,7 @@ void Export_Event_API() {
                     (Actor * entity, int toDimId),
                     (&ev.self(), ev.getToDimensionId()),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onLeaveBed"): {
                 REGISTER_EVENT_LISTEN(
@@ -123,7 +123,7 @@ void Export_Event_API() {
                     (Player * pl),
                     (&ev.self()),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onDeathMessage"): {
                 REGISTER_EVENT_LISTEN(
@@ -131,7 +131,7 @@ void Export_Event_API() {
                     (std::string const& message, std::vector<std::string>, Actor* dead),
                     (ev.getDeathMessage().first, ev.getDeathMessage().second, &ev.self()),
                     logger.error("Event \"onDeathMessage\" cannot be intercepted"),
-                );
+                )
             }
             case doHash("onMobHurted"): {
                 REGISTER_EVENT_LISTEN(
@@ -146,7 +146,7 @@ void Export_Event_API() {
                         source        = ll::service::getLevel()->fetchEntity(uniqueId);
                         if (source->getOwner()) source = source->getOwner();
                     }
-                );
+                )
             }
             case doHash("onEndermanTake"): {
                 REGISTER_EVENT_LISTEN(
@@ -154,7 +154,7 @@ void Export_Event_API() {
                     (Actor * mob),
                     (&ev.self()),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onEntityChangeDim"): {
                 REGISTER_EVENT_LISTEN(
@@ -162,7 +162,7 @@ void Export_Event_API() {
                     (Actor * mob, int fromDimId),
                     (&ev.self(), ev.getFromDimensionId()),
                     logger.error("Event \"onEntityChangeDim\" cannot be intercepted"),
-                );
+                )
             }
             case doHash("onDragonRespawn"): {
                 REGISTER_EVENT_LISTEN(
@@ -178,7 +178,7 @@ void Export_Event_API() {
                     (Actor * mob, int64 uniqueId),
                     (&ev.self(), ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onProjectileCreate"): {
                 REGISTER_EVENT_LISTEN(
@@ -186,7 +186,7 @@ void Export_Event_API() {
                     (Actor * mob, int64 uniqueId),
                     (&ev.self(), ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1),
                     logger.error("Event \"onProjectileCreate\" cannot be intercepted"),
-                );
+                )
             }
             case doHash("onSpawnWanderingTrader"): {
                 REGISTER_EVENT_LISTEN(
@@ -194,7 +194,7 @@ void Export_Event_API() {
                     (std::pair<BlockPos, int> pos),
                     ({ev.getPos(), ev.getRegion().getDimensionId()}),
                     ev.cancel(),
-                );
+                )
             }
             case doHash("onHandleRequestAction"): {
                 // clang-format off
@@ -220,7 +220,7 @@ void Export_Event_API() {
                     ),
                     ev.cancel(),
                     auto& requestAction = (ItemStackRequestActionTransferBase&)ev.getRequestAction();
-                );
+                )
                 // clang-format on
             }
             case doHash("onSendContainerClosePacket"): {
@@ -239,7 +239,7 @@ void Export_Event_API() {
                     (),
                     (),
                     logger.error("Event \"onServerStopping\" cannot be intercepted"),
-                );
+                )
             }
             default:
                 return false;
