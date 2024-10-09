@@ -3,7 +3,7 @@ using namespace ll::hash_utils;
 
 class LegacyScriptEventManager {
 private:
-    int64                                             mNextEventId = 0;
+    int64                                              mNextEventId = 0;
     std::unordered_map<uint64, ll::event::ListenerPtr> mEventListeners;
 
 public:

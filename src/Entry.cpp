@@ -17,6 +17,7 @@ bool LegacyRemoteCallApi::load() {
     ExportPAPI();
     Export_Event_API();
     Export_BinaryStream_API();
+    Export_Form_API();
     logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
     logger.info(
         "Loaded Version: {} with {}",
