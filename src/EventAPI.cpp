@@ -47,7 +47,7 @@ public:
             if (!result) cancelFunction;                                                                               \
         })                                                                                                             \
     );                                                                                                                 \
-    return true;
+    return true
 
 void Export_Event_API() {
     RemoteCall::exportAs("GMLIB_Event_API", "getNextScriptEventId", []() -> std::string {
@@ -197,24 +197,31 @@ void Export_Event_API() {
                 );
             }
             case doHash("onHandleRequestAction"): {
-                REGISTER_EVENT_LISTEN(Event::PlayerEvent::HandleRequestActionBeforeEvent,
-                                      (Player * player,
-                                       std::string const& actionType,
-                                       int                count,
-                                       std::string const& sourceContainerNetId,
-                                       int                sourceSlot,
-                                       std::string const& destinationContainerNetId,
-                                       int                destinationSlot),
-                                      ((Player*)&ev.self(),
-                                       magic_enum::enum_name(requestAction->mActionType).data(),
-                                       (int)requestAction->mAmount,
-                                       magic_enum::enum_name(requestAction->mSrc.mOpenContainerNetId).data(),
-                                       (int)requestAction->mSrc.mSlot,
-                                       magic_enum::enum_name(requestAction->mDst.mOpenContainerNetId).data(),
-                                       (int)requestAction->mDst.mSlot),
-                                      ev.cancel(),
-                                      auto requestAction = (ItemStackRequestActionTransferBase*)&ev.getRequestAction();
+                // clang-format off
+                REGISTER_EVENT_LISTEN(
+                    Event::PlayerEvent::HandleRequestActionBeforeEvent,
+                    (
+                        Player * player,
+                        std::string const& actionType,
+                        int                count,
+                        std::string const& sourceContainerNetId,
+                        int                sourceSlot,
+                        std::string const& destinationContainerNetId,
+                        int                destinationSlot
+                    ),
+                    (
+                        (Player*)&ev.self(),
+                        magic_enum::enum_name(requestAction.mActionType).data(),
+                        (int)requestAction.mAmount,
+                        magic_enum::enum_name(requestAction.mSrc.mOpenContainerNetId).data(),
+                        (int)requestAction.mSrc.mSlot,
+                        magic_enum::enum_name(requestAction.mDst.mOpenContainerNetId).data(),
+                        (int)requestAction.mDst.mSlot
+                    ),
+                    ev.cancel(),
+                    auto& requestAction = (ItemStackRequestActionTransferBase&)ev.getRequestAction();
                 );
+                // clang-format on
             }
             case doHash("onSendContainerClosePacket"): {
                 REGISTER_EVENT_LISTEN(
