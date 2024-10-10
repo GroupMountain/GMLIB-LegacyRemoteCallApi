@@ -1,17 +1,48 @@
 #include "Global.h"
 
+#include <GMLIB/Server/FormAPI/ChestForm.h>
+
 using namespace GMLIB::Server::Form;
 using namespace ll::hash_utils;
 
 class LegacyScriptFormManager {
 private:
-    int64 mNextFormCallbackId = 0;
-    // std::unordered_map<int64, ll::event::ListenerPtr> mEventListeners;
+    int64                                                       mNextFormCallbackId = 0;
+    int64                                                       mNextFormId         = 0;
+    std::unordered_map<int64, std::unique_ptr<NpcDialogueForm>> mNpcDialogueForms;
+    std::unordered_map<int64, std::unique_ptr<ChestForm>>       mChestForms;
 
 public:
     std::string getNextFormCallbackId() {
         mNextFormCallbackId++;
         return "GMLIB_EVENT_" + std::to_string(mNextFormCallbackId);
+    }
+
+    int64 getNextFormId() {
+        mNextFormId++;
+        return mNextFormId;
+    }
+
+    int64 createNpcDialogueForm(std::string const& npcName, std::string const& sceneName, std::string const& dialogue) {
+        auto formId               = LegacyScriptFormManager::getInstance().getNextFormId();
+        auto formPtr              = std::make_unique<NpcDialogueForm>(npcName, sceneName, dialogue);
+        mNpcDialogueForms[formId] = std::move(formPtr);
+        return formId;
+    }
+
+    bool destroyNpcDialogueForm(int64 formId) {
+        if (mNpcDialogueForms.contains(formId)) {
+            mNpcDialogueForms.erase(formId);
+            return true;
+        }
+        return false;
+    }
+
+    optional_ref<NpcDialogueForm> getNpcDialogueForm(int64 formId) {
+        if (mNpcDialogueForms.contains(formId)) {
+            return mNpcDialogueForms[formId].get();
+        }
+        return {};
     }
 
 public:
@@ -89,11 +120,13 @@ public:
 
 
 void Export_Form_API() {
-    RemoteCall::exportAs("GMLIB_ServerSettingForm", "getDefaultPriority", []() -> int {
-        return ServerSettingForm::getDefaultPriority();
-    });
+    ////////////////////////////////   Form Manager   /////////////////////////////////
     RemoteCall::exportAs("GMLIB_FormAPI", "getNextFormCallbackId", []() -> std::string {
         return LegacyScriptFormManager::getInstance().getNextFormCallbackId();
+    });
+    //////////////////////////////   ServerSettingForm   //////////////////////////////
+    RemoteCall::exportAs("GMLIB_ServerSettingForm", "getDefaultPriority", []() -> int {
+        return ServerSettingForm::getDefaultPriority();
     });
     RemoteCall::exportAs("GMLIB_ServerSettingForm", "hasTitle", []() -> bool { return ServerSettingForm::hasTitle(); });
     RemoteCall::exportAs("GMLIB_ServerSettingForm", "getTitle", []() -> std::string {
@@ -229,4 +262,41 @@ void Export_Form_API() {
     RemoteCall::exportAs("GMLIB_ServerSettingForm", "removeElement", [](uint id) -> bool {
         return ServerSettingForm::removeElement(id);
     });
+    //////////////////////////////   NpcDialogueForm   //////////////////////////////
+    RemoteCall::exportAs(
+        "GMLIB_NpcDialogueForm",
+        "createForm",
+        [](std::string const& npcName, std::string const& sceneName, std::string const& dialogue) -> int64 {
+            return LegacyScriptFormManager::getInstance().createNpcDialogueForm(npcName, sceneName, dialogue);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_NpcDialogueForm", "destroyForm", [](int64 formId) -> bool {
+        return LegacyScriptFormManager::getInstance().destroyNpcDialogueForm(formId);
+    });
+    RemoteCall::exportAs("GMLIB_NpcDialogueForm", "addButton", [](int64 formId, std::string const& button) -> int {
+        if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
+            return formPtr->addButton(button);
+        }
+        return -1;
+    });
+    RemoteCall::exportAs(
+        "GMLIB_NpcDialogueForm",
+        "sendTo",
+        [](int64 formId, Player* pl, std::string const& callbackId) -> void {
+            if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
+                formPtr->sendTo(*pl, [callbackId](Player& pl, int index, NpcRequestPacket::RequestType type) -> void {
+                    try {
+                        if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {
+                            auto const& callback = RemoteCall::importAs<void(Player*, int index, int type)>(
+                                "GMLIB_FORM_CALLBACK",
+                                callbackId
+                            );
+                            callback(&pl, index, (int)type);
+                        }
+                    } catch (...) {}
+                });
+            }
+        }
+    );
+    //////////////////////////////   ChestForm   //////////////////////////////
 }
