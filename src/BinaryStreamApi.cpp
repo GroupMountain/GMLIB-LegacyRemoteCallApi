@@ -63,7 +63,11 @@ void Export_BinaryStream_API() {
     });
     EXPORTAPI("writePacketHeader", int, binaryStream->writePacketHeader((MinecraftPacketIds)value));
     EXPORTAPI("writeUuid", std::string const&, binaryStream->writeUuid(mce::UUID::fromString(value)));
-    EXPORTAPI("writeItem", ItemStack*, NetworkItemStackDescriptor(*value).write(*binaryStream));
+    EXPORTAPI(
+        "writeItem",
+        ItemStack*,
+        binaryStream->writeType<NetworkItemStackDescriptor>(NetworkItemStackDescriptor(*value))
+    );
     EXPORTAPI("writeString", std::string const&, binaryStream->writeString(value));
     EXPORTAPI("writeCompoundTag", CompoundTag*, binaryStream->writeCompoundTag(*value));
     EXPORTAPI2(writeBool);
