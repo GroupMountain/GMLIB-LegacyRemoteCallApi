@@ -25,10 +25,11 @@ public:
     }
 };
 
+#define BinaryStreamManager LegacyScriptBinaryStreamManager::getInstance()
 #define EXPORTAPI(funcName, type, fuc)                                                                                 \
-    RemoteCall::exportAs("GMLIB_BinaryStream_API", funcName, [](uint64 BinaryStreamId, type value) -> void {           \
-        auto binaryStream = LegacyScriptBinaryStreamManager::getInstance().getBinaryStream(BinaryStreamId);            \
-        if (binaryStream != nullptr) fuc;                                                                              \
+    RemoteCall::exportAs("GMLIB_BinaryStream_API", funcName, [](uint64 id, type value) -> void {                       \
+        auto bs = BinaryStreamManager.getBinaryStream(id);                                                             \
+        if (bs != nullptr) fuc;                                                                                        \
     })
 
 template <typename T>
@@ -37,39 +38,29 @@ template <typename T, typename R, typename A, typename... AS>
 struct Info<R (T::*)(A, AS...)> {
     using ArgT = A;
 };
-#define EXPORTAPI2(T) EXPORTAPI(#T, Info<decltype(&GMLIB_BinaryStream::T)>::ArgT, binaryStream->T(value))
+#define EXPORTAPI2(T) EXPORTAPI(#T, Info<decltype(&GMLIB_BinaryStream::T)>::ArgT, bs->T(value))
 
 void Export_BinaryStream_API() {
     RemoteCall::exportAs("GMLIB_BinaryStream_API", "create", []() -> uint64 {
-        auto id = LegacyScriptBinaryStreamManager::getInstance().getNextId();
-        LegacyScriptBinaryStreamManager::getInstance().cretateBinaryStream(id);
+        auto id = BinaryStreamManager.getNextId();
+        BinaryStreamManager.cretateBinaryStream(id);
         return id;
     });
-    RemoteCall::exportAs("GMLIB_BinaryStream_API", "reset", [](uint64 BinaryStreamId) -> void {
-        if (LegacyScriptBinaryStreamManager::getInstance().getBinaryStream(BinaryStreamId) == nullptr)
-            LegacyScriptBinaryStreamManager::getInstance().cretateBinaryStream(BinaryStreamId);
-        LegacyScriptBinaryStreamManager::getInstance().getBinaryStream(BinaryStreamId)->reset();
+    RemoteCall::exportAs("GMLIB_BinaryStream_API", "reset", [](uint64 id) -> void {
+        if (BinaryStreamManager.getBinaryStream(id) == nullptr) BinaryStreamManager.cretateBinaryStream(id);
+        else BinaryStreamManager.getBinaryStream(id)->reset();
     });
-    RemoteCall::exportAs(
-        "GMLIB_BinaryStream_API",
-        "sendTo",
-        [](uint64 BinaryStreamId, Player* player) -> void {
-            auto binaryStream = LegacyScriptBinaryStreamManager::getInstance().getBinaryStream(BinaryStreamId);
-            if (binaryStream != nullptr) binaryStream->sendTo(*player);
-        }
-    );
-    RemoteCall::exportAs("GMLIB_BinaryStream_API", "destroy", [](uint64 BinaryStreamId) -> void {
-        LegacyScriptBinaryStreamManager::getInstance().removeBinaryStream(BinaryStreamId);
+    RemoteCall::exportAs("GMLIB_BinaryStream_API", "sendTo", [](uint64 id, Player* player) -> void {
+        if (auto bs = BinaryStreamManager.getBinaryStream(id); bs != nullptr) bs->sendTo(*player);
     });
-    EXPORTAPI("writePacketHeader", int, binaryStream->writePacketHeader((MinecraftPacketIds)value));
-    EXPORTAPI("writeUuid", std::string const&, binaryStream->writeUuid(mce::UUID::fromString(value)));
-    EXPORTAPI(
-        "writeItem",
-        ItemStack*,
-        binaryStream->writeType<NetworkItemStackDescriptor>(NetworkItemStackDescriptor(*value))
-    );
-    EXPORTAPI("writeString", std::string const&, binaryStream->writeString(value));
-    EXPORTAPI("writeCompoundTag", CompoundTag*, binaryStream->writeCompoundTag(*value));
+    RemoteCall::exportAs("GMLIB_BinaryStream_API", "destroy", [](uint64 id) -> void {
+        BinaryStreamManager.removeBinaryStream(id);
+    });
+    EXPORTAPI("writePacketHeader", int, bs->writePacketHeader((MinecraftPacketIds)value));
+    EXPORTAPI("writeUuid", std::string const&, bs->writeUuid(mce::UUID::fromString(value)));
+    EXPORTAPI("writeItem", ItemStack*, bs->writeType(NetworkItemStackDescriptor(*value)));
+    EXPORTAPI("writeString", std::string const&, bs->writeString(value));
+    EXPORTAPI("writeCompoundTag", CompoundTag*, bs->writeCompoundTag(*value));
     EXPORTAPI2(writeBool);
     EXPORTAPI2(writeByte);
     EXPORTAPI2(writeDouble);
