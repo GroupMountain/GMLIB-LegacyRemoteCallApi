@@ -1078,7 +1078,8 @@ type PacketDataItem = (
 );
 
 type PacketData = (
-    { type: "Item", value: Item }
+    | { type: "", value: PacketData | PacketData[] }
+    | { type: "Item", value: Item }
     | { type: "CompoundTag", value: NbtCompound }
     | {
         type: "DataItem",
