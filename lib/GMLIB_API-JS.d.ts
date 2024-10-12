@@ -1217,10 +1217,10 @@ declare class GMLIB_BinaryStream {
         value: IntPos
     ): GMLIB_BinaryStream;
 
-    /** 写入方向角对象 */
+    /**  */
     writeVec2(
-        /** 方向角对象 */
-        value: DirectionAngle
+        /** 数据 */
+        value: { "x": number, "z": number }
     ): GMLIB_BinaryStream;
 
     /** 写入字符串 */
