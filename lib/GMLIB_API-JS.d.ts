@@ -1123,6 +1123,11 @@ type PacketData = (
 
 /** 二进制流数据包类 */
 declare class GMLIB_BinaryStream {
+    /** 数据包ID */
+    #id: number;
+    /** 数据包是否被销毁 */
+    #destroy: boolean;
+
     constructor(
         /** 数据包数据 */
         data: PacketData[]?
@@ -1160,6 +1165,9 @@ declare class GMLIB_BinaryStream {
 
     /** 销毁数据包 */
     destroy(): GMLIB_BinaryStream;
+
+    /** 数据包是否已被销毁 */
+    isDestroy(): boolean;
 
     /** 重置数据包 */
     reset(): GMLIB_BinaryStream;
