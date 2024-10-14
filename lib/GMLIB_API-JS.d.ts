@@ -1172,6 +1172,9 @@ declare class GMLIB_BinaryStream {
     /** 重置数据包 */
     reset(): GMLIB_BinaryStream;
 
+    /** 转换成字符串 */
+    toString(): string;
+
     /** 写入数据 */
     write(
         /** 数据 */
