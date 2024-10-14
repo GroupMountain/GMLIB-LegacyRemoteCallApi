@@ -1,6 +1,5 @@
 #include "Global.h"
 #include <regex>
-#include <vector>
 
 bool isInteger(const std::string& str) {
     std::regex pattern("^[+-]?\\d+$");
