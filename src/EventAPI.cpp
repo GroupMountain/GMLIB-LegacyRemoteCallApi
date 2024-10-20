@@ -1,4 +1,6 @@
 #include "Global.h"
+#include "ll/api/event/EventBus.h"
+#include "mc/world/inventory/network/ItemStackRequestActionTransferBase.h"
 using namespace ll::hash_utils;
 
 class LegacyScriptEventManager {
@@ -63,7 +65,7 @@ void Export_Event_API() {
             switch (doHash(eventName)) {
             case doHash("onClientLogin"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::PacketEvent::ClientLoginAfterEvent,
+                    gmlib::event::packet::ClientLoginAfterEvent,
                     (std::string const& realName,
                      std::string const& uuid,
                      std::string const& serverXuid,
@@ -74,7 +76,7 @@ void Export_Event_API() {
             }
             case doHash("onWeatherChange"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::LevelEvent::WeatherUpdateBeforeEvent,
+                    gmlib::event::level::WeatherUpdateBeforeEvent,
                     (int lightningLevel, int rainLevel, int lightningLast, int rainLast),
                     (ev.getLightningLevel(), ev.getRainLevel(), ev.getLightningLastTick(), ev.getRainingLastTick()),
                     ev.cancel(),
@@ -82,16 +84,16 @@ void Export_Event_API() {
             }
             case doHash("onMobPick"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::MobPickupItemBeforeEvent,
-                    (Actor * mob, Actor * item),
-                    (&ev.self(), (Actor*)&ev.getItemActor()),
+                    gmlib::event::entity::MobPickupItemBeforeEvent,
+                    (::Actor * mob, ::Actor * item),
+                    (&ev.self(), (::Actor*)&ev.getItemActor()),
                     ev.cancel(),
                 );
             }
             case doHash("onItemTrySpawn"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::ItemActorSpawnBeforeEvent,
-                    (const ItemStack* item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
+                    gmlib::event::entity::ItemActorSpawnBeforeEvent,
+                    (const ::ItemStack* item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
                     (&ev.getItem(),
                      {ev.getPosition(), ev.getBlockSource().getDimensionId().id},
                      ev.getSpawner().has_value() ? ev.getSpawner()->getOrCreateUniqueID().id : -1),
@@ -100,10 +102,10 @@ void Export_Event_API() {
             }
             case doHash("onItemSpawned"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::ItemActorSpawnAfterEvent,
-                    (const ItemStack* item, Actor* itemActor, std::pair<Vec3, int> position, int64 spawnerUniqueId),
+                    gmlib::event::entity::ItemActorSpawnAfterEvent,
+                    (const ::ItemStack* item, ::Actor* itemActor, std::pair<Vec3, int> position, int64 spawnerUniqueId),
                     (&ev.getItem(),
-                     (Actor*)&ev.getItemActor(),
+                     (::Actor*)&ev.getItemActor(),
                      {ev.getPosition(), ev.getBlockSource().getDimensionId().id},
                      ev.getSpawner().has_value() ? ev.getSpawner()->getOrCreateUniqueID().id : -1),
                     logger.error("Event \"onItemSpawned\" cannot be intercepted"),
@@ -111,36 +113,36 @@ void Export_Event_API() {
             }
             case doHash("onEntityTryChangeDim"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::ActorChangeDimensionBeforeEvent,
-                    (Actor * entity, int toDimId),
+                    gmlib::event::entity::ActorChangeDimensionBeforeEvent,
+                    (::Actor * entity, int toDimId),
                     (&ev.self(), ev.getToDimensionId()),
                     ev.cancel(),
                 );
             }
             case doHash("onLeaveBed"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::PlayerEvent::PlayerStopSleepBeforeEvent,
-                    (Player * pl),
+                    gmlib::event::player::PlayerStopSleepBeforeEvent,
+                    (::Player * pl),
                     (&ev.self()),
                     ev.cancel(),
                 );
             }
             case doHash("onDeathMessage"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::DeathMessageAfterEvent,
-                    (std::string const& message, std::vector<std::string>, Actor* dead),
+                    gmlib::event::entity::DeathMessageAfterEvent,
+                    (std::string const& message, std::vector<std::string>, ::Actor* dead),
                     (ev.getDeathMessage().first, ev.getDeathMessage().second, &ev.self()),
                     logger.error("Event \"onDeathMessage\" cannot be intercepted"),
                 );
             }
             case doHash("onMobHurted"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::MobHurtAfterEvent,
-                    (Actor * mob, Actor * source, float damage, int cause),
+                    gmlib::event::entity::MobHurtAfterEvent,
+                    (::Actor * mob, ::Actor * source, float damage, int cause),
                     (&ev.self(), source, ev.getDamage(), (int)damageSource.getCause()),
                     logger.error("Event \"onMobHurted\" cannot be intercepted"),
                     auto& damageSource = ev.getSource();
-                    Actor* source      = nullptr;
+                    ::Actor* source    = nullptr;
                     if (damageSource.isEntitySource()) {
                         auto uniqueId = damageSource.getDamagingEntityUniqueID();
                         source        = ll::service::getLevel()->fetchEntity(uniqueId);
@@ -150,23 +152,23 @@ void Export_Event_API() {
             }
             case doHash("onEndermanTake"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::EndermanTakeBlockBeforeEvent,
-                    (Actor * mob),
+                    gmlib::event::entity::EndermanTakeBlockBeforeEvent,
+                    (::Actor * mob),
                     (&ev.self()),
                     ev.cancel(),
                 );
             }
             case doHash("onEntityChangeDim"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::ActorChangeDimensionAfterEvent,
-                    (Actor * mob, int fromDimId),
+                    gmlib::event::entity::ActorChangeDimensionAfterEvent,
+                    (::Actor * mob, int fromDimId),
                     (&ev.self(), ev.getFromDimensionId()),
                     logger.error("Event \"onEntityChangeDim\" cannot be intercepted"),
                 );
             }
             case doHash("onDragonRespawn"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::DragonRespawnBeforeEvent,
+                    gmlib::event::entity::DragonRespawnBeforeEvent,
                     (int64 enderDragonUniqueID),
                     (ev.getEnderDragon().id),
                     ev.cancel(),
@@ -174,38 +176,38 @@ void Export_Event_API() {
             }
             case doHash("onProjectileTryCreate"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::ProjectileCreateBeforeEvent,
-                    (Actor * mob, int64 uniqueId),
+                    gmlib::event::entity::ProjectileCreateBeforeEvent,
+                    (::Actor * mob, int64 uniqueId),
                     (&ev.self(), ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1),
                     ev.cancel(),
                 );
             }
             case doHash("onProjectileCreate"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::ProjectileCreateAfterEvent,
-                    (Actor * mob, int64 uniqueId),
+                    gmlib::event::entity::ProjectileCreateAfterEvent,
+                    (::Actor * mob, int64 uniqueId),
                     (&ev.self(), ev.getShooter() ? ev.getShooter()->getOrCreateUniqueID().id : -1),
                     logger.error("Event \"onProjectileCreate\" cannot be intercepted"),
                 );
             }
             case doHash("onSpawnWanderingTrader"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::EntityEvent::SpawnWanderingTraderBeforeEvent,
+                    gmlib::event::entity::SpawnWanderingTraderBeforeEvent,
                     (std::pair<BlockPos, int> pos),
                     ({ev.getPos(), ev.getRegion().getDimensionId()}),
                     ev.cancel(),
                 );
             }
             case doHash("onHandleRequestAction"): {
-                REGISTER_EVENT_LISTEN(Event::PlayerEvent::HandleRequestActionBeforeEvent,
-                                      (Player * player,
+                REGISTER_EVENT_LISTEN(gmlib::event::player::HandleRequestActionBeforeEvent,
+                                      (::Player * player,
                                        std::string const& actionType,
                                        int                count,
                                        std::string const& sourceContainerNetId,
                                        int                sourceSlot,
                                        std::string const& destinationContainerNetId,
                                        int                destinationSlot),
-                                      ((Player*)&ev.self(),
+                                      ((::Player*)&ev.self(),
                                        magic_enum::enum_name(requestAction->mActionType).data(),
                                        (int)requestAction->mAmount,
                                        magic_enum::enum_name(requestAction->mSrc.mOpenContainerNetId).data(),
@@ -218,8 +220,8 @@ void Export_Event_API() {
             }
             case doHash("onSendContainerClosePacket"): {
                 REGISTER_EVENT_LISTEN(
-                    Event::PacketEvent::ContainerClosePacketSendAfterEvent,
-                    (Player * player, int ContainerNetId),
+                    event::packet::ContainerClosePacketSendAfterEvent,
+                    (::Player * player, int ContainerNetId),
                     (ev.getServerNetworkHandler()
                          .getServerPlayer(ev.getNetworkIdentifier(), ev.getPacket().mClientSubId),
                      (int)ev.getPacket().mContainerId),

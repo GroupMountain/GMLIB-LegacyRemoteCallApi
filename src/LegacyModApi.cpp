@@ -22,7 +22,7 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       result,
            int                      count,
            std::string const&       unlock) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
@@ -33,7 +33,7 @@ void Export_Legacy_GMLib_ModAPI() {
             }
             auto res = RecipeIngredient(result, 0, count);
             auto unl = makeRecipeUnlockingKey(unlock);
-            JsonRecipe::registerShapelessCraftingTableRecipe(recipe_id, types, res, unl);
+            recipe::JsonRecipeRegistry::registerShapelessCraftingTableRecipe(recipe_id, types, res, unl);
         }
     );
     RemoteCall::exportAs(
@@ -45,7 +45,7 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       result,
            int                      count,
            std::string const&       unlock) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
@@ -56,7 +56,7 @@ void Export_Legacy_GMLib_ModAPI() {
             }
             auto res = RecipeIngredient(result, 0, count);
             auto unl = makeRecipeUnlockingKey(unlock);
-            JsonRecipe::registerShapedCraftingTableRecipe(recipe_id, shape, types, res, unl);
+            recipe::JsonRecipeRegistry::registerShapedCraftingTableRecipe(recipe_id, shape, types, res, unl);
         }
     );
     RemoteCall::exportAs(
@@ -66,13 +66,13 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       input,
            std::string const&       output,
            std::vector<std::string> tags) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
-            JsonRecipe::registerFurnaceRecipe(recipe_id, inp, outp, tags);
+            recipe::JsonRecipeRegistry::registerFurnaceRecipe(recipe_id, inp, outp, tags);
         }
     );
     RemoteCall::exportAs(
@@ -80,12 +80,12 @@ void Export_Legacy_GMLib_ModAPI() {
         "registerBrewingMixRecipe",
         [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
         ) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
             auto rea = RecipeIngredient(reagent, 0, 1);
-            JsonRecipe::registerBrewingMixRecipe(recipe_id, input, output, rea);
+            recipe::JsonRecipeRegistry::registerBrewingMixRecipe(recipe_id, input, output, rea);
         }
     );
     RemoteCall::exportAs(
@@ -93,14 +93,14 @@ void Export_Legacy_GMLib_ModAPI() {
         "registerBrewingContainerRecipe",
         [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
         ) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
             auto rea  = RecipeIngredient(reagent, 0, 1);
-            JsonRecipe::registerBrewingContainerRecipe(recipe_id, inp, outp, rea);
+            recipe::JsonRecipeRegistry::registerBrewingContainerRecipe(recipe_id, inp, outp, rea);
         }
     );
     RemoteCall::exportAs(
@@ -111,11 +111,11 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& base,
            std::string const& addition,
            std::string const& result) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
-            JsonRecipe::registerSmithingTransformRecipe(recipe_id, smithing_template, base, addition, result);
+            recipe::JsonRecipeRegistry::registerSmithingTransformRecipe(recipe_id, smithing_template, base, addition, result);
         }
     );
     RemoteCall::exportAs(
@@ -125,11 +125,11 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& smithing_template,
            std::string const& base,
            std::string const& addition) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
-            JsonRecipe::registerSmithingTrimRecipe(recipe_id, smithing_template, base, addition);
+            recipe::JsonRecipeRegistry::registerSmithingTrimRecipe(recipe_id, smithing_template, base, addition);
         }
     );
     RemoteCall::exportAs(
@@ -141,13 +141,13 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& output,
            int                output_data,
            int                output_count) -> void {
-            auto level = GMLIB_Level::getInstance();
+            auto level = world::Level::getInstance();
             if (!level) {
                 return;
             }
             auto inp  = RecipeIngredient(input, 0, 1);
             auto outp = RecipeIngredient(output, 0, 1);
-            JsonRecipe::registerStoneCutterRecipe(recipe_id, inp, outp);
+            recipe::JsonRecipeRegistry::registerStoneCutterRecipe(recipe_id, inp, outp);
         }
     );
     // 错误方块清理
@@ -156,29 +156,29 @@ void Export_Legacy_GMLib_ModAPI() {
     });
     // 实验性
     RemoteCall::exportAs("GMLib_ModAPI", "registerExperimentsRequire", [](int experiment_id) -> void {
-        auto                               list = GMLIB_Level::getAllExperiments();
+        auto                               list = world::Level::getAllExperiments();
         std::unordered_set<AllExperiments> set(list.begin(), list.end());
         if (set.contains((AllExperiments)experiment_id)) {
-            GMLIB_Level::addExperimentsRequire((AllExperiments)experiment_id);
+            world::Level::addExperimentsRequire((AllExperiments)experiment_id);
         } else {
             ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
         }
     });
     RemoteCall::exportAs("GMLib_ModAPI", "setExperimentEnabled", [](int experiment_id, bool value) -> void {
-        if (GMLIB_Level::getInstance()) {
-            auto                               list = GMLIB_Level::getAllExperiments();
+        if (world::Level::getInstance()) {
+            auto                               list = world::Level::getAllExperiments();
             std::unordered_set<AllExperiments> set(list.begin(), list.end());
             if (set.contains((AllExperiments)experiment_id)) {
-                GMLIB_Level::getInstance()->setExperimentEnabled(((AllExperiments)experiment_id), value);
+                world::Level::getInstance()->setExperimentEnabled(((AllExperiments)experiment_id), value);
             } else ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
         }
     });
     RemoteCall::exportAs("GMLib_ModAPI", "getExperimentEnabled", [](int experiment_id) -> bool {
-        if (GMLIB_Level::getInstance()) {
-            auto                               list = GMLIB_Level::getAllExperiments();
+        if (world::Level::getInstance()) {
+            auto                               list = world::Level::getAllExperiments();
             std::unordered_set<AllExperiments> set(list.begin(), list.end());
             if (set.contains((AllExperiments)experiment_id)) {
-                return GMLIB_Level::getInstance()->getExperimentEnabled(((AllExperiments)experiment_id));
+                return world::Level::getInstance()->getExperimentEnabled(((AllExperiments)experiment_id));
             } else {
                 ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
                 return false;

@@ -1,8 +1,7 @@
 #include "Global.h"
+#include "gmlib/world/Player.h"
 
-#include <GMLIB/Server/FormAPI/ChestForm.h>
-
-using namespace GMLIB::Server::Form;
+using namespace gmlib::form;
 using namespace ll::hash_utils;
 
 class LegacyScriptFormManager {
@@ -10,7 +9,7 @@ private:
     int64                                                       mNextFormCallbackId = 0;
     int64                                                       mNextFormId         = 0;
     std::unordered_map<int64, std::unique_ptr<NpcDialogueForm>> mNpcDialogueForms;
-    std::unordered_map<int64, std::unique_ptr<ChestForm>>       mChestForms;
+    // std::unordered_map<int64, std::unique_ptr<ChestForm>>       mChestForms;
 
 public:
     std::string getNextFormCallbackId() {
@@ -45,6 +44,30 @@ public:
         return {};
     }
 
+    /*
+    int64 createChestForm(std::string const& npcName, std::string const& sceneName, std::string const& dialogue) {
+        auto formId         = LegacyScriptFormManager::getInstance().getNextFormId();
+        auto formPtr        = std::make_unique<ChestForm>(npcName, sceneName, dialogue);
+        mChestForms[formId] = std::move(formPtr);
+        return formId;
+    }
+
+    bool destroyChestForm(int64 formId) {
+        if (mChestForms.contains(formId)) {
+            mChestForms.erase(formId);
+            return true;
+        }
+        return false;
+    }
+
+    optional_ref<ChestForm> getChestForm(int64 formId) {
+        if (mChestForms.contains(formId)) {
+            return mChestForms[formId].get();
+        }
+        return {};
+    }
+
+    */
 public:
     static LegacyScriptFormManager& getInstance() {
         static std::unique_ptr<LegacyScriptFormManager> instance;
@@ -56,10 +79,10 @@ public:
 };
 
 #define PLAYER_DETECROR                                                                                                \
-    [detectorId, result](Player& pl) -> bool {                                                                         \
+    [detectorId, result](::Player& pl) -> bool {                                                                       \
         try {                                                                                                          \
             if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", detectorId)) {                                              \
-                auto const& detector = RemoteCall::importAs<bool(Player*)>("GMLIB_FORM_CALLBACK", detectorId);         \
+                auto const& detector = RemoteCall::importAs<bool(::Player*)>("GMLIB_FORM_CALLBACK", detectorId);       \
                 return detector(&pl);                                                                                  \
             } else {                                                                                                   \
                 ServerSettingForm::removeElement(result);                                                              \
@@ -69,11 +92,11 @@ public:
     }
 
 #define CALLBACK_TYPE_STRING                                                                                           \
-    [callbackId, result](Player& pl, std::string const& data) {                                                        \
+    [callbackId, result](::Player& pl, std::string const& data) {                                                      \
         try {                                                                                                          \
             if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {                                              \
                 auto const& callback =                                                                                 \
-                    RemoteCall::importAs<void(Player*, std::string const&)>("GMLIB_FORM_CALLBACK", callbackId);        \
+                    RemoteCall::importAs<void(::Player*, std::string const&)>("GMLIB_FORM_CALLBACK", callbackId);      \
                 callback(&pl, data);                                                                                   \
             } else {                                                                                                   \
                 ServerSettingForm::removeElement(result);                                                              \
@@ -82,10 +105,10 @@ public:
     }
 
 #define CALLBACK_TYPE_BOOL                                                                                             \
-    [callbackId, result](Player& pl, bool data) {                                                                      \
+    [callbackId, result](::Player& pl, bool data) {                                                                    \
         try {                                                                                                          \
             if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {                                              \
-                auto const& callback = RemoteCall::importAs<void(Player*, bool)>("GMLIB_FORM_CALLBACK", callbackId);   \
+                auto const& callback = RemoteCall::importAs<void(::Player*, bool)>("GMLIB_FORM_CALLBACK", callbackId); \
                 callback(&pl, data);                                                                                   \
             } else {                                                                                                   \
                 ServerSettingForm::removeElement(result);                                                              \
@@ -94,10 +117,11 @@ public:
     }
 
 #define CALLBACK_TYPE_DOUBLE                                                                                           \
-    [callbackId, result](Player& pl, double data) {                                                                    \
+    [callbackId, result](::Player& pl, double data) {                                                                  \
         try {                                                                                                          \
             if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {                                              \
-                auto const& callback = RemoteCall::importAs<void(Player*, double)>("GMLIB_FORM_CALLBACK", callbackId); \
+                auto const& callback =                                                                                 \
+                    RemoteCall::importAs<void(::Player*, double)>("GMLIB_FORM_CALLBACK", callbackId);                  \
                 callback(&pl, data);                                                                                   \
             } else {                                                                                                   \
                 ServerSettingForm::removeElement(result);                                                              \
@@ -107,13 +131,24 @@ public:
 
 
 #define CALLBACK_TYPE_LONG                                                                                             \
-    [callbackId, result](Player& pl, int64 data) {                                                                     \
+    [callbackId, result](::Player& pl, int64 data) {                                                                   \
         try {                                                                                                          \
             if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {                                              \
-                auto const& callback = RemoteCall::importAs<void(Player*, int64)>("GMLIB_FORM_CALLBACK", callbackId);  \
+                auto const& callback =                                                                                 \
+                    RemoteCall::importAs<void(::Player*, int64)>("GMLIB_FORM_CALLBACK", callbackId);                   \
                 callback(&pl, data);                                                                                   \
             } else {                                                                                                   \
                 ServerSettingForm::removeElement(result);                                                              \
+            }                                                                                                          \
+        } catch (...) {}                                                                                               \
+    }
+
+#define CALLBACK_TYPE_NORMAL                                                                                           \
+    [callbackId](::Player& pl) {                                                                                       \
+        try {                                                                                                          \
+            if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {                                              \
+                auto const& callback = RemoteCall::importAs<void(::Player*)>("GMLIB_FORM_CALLBACK", callbackId);       \
+                callback(&pl);                                                                                         \
             }                                                                                                          \
         } catch (...) {}                                                                                               \
     }
@@ -273,30 +308,28 @@ void Export_Form_API() {
     RemoteCall::exportAs("GMLIB_NpcDialogueForm", "destroyForm", [](int64 formId) -> bool {
         return LegacyScriptFormManager::getInstance().destroyNpcDialogueForm(formId);
     });
-    RemoteCall::exportAs("GMLIB_NpcDialogueForm", "addButton", [](int64 formId, std::string const& button) -> int {
-        if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
-            return formPtr->addButton(button);
-        }
-        return -1;
-    });
     RemoteCall::exportAs(
         "GMLIB_NpcDialogueForm",
-        "sendTo",
-        [](int64 formId, Player* pl, std::string const& callbackId) -> void {
+        "addButton",
+        [](int64 formId, std::string const& button, std::string const& callbackId) -> void {
             if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
-                formPtr->sendTo(*pl, [callbackId](Player& pl, int index, NpcRequestPacket::RequestType type) -> void {
-                    try {
-                        if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {
-                            auto const& callback = RemoteCall::importAs<void(Player*, int index, int type)>(
-                                "GMLIB_FORM_CALLBACK",
-                                callbackId
-                            );
-                            callback(&pl, index, (int)type);
-                        }
-                    } catch (...) {}
-                });
+                formPtr->addButton(button, CALLBACK_TYPE_NORMAL);
             }
         }
     );
+    RemoteCall::exportAs(
+        "GMLIB_NpcDialogueForm",
+        "onPlayerClose",
+        [](int64 formId, std::string const& callbackId) -> void {
+            if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
+                formPtr->onPlayerClose(CALLBACK_TYPE_NORMAL);
+            }
+        }
+    );
+    RemoteCall::exportAs("GMLIB_NpcDialogueForm", "sendTo", [](int64 formId, ::Player* pl) -> void {
+        if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
+            formPtr->sendTo(*pl);
+        }
+    });
     //////////////////////////////   ChestForm   //////////////////////////////
 }

@@ -15,7 +15,7 @@ bool isParameters(std::string const& str) {
 
 std::string GetValue(std::string const& from) { return PlaceholderAPI::getValue(from); }
 
-std::string GetValueWithPlayer(std::string const& key, Player* player) { return PlaceholderAPI::getValue(key, player); }
+std::string GetValueWithPlayer(std::string const& key, ::Player* player) { return PlaceholderAPI::getValue(key, player); }
 
 bool registerPlayerPlaceholder(
     std::string const& PluginName,
@@ -25,18 +25,18 @@ bool registerPlayerPlaceholder(
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
         PlaceholderAPI::unregisterPlaceholder(PAPIName);
         if (isParameters(PAPIName)) {
-            auto Call = RemoteCall::importAs<std::string(Player * pl, std::unordered_map<std::string, std::string>)>(
+            auto Call = RemoteCall::importAs<std::string(::Player * pl, std::unordered_map<std::string, std::string>)>(
                 PluginName,
                 FuncName
             );
             PlaceholderAPI::registerPlayerPlaceholder(
                 PAPIName,
-                [Call](Player* sp, std::unordered_map<std::string, std::string> map) { return Call(sp, map); },
+                [Call](::Player* sp, std::unordered_map<std::string, std::string> map) { return Call(sp, map); },
                 PluginName
             );
         } else {
-            auto Call = RemoteCall::importAs<std::string(Player * pl)>(PluginName, FuncName);
-            PlaceholderAPI::registerPlayerPlaceholder(PAPIName, [Call](Player* sp) { return Call(sp); }, PluginName);
+            auto Call = RemoteCall::importAs<std::string(::Player * pl)>(PluginName, FuncName);
+            PlaceholderAPI::registerPlayerPlaceholder(PAPIName, [Call](::Player* sp) { return Call(sp); }, PluginName);
         }
         return true;
     }
@@ -88,7 +88,7 @@ bool registerStaticPlaceholder(
     return false;
 }
 
-std::string translateStringWithPlayer(std::string const& str, Player* pl) {
+std::string translateStringWithPlayer(std::string const& str, ::Player* pl) {
     return PlaceholderAPI::translateString(str, pl);
 }
 

@@ -2,7 +2,7 @@
 #include <ll/api/mod/NativeMod.h>
 #include <ll/api/mod/RegisterHelper.h>
 
-namespace GMLIB {
+namespace gmlib {
 
 class LegacyRemoteCallApi {
 
@@ -30,4 +30,4 @@ private:
     ll::mod::NativeMod& mSelf;
 };
 
-} // namespace GMLIB
+} // namespace gmlib
