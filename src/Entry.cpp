@@ -3,7 +3,7 @@
 
 ll::Logger logger(PLUGIN_NAME);
 
-namespace GMLIB {
+namespace gmlib {
 
 std::unique_ptr<LegacyRemoteCallApi>& LegacyRemoteCallApi::getInstance() {
     static std::unique_ptr<LegacyRemoteCallApi> instance;
@@ -33,6 +33,6 @@ bool LegacyRemoteCallApi::enable() { return true; }
 
 bool LegacyRemoteCallApi::disable() { return true; }
 
-} // namespace GMLIB
+} // namespace gmlib
 
 LL_REGISTER_MOD(GMLIB::LegacyRemoteCallApi, GMLIB::LegacyRemoteCallApi::getInstance());

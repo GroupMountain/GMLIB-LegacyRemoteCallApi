@@ -2,28 +2,84 @@
 
 using namespace ll::hash_utils;
 
-// class LegacyScriptFormManager {
-// private:
-//     int64 mNextFormCallbackId = 0;
+class LegacyScriptFormManager {
+private:
+    int64                                                       mNextFormCallbackId = 0;
+    int64                                                       mNextFormId         = 0;
+    std::unordered_map<int64, std::unique_ptr<gmlib::form::NpcDialogueForm>> mNpcDialogueForms;
+    // std::unordered_map<int64, std::unique_ptr<ChestForm>>       mChestForms;
 
-// public:
-//     std::string getNextFormCallbackId() {
-//         return "GMLIB_FormApi_" + std::to_string(mNextFormCallbackId++);
-//     }
+public:
+    //     std::string getNextFormCallbackId() {
+    //         return "GMLIB_FormApi_" + std::to_string(mNextFormCallbackId++);
+    //     }
 
-// public:
-//     static LegacyScriptFormManager& getInstance() {
-//         static std::unique_ptr<LegacyScriptFormManager> instance;
-//         if (!instance) instance = std::make_unique<LegacyScriptFormManager>();
-//         return *instance;
-//     }
-// };
+    int64 getNextFormId() {
+        mNextFormId++;
+        return mNextFormId;
+    }
+
+    int64 createNpcDialogueForm(std::string const& npcName, std::string const& sceneName, std::string const& dialogue) {
+        auto formId               = LegacyScriptFormManager::getInstance().getNextFormId();
+        auto formPtr              = std::make_unique<gmlib::form::NpcDialogueForm>(npcName, sceneName, dialogue);
+        mNpcDialogueForms[formId] = std::move(formPtr);
+        return formId;
+    }
+
+    bool destroyNpcDialogueForm(int64 formId) {
+        if (mNpcDialogueForms.contains(formId)) {
+            mNpcDialogueForms.erase(formId);
+            return true;
+        }
+        return false;
+    }
+
+    optional_ref<gmlib::form::NpcDialogueForm> getNpcDialogueForm(int64 formId) {
+        if (mNpcDialogueForms.contains(formId)) {
+            return mNpcDialogueForms[formId].get();
+        }
+        return {};
+    }
+
+    /*
+    int64 createChestForm(std::string const& npcName, std::string const& sceneName, std::string const& dialogue) {
+        auto formId         = LegacyScriptFormManager::getInstance().getNextFormId();
+        auto formPtr        = std::make_unique<ChestForm>(npcName, sceneName, dialogue);
+        mChestForms[formId] = std::move(formPtr);
+        return formId;
+    }
+
+    bool destroyChestForm(int64 formId) {
+        if (mChestForms.contains(formId)) {
+            mChestForms.erase(formId);
+            return true;
+        }
+        return false;
+    }
+
+    optional_ref<ChestForm> getChestForm(int64 formId) {
+        if (mChestForms.contains(formId)) {
+            return mChestForms[formId].get();
+        }
+        return {};
+    }
+
+    */
+public:
+    static LegacyScriptFormManager& getInstance() {
+        static std::unique_ptr<LegacyScriptFormManager> instance;
+        if (!instance) {
+            instance = std::make_unique<LegacyScriptFormManager>();
+        }
+        return *instance;
+    }
+};
 
 #define PLAYER_DETECROR                                                                                                \
-    [detectorId, result](Player& pl) -> bool {                                                                         \
+    [detectorId, result](::Player& pl) -> bool {                                                                       \
         try {                                                                                                          \
             if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", detectorId)) {                                              \
-                auto const& detector = RemoteCall::importAs<bool(Player*)>("GMLIB_FORM_CALLBACK", detectorId);         \
+                auto const& detector = RemoteCall::importAs<bool(::Player*)>("GMLIB_FORM_CALLBACK", detectorId);       \
                 return detector(&pl);                                                                                  \
             } else {                                                                                                   \
                 gmlib::form::ServerSettingForm::removeElement(result);                                                 \
@@ -44,15 +100,28 @@ using namespace ll::hash_utils;
         } catch (...) {}                                                                                               \
     }
 
+#define CALLBACK_TYPE_NORMAL                                                                                           \
+    [callbackId](::Player& pl) {                                                                                       \
+        try {                                                                                                          \
+            if (RemoteCall::hasFunc("GMLIB_FORM_CALLBACK", callbackId)) {                                              \
+                auto const& callback = RemoteCall::importAs<void(::Player*)>("GMLIB_FORM_CALLBACK", callbackId);       \
+                callback(&pl);                                                                                         \
+            }                                                                                                          \
+        } catch (...) {}                                                                                               \
+    }
+
+
 void Export_Form_API() {
-    RemoteCall::exportAs("GMLIB_gmlib::form::ServerSettingForm", "getDefaultPriority", []() -> int {
-        return gmlib::form::ServerSettingForm::getDefaultPriority();
-    });
+    ////////////////////////////////   Form Manager   /////////////////////////////////
     // RemoteCall::exportAs("GMLIB_FormAPI", "getNextFormCallbackId", []() -> std::string {
     //     return LegacyScriptFormManager::getInstance().getNextFormCallbackId();
     // });
-    RemoteCall::exportAs("GMLIB_gmlib::form::ServerSettingForm", "hasTitle", []() -> bool { return gmlib::form::ServerSettingForm::hasTitle(); });
-    RemoteCall::exportAs("GMLIB_gmlib::form::ServerSettingForm", "getTitle", []() -> std::string {
+    //////////////////////////////   ServerSettingForm   //////////////////////////////
+    RemoteCall::exportAs("GMLIB_ServerSettingForm", "getDefaultPriority", []() -> int {
+        return gmlib::form::ServerSettingForm::getDefaultPriority();
+    });
+    RemoteCall::exportAs("GMLIB_ServerSettingForm", "hasTitle", []() -> bool { return gmlib::form::ServerSettingForm::hasTitle(); });
+    RemoteCall::exportAs("GMLIB_ServerSettingForm", "getTitle", []() -> std::string {
         return gmlib::form::ServerSettingForm::getTitle();
     });
     RemoteCall::exportAs("GMLIB_gmlib::form::ServerSettingForm", "setTitle", [](std::string const& title, bool forceModify) -> bool {
@@ -181,4 +250,39 @@ void Export_Form_API() {
     RemoteCall::exportAs("GMLIB_gmlib::form::ServerSettingForm", "removeElement", [](uint id) -> bool {
         return gmlib::form::ServerSettingForm::removeElement(id);
     });
+    //////////////////////////////   NpcDialogueForm   //////////////////////////////
+    RemoteCall::exportAs(
+        "GMLIB_NpcDialogueForm",
+        "createForm",
+        [](std::string const& npcName, std::string const& sceneName, std::string const& dialogue) -> int64 {
+            return LegacyScriptFormManager::getInstance().createNpcDialogueForm(npcName, sceneName, dialogue);
+        }
+    );
+    RemoteCall::exportAs("GMLIB_NpcDialogueForm", "destroyForm", [](int64 formId) -> bool {
+        return LegacyScriptFormManager::getInstance().destroyNpcDialogueForm(formId);
+    });
+    RemoteCall::exportAs(
+        "GMLIB_NpcDialogueForm",
+        "addButton",
+        [](int64 formId, std::string const& button, std::string const& callbackId) -> void {
+            if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
+                formPtr->addButton(button, CALLBACK_TYPE_NORMAL);
+            }
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_NpcDialogueForm",
+        "onPlayerClose",
+        [](int64 formId, std::string const& callbackId) -> void {
+            if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
+                formPtr->onPlayerClose(CALLBACK_TYPE_NORMAL);
+            }
+        }
+    );
+    RemoteCall::exportAs("GMLIB_NpcDialogueForm", "sendTo", [](int64 formId, ::Player* pl) -> void {
+        if (auto formPtr = LegacyScriptFormManager::getInstance().getNpcDialogueForm(formId)) {
+            formPtr->sendTo(*pl);
+        }
+    });
+    //////////////////////////////   ChestForm   //////////////////////////////
 }
