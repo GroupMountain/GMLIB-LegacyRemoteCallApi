@@ -7,80 +7,69 @@ bool isInteger(const std::string& str) {
 }
 
 ActorUniqueID parseScriptUniqueID(std::string const& uniqueId) {
-    if (!isInteger(uniqueId)) {
-        return ActorUniqueID::INVALID_ID;
-    }
-    return ActorUniqueID(std::stoll(uniqueId));
+    return isInteger(uniqueId) ? ActorUniqueID(std::stoll(uniqueId)) : ActorUniqueID::INVALID_ID;
 }
 
 void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "unregisterRecipe", [](std::string const& id) -> bool {
-        auto level = GMLIB_Level::getInstance();
-        if (!level) {
-            return false;
-        }
-        return CustomRecipe::unregisterRecipe(id);
+        return gmlib::world::Level::getInstance().has_value() ? gmlib::mod::recipe::RecipeRegistry::unregisterRecipe(id) : false;
     });
     RemoteCall::exportAs("GMLIB_API", "setCustomPackPath", [](std::string const& path) -> void {
-        CustomPacks::addCustomPackPath(path);
+        gmlib::tools::AddonsLoader::addCustomPackPath(path);
     });
-    RemoteCall::exportAs("GMLIB_API", "getServerMspt", []() -> float {
-        auto level = GMLIB_Level::getInstance();
-        if (!level) {
-            return 0.0f;
-        }
-        return level->getServerMspt();
+    RemoteCall::exportAs("GMLIB_API", "getServerMspt", []() -> double {
+        return gmlib::world::Level::getInstance()
+            .transform([](gmlib::world::Level& level) -> double { return level.getServerMspt(); })
+            .value_or(0.0);
     });
     RemoteCall::exportAs("GMLIB_API", "getServerCurrentTps", []() -> float {
-        auto level = GMLIB_Level::getInstance();
-        if (!level) {
-            return 0.0f;
-        }
-        return level->getServerCurrentTps();
+        return gmlib::world::Level::getInstance()
+            .transform([](gmlib::world::Level& level) -> float { return level.getServerCurrentTps(); })
+            .value_or(0.0);
     });
-    RemoteCall::exportAs("GMLIB_API", "getServerAverageTps", []() -> float {
-        auto level = GMLIB_Level::getInstance();
-        if (!level) {
-            return 0.0f;
-        }
-        return level->getServerAverageTps();
+    RemoteCall::exportAs("GMLIB_API", "getServerAverageTps", []() -> double {
+        return gmlib::world::Level::getInstance()
+            .transform([](gmlib::world::Level& level) -> double { return level.getServerAverageTps(); })
+            .value_or(0.0);
     });
     RemoteCall::exportAs("GMLIB_API", "getAllPlayerUuids", []() -> std::vector<std::string> {
         std::vector<std::string> result;
-        std::vector<mce::UUID>   uuids = GMLIB_Player::getAllUuids();
-        for (auto& uuid : uuids) {
+        for (auto& uuid : gmlib::world::Player::getAllUuids()) {
             result.push_back(uuid.asString());
         }
         return result;
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerNbt", [](std::string const& uuid) -> std::unique_ptr<CompoundTag> {
-        auto uid = mce::UUID::fromString(uuid);
-        return std::move(GMLIB_Player::getPlayerNbt(uid));
+        return std::move(gmlib::world::Player::getPlayerNbt(mce::UUID::fromString(uuid)));
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "setPlayerNbt",
         [](std::string const& uuid, CompoundTag* nbt, bool forceCreate) -> bool {
-            auto uid = mce::UUID::fromString(uuid);
-            return GMLIB_Player::setPlayerNbt(uid, *nbt, forceCreate);
+            return gmlib::world::Player::setPlayerNbt(
+                mce::UUID::fromString(uuid),
+                (gmlib::world::CompoundTag&)*nbt,
+                forceCreate
+            );
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "setPlayerNbtTags",
         [](std::string const& uuid, CompoundTag* nbt, std::vector<std::string> tags) -> bool {
-            auto uid = mce::UUID::fromString(uuid);
-            return GMLIB_Player::setPlayerNbtTags(uid, *nbt, tags);
+            return gmlib::world::Player::setPlayerNbtTags(
+                mce::UUID::fromString(uuid),
+                (gmlib::world::CompoundTag&)*nbt,
+                tags
+            );
         }
     );
     RemoteCall::exportAs("GMLIB_API", "deletePlayerNbt", [](std::string const& uuid) -> bool {
-        auto uid = mce::UUID::fromString(uuid);
-        return GMLIB_Player::deletePlayerNbt(uid);
+        return gmlib::world::Player::deletePlayerNbt(mce::UUID::fromString(uuid));
     });
     RemoteCall::exportAs("GMLIB_API", "getAllExperiments", []() -> std::vector<int> {
-        auto             list = GMLIB_Level::getAllExperiments();
         std::vector<int> result;
-        for (auto& key : list) {
+        for (auto& key : gmlib::world::Level::getAllExperiments()) {
             result.push_back((int)key);
         }
         return result;
@@ -96,104 +85,113 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "createFloatingText",
         [](std::pair<Vec3, int> pos, std::string const& text, bool papi) -> int {
-            auto& manager = FloatingTextManager::getInstance();
-            auto  ft      = manager.createStatic(text, pos.first, pos.second, papi);
-            manager.add(ft);
+            auto ft = gmlib::tools::FloatingTextManager::createStatic(text, pos.first, pos.second, papi);
+            gmlib::tools::FloatingTextManager::getInstance().add(ft);
             return ft->getRuntimeID();
         }
     );
     RemoteCall::exportAs("GMLIB_API", "setFloatingTextData", [](int id, std::string const& text) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
-            ft->setText(text);
-            return true;
-        }
-        return false;
+        return gmlib::tools::FloatingTextManager::getInstance()
+            .getFloatingText(id)
+            .transform([&text](gmlib::tools::FloatingTextBase& ft) -> bool {
+                ft.setText(text);
+                return true;
+            })
+            .has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "deleteFloatingText", [](int id) -> bool {
-        return FloatingTextManager::getInstance().remove(id);
+        return gmlib::tools::FloatingTextManager::getInstance().remove(id);
     });
     RemoteCall::exportAs("GMLIB_API", "sendFloatingTextToPlayer", [](int id, Player* pl) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
-            ft->sendTo(*pl);
-            return true;
-        }
-        return false;
+        return gmlib::tools::FloatingTextManager::getInstance()
+            .getFloatingText(id)
+            .transform([&pl](gmlib::tools::FloatingTextBase& ft) -> bool {
+                ft.sendTo(*pl);
+                return true;
+            })
+            .has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "sendFloatingText", [](int id) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
-            ft->sendToClients();
-            return true;
-        }
-        return false;
+        return gmlib::tools::FloatingTextManager::getInstance()
+            .getFloatingText(id)
+            .transform([](gmlib::tools::FloatingTextBase& ft) -> bool {
+                ft.sendToClients();
+                return true;
+            })
+            .has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "removeFloatingTextFromPlayer", [](int id, Player* pl) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
-            ft->removeFrom(*pl);
-            return true;
-        }
-        return false;
+        return gmlib::tools::FloatingTextManager::getInstance()
+            .getFloatingText(id)
+            .transform([&pl](gmlib::tools::FloatingTextBase& ft) -> bool {
+                ft.removeFrom(*pl);
+                return true;
+            })
+            .has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "removeFloatingText", [](int id) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
-            ft->removeFromClients();
-            return true;
-        }
-        return false;
+        return gmlib::tools::FloatingTextManager::getInstance()
+            .getFloatingText(id)
+            .transform([](gmlib::tools::FloatingTextBase& ft) -> bool {
+                ft.removeFromClients();
+                return true;
+            })
+            .has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "updateClientFloatingTextData", [](int id, Player* pl) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
-            ft->update(*pl);
-            return true;
-        }
-        return false;
+        return gmlib::tools::FloatingTextManager::getInstance()
+            .getFloatingText(id)
+            .transform([&pl](gmlib::tools::FloatingTextBase& ft) -> bool {
+                ft.update(*pl);
+                return true;
+            })
+            .has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "updateAllClientsFloatingTextData", [](int id) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().getFloatingText(id)) {
-            ft->updateClients();
-            return true;
-        }
-        return false;
+        return gmlib::tools::FloatingTextManager::getInstance()
+            .getFloatingText(id)
+            .transform([](gmlib::tools::FloatingTextBase& ft) -> bool {
+                ft.updateClients();
+                return true;
+            })
+            .has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "isVersionMatched", [](int a, int b, int c) -> bool {
-        auto version = Version(a, b, c, "", "");
-        return LIB_VERSION >= version;
+        return LIB_VERSION >= gmlib::Version(a, b, c, "", "");
     });
     RemoteCall::exportAs("GMLIB_API", "getVersion_LRCA", []() -> std::string { return LIB_VERSION.asString(); });
     RemoteCall::exportAs("GMLIB_API", "getVersion_GMLIB", []() -> std::string {
-        return Version::getLibVersionString();
+        return gmlib::Version::getLibVersionString();
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "resourcePackDefaultTranslate",
-        [](std::string const& key, std::vector<std::string> params) -> std::string { return I18nAPI::get(key, params); }
+        [](std::string const& key, std::vector<std::string> params) -> std::string {
+            return gmlib::world::I18nAPI::get(key, params);
+        }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "resourcePackTranslate",
         [](std::string const& key, std::vector<std::string> params, std::string const& code) -> std::string {
-            return I18nAPI::get(key, params, code);
+            return gmlib::world::I18nAPI::get(key, params, code);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "chooseResourcePackI18nLanguage", [](std::string const& code) -> void {
-        if (GMLIB_Level::getInstance()) {
-            I18nAPI::chooseLanguage(code);
+        if (gmlib::world::Level::getInstance()) {
+            gmlib::world::I18nAPI::chooseLanguage(code);
         }
     });
     RemoteCall::exportAs("GMLIB_API", "getResourcePackI18nLanguage", []() -> std::string {
-        if (GMLIB_Level::getInstance()) {
-            return I18nAPI::getCurrentLanguageCode();
-        }
-        return "unknown";
+        return gmlib::world::Level::getInstance().has_value() ? gmlib::world::I18nAPI::getCurrentLanguageCode() : "unknown";
     });
     RemoteCall::exportAs("GMLIB_API", "getSupportedLanguages", []() -> std::vector<std::string> {
-        if (GMLIB_Level::getInstance()) {
-            return I18nAPI::getSupportedLanguageCodes();
-        }
-        return {};
+        return gmlib::world::Level::getInstance() ? gmlib::world::I18nAPI::getSupportedLanguageCodes()
+                                                  : std::vector<std::string>();
     });
     RemoteCall::exportAs("GMLIB_API", "loadLanguage", [](std::string const& code, std::string const& lang) -> void {
-        if (GMLIB_Level::getInstance()) {
-            I18nAPI::loadLanguage(code, lang);
+        if (gmlib::world::Level::getInstance()) {
+            gmlib::world::I18nAPI::loadLanguage(code, lang);
         }
     });
     RemoteCall::exportAs(
@@ -201,281 +199,211 @@ void Export_Compatibility_API() {
         "updateOrCreateLanguageFile",
         [](std::string const& code, std::unordered_map<std::string, std::string> lang, std::string const& path
         ) -> void {
-            if (GMLIB_Level::getInstance()) {
-                I18nAPI::updateOrCreateLanguageFile(path, code, lang);
+            if (gmlib::world::Level::getInstance()) {
+                gmlib::world::I18nAPI::updateOrCreateLanguageFile(path, code, lang);
             }
         }
     );
     RemoteCall::exportAs("GMLIB_API", "loadLanguagePath", [](std::string const& path) -> void {
-        if (GMLIB_Level::getInstance()) {
-            I18nAPI::loadLanguagesFromDirectory(path);
+        if (gmlib::world::Level::getInstance()) {
+            gmlib::world::I18nAPI::loadLanguagesFromDirectory(path);
         }
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerPosition", [](std::string const& uuid) -> std::pair<BlockPos, int> {
-        auto uid = mce::UUID::fromString(uuid);
-        auto pos = GMLIB_Player::getPlayerPosition(uid);
-        if (pos.has_value()) {
-            return pos.value();
-        }
-        return {
-            {0, 0, 0},
-            -1
-        };
+        return gmlib::world::Player::getPlayerPosition(mce::UUID::fromString(uuid))
+            .value_or(std::pair<BlockPos, int>({0, 0, 0}, -1));
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "setPlayerPosition",
         [](std::string const& uuid, std::pair<BlockPos, int> pos) -> bool {
-            auto uid = mce::UUID::fromString(uuid);
-            return GMLIB_Player::setPlayerPosition(uid, pos.first, pos.second);
+            return gmlib::world::Player::setPlayerPosition(mce::UUID::fromString(uuid), pos.first, pos.second);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "playerHasScore", [](std::string const& uuid, std::string const& obj) -> bool {
-        auto uid = mce::UUID::fromString(uuid);
-        if (auto result = GMLIB_Player::getPlayerScore(uid, obj)) {
-            return true;
-        }
-        return false;
+        return gmlib::world::Player::getPlayerScore(mce::UUID::fromString(uuid), obj).has_value();
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerScore", [](std::string const& uuid, std::string const& obj) -> int {
-        auto uid = mce::UUID::fromString(uuid);
-        if (auto result = GMLIB_Player::getPlayerScore(uid, obj)) {
-            return result.value();
-        }
-        return 0;
+        return gmlib::world::Player::getPlayerScore(mce::UUID::fromString(uuid), obj).value_or(0);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "addPlayerScore",
         [](std::string const& uuid, std::string const& obj, int value) -> bool {
-            auto uid = mce::UUID::fromString(uuid);
-            if (auto res = GMLIB_Player::setPlayerScore(uid, obj, value, PlayerScoreSetFunction::Add)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Player::setPlayerScore(
+                       mce::UUID::fromString(uuid),
+                       obj,
+                       value,
+                       PlayerScoreSetFunction::Add
+            )
+                .has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "reducePlayerScore",
         [](std::string const& uuid, std::string const& obj, int value) -> bool {
-            auto uid = mce::UUID::fromString(uuid);
-            if (auto res = GMLIB_Player::setPlayerScore(uid, obj, value, PlayerScoreSetFunction::Subtract)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Player::setPlayerScore(mce::UUID::fromString(uuid), obj, value, PlayerScoreSetFunction::Subtract).has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "setPlayerScore",
         [](std::string const& uuid, std::string const& obj, int value) -> bool {
-            auto uid = mce::UUID::fromString(uuid);
-            if (auto res = GMLIB_Player::setPlayerScore(uid, obj, value)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Player::setPlayerScore(mce::UUID::fromString(uuid), obj, value).has_value();
         }
     );
     RemoteCall::exportAs("GMLIB_API", "resetPlayerScore", [](std::string const& uuid, std::string const& obj) -> bool {
-        auto uid = mce::UUID::fromString(uuid);
-        return GMLIB_Player::resetPlayerScore(uid, obj);
+        return gmlib::world::Player::resetPlayerScore(mce::UUID::fromString(uuid), obj);
     });
     RemoteCall::exportAs("GMLIB_API", "resetPlayerScores", [](std::string const& uuid) -> bool {
-        auto uid = mce::UUID::fromString(uuid);
-        return GMLIB_Player::resetPlayerScore(uid);
+        return gmlib::world::Player::resetPlayerScore(mce::UUID::fromString(uuid));
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "entityHasScore",
         [](std::string const& uniqueId, std::string const& obj) -> bool {
-            auto auid = parseScriptUniqueID(uniqueId);
-            if (auto result = GMLIB_Scoreboard::getInstance()->getScore(obj, auid)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()->getScore(obj, parseScriptUniqueID(uniqueId)).has_value();
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getEntityScore", [](std::string const& uniqueId, std::string const& obj) -> int {
-        auto auid = parseScriptUniqueID(uniqueId);
-        if (auto result = GMLIB_Scoreboard::getInstance()->getScore(obj, auid)) {
-            return result.value();
-        }
-        return 0;
+        return gmlib::world::Scoreboard::getInstance()->getScore(obj, parseScriptUniqueID(uniqueId)).value_or(0);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "addEntityScore",
         [](std::string const& uniqueId, std::string const& obj, int value) -> bool {
-            auto auid = parseScriptUniqueID(uniqueId);
-            if (auto res = GMLIB_Scoreboard::getInstance()->setScore(obj, auid, value, PlayerScoreSetFunction::Add)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()
+                ->setScore(obj, parseScriptUniqueID(uniqueId), value, PlayerScoreSetFunction::Add)
+                .has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "reduceEntityScore",
         [](std::string const& uniqueId, std::string const& obj, int value) -> bool {
-            auto auid = parseScriptUniqueID(uniqueId);
-            if (auto res =
-                    GMLIB_Scoreboard::getInstance()->setScore(obj, auid, value, PlayerScoreSetFunction::Subtract)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()
+                ->setScore(obj, parseScriptUniqueID(uniqueId), value, PlayerScoreSetFunction::Subtract)
+                .has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "setEntityScore",
         [](std::string const& uniqueId, std::string const& obj, int value) -> bool {
-            auto auid = parseScriptUniqueID(uniqueId);
-            if (auto res = GMLIB_Scoreboard::getInstance()->setScore(obj, auid, value)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()->setScore(obj, parseScriptUniqueID(uniqueId), value).has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "resetEntityScore",
         [](std::string const& uniqueId, std::string const& obj) -> bool {
-            auto auid = parseScriptUniqueID(uniqueId);
-            return GMLIB_Scoreboard::getInstance()->resetScore(obj, auid);
+            return gmlib::world::Scoreboard::getInstance()->resetScore(obj, parseScriptUniqueID(uniqueId));
         }
     );
     RemoteCall::exportAs("GMLIB_API", "resetEntityScores", [](std::string const& uniqueId) -> bool {
-        auto auid = parseScriptUniqueID(uniqueId);
-        return GMLIB_Scoreboard::getInstance()->resetScore(auid);
+        return gmlib::world::Scoreboard::getInstance()->resetScore(parseScriptUniqueID(uniqueId));
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "fakePlayerHasScore",
         [](std::string const& name, std::string const& obj) -> bool {
-            if (auto result = GMLIB_Scoreboard::getInstance()->getScore(obj, name)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()->getScore(obj, name).has_value();
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getFakePlayerScore", [](std::string const& name, std::string const& obj) -> int {
-        if (auto result = GMLIB_Scoreboard::getInstance()->getScore(obj, name)) {
-            return result.value();
-        }
-        return 0;
+        return gmlib::world::Scoreboard::getInstance()->getScore(obj, name).value_or(0);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "addFakePlayerScore",
         [](std::string const& name, std::string const& obj, int value) -> bool {
-            if (auto res = GMLIB_Scoreboard::getInstance()->setScore(obj, name, value, PlayerScoreSetFunction::Add)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()->setScore(obj, name, value, PlayerScoreSetFunction::Add).has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "reduceFakePlayerScore",
         [](std::string const& name, std::string const& obj, int value) -> bool {
-            if (auto res =
-                    GMLIB_Scoreboard::getInstance()->setScore(obj, name, value, PlayerScoreSetFunction::Subtract)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()
+                ->setScore(obj, name, value, PlayerScoreSetFunction::Subtract)
+                .has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "setFakePlayerScore",
         [](std::string const& name, std::string const& obj, int value) -> bool {
-            if (auto res = GMLIB_Scoreboard::getInstance()->setScore(obj, name, value)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()->setScore(obj, name, value).has_value();
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "resetFakePlayerScore",
         [](std::string const& name, std::string const& obj) -> bool {
-            return GMLIB_Scoreboard::getInstance()->resetScore(obj, name);
+            return gmlib::world::Scoreboard::getInstance()->resetScore(obj, name);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "resetFakePlayerScores", [](std::string const& name) -> bool {
-        return GMLIB_Scoreboard::getInstance()->resetScore(name);
+        return gmlib::world::Scoreboard::getInstance()->resetScore(name);
     });
     RemoteCall::exportAs("GMLIB_API", "addObjective", [](std::string const& obj) -> bool {
-        if (auto res = GMLIB_Scoreboard::getInstance()->addObjective(obj)) {
-            return true;
-        }
-        return false;
+        return gmlib::world::Scoreboard::getInstance()->addObjective(obj).has_value();
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "addObjectiveWithDisplayName",
         [](std::string const& obj, std::string const& displayName) -> bool {
-            if (auto res = GMLIB_Scoreboard::getInstance()->addObjective(obj, displayName)) {
-                return true;
-            }
-            return false;
+            return gmlib::world::Scoreboard::getInstance()->addObjective(obj, displayName).has_value();
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getDisplayName", [](std::string const& obj) -> std::string {
-        if (auto result = GMLIB_Scoreboard::getInstance()->getObjectiveDisplayName(obj)) {
-            return result.value();
-        }
-        return "";
+        return gmlib::world::Scoreboard::getInstance()->getObjectiveDisplayName(obj).value_or("");
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "setDisplayName",
         [](std::string const& obj, std::string const& displayName) -> bool {
-            return GMLIB_Scoreboard::getInstance()->setObjectiveDisplayName(obj, displayName);
+            return gmlib::world::Scoreboard::getInstance()->setObjectiveDisplayName(obj, displayName);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "removeObjective", [](std::string const& obj) -> bool {
-        return GMLIB_Scoreboard::getInstance()->removeObjective(obj);
+        return gmlib::world::Scoreboard::getInstance()->removeObjective(obj);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "setDisplayObjective",
         [](std::string const& obj, std::string const& slot, int order) -> void {
-            return GMLIB_Scoreboard::getInstance()->setObjectiveDisplay(obj, slot, (ObjectiveSortOrder)order);
+            return gmlib::world::Scoreboard::getInstance()->setObjectiveDisplay(obj, slot, (ObjectiveSortOrder)order);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "clearDisplayObjective", [](std::string const& slot) -> void {
-        return GMLIB_Scoreboard::getInstance()->clearObjectiveDisplay(slot);
+        return gmlib::world::Scoreboard::getInstance()->clearObjectiveDisplay(slot);
     });
     RemoteCall::exportAs("GMLIB_API", "getAllObjectives", []() -> std::vector<std::string> {
-        auto                     objs = GMLIB_Scoreboard::getInstance()->getObjectives();
         std::vector<std::string> result;
-        for (auto& obj : objs) {
+        for (auto& obj : gmlib::world::Scoreboard::getInstance()->getObjectives()) {
             result.push_back(obj->getName());
         }
         return result;
     });
     RemoteCall::exportAs("GMLIB_API", "getAllScoreboardPlayers", []() -> std::vector<std::string> {
-        auto                     uuids = GMLIB_Scoreboard::getInstance()->getAllPlayerUuids();
         std::vector<std::string> result;
-        for (auto& uuid : uuids) {
+        for (auto& uuid : gmlib::world::Scoreboard::getInstance()->getAllPlayerUuids()) {
             result.push_back(uuid.asString());
         }
         return result;
     });
     RemoteCall::exportAs("GMLIB_API", "getAllScoreboardFakePlayers", []() -> std::vector<std::string> {
-        auto                     names = GMLIB_Scoreboard::getInstance()->getAllFakePlayers();
         std::vector<std::string> result;
-        for (auto& name : names) {
+        for (auto& name : gmlib::world::Scoreboard::getInstance()->getAllFakePlayers()) {
             result.push_back(name);
         }
         return result;
     });
     RemoteCall::exportAs("GMLIB_API", "getAllScoreboardEntities", []() -> std::vector<std::string> {
-        auto                     uniqueIds = GMLIB_Scoreboard::getInstance()->getAllEntities();
         std::vector<std::string> result;
-        for (auto& uniqueId : uniqueIds) {
+        for (auto& uniqueId : gmlib::world::Scoreboard::getInstance()->getAllEntities()) {
             result.push_back(std::to_string(uniqueId.id));
         }
         return result;
@@ -485,26 +413,23 @@ void Export_Compatibility_API() {
         "getAllTrackedTargets",
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
             std::vector<std::unordered_map<std::string, std::string>> result;
-            auto uuids = GMLIB_Scoreboard::getInstance()->getAllPlayerUuids();
-            for (auto& uuid : uuids) {
-                std::unordered_map<std::string, std::string> data;
-                data["Type"] = "Player";
-                data["Uuid"] = uuid.asString();
-                result.push_back(data);
+            for (auto& uuid : gmlib::world::Scoreboard::getInstance()->getAllPlayerUuids()) {
+                result.push_back({
+                    {"Type", "Player"       },
+                    {"Uuid", uuid.asString()}
+                });
             }
-            auto names = GMLIB_Scoreboard::getInstance()->getAllFakePlayers();
-            for (auto& name : names) {
-                std::unordered_map<std::string, std::string> data;
-                data["Type"] = "FakePlayer";
-                data["Name"] = name;
-                result.push_back(data);
+            for (auto& name : gmlib::world::Scoreboard::getInstance()->getAllFakePlayers()) {
+                result.push_back({
+                    {"Type", "FakePlayer"},
+                    {"Name", name        }
+                });
             }
-            auto uniqueIds = GMLIB_Scoreboard::getInstance()->getAllEntities();
-            for (auto& uniqueId : uniqueIds) {
-                std::unordered_map<std::string, std::string> data;
-                data["Type"]     = "Entity";
-                data["UniqueId"] = std::to_string(uniqueId.id);
-                result.push_back(data);
+            for (auto& uniqueId : gmlib::world::Scoreboard::getInstance()->getAllEntities()) {
+                result.push_back({
+                    {"Type",     "Entity"                   },
+                    {"UniqueId", std::to_string(uniqueId.id)}
+                });
             }
             return result;
         }
@@ -513,35 +438,28 @@ void Export_Compatibility_API() {
         return ll::service::getLevel()->getPlayer(mce::UUID::fromString(uuid));
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerFromUniqueId", [](std::string const& uniqueId) -> Actor* {
-        auto auid = parseScriptUniqueID(uniqueId);
-        return ll::service::getLevel()->getPlayer(auid);
+        return ll::service::getLevel()->getPlayer(parseScriptUniqueID(uniqueId));
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityFromUniqueId", [](std::string const& uniqueId) -> Actor* {
-        auto auid = parseScriptUniqueID(uniqueId);
-        return ll::service::getLevel()->fetchEntity(auid);
+        return ll::service::getLevel()->fetchEntity(parseScriptUniqueID(uniqueId));
     });
     RemoteCall::exportAs("GMLIB_API", "getWorldSpawn", []() -> std::pair<BlockPos, int> {
-        return {GMLIB_Level::getInstance()->getWorldSpawn(), 0};
+        return {gmlib::world::Level::getInstance()->getWorldSpawn(), 0};
     });
     RemoteCall::exportAs("GMLIB_API", "setWorldSpawn", [](std::pair<BlockPos, int> pos) -> bool {
-        if (pos.second != 0) {
-            return false;
-        }
-        GMLIB_Level::getInstance()->setWorldSpawn(pos.first);
+        if (pos.second != 0) return false;
+        gmlib::world::Level::getInstance()->setWorldSpawn(pos.first);
         return true;
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerSpawnPoint", [](Player* pl) -> std::pair<BlockPos, int> {
-        auto player = (GMLIB_Player*)pl;
-        auto res    = player->getSpawnPoint();
+        auto res = ((gmlib::world::Player*)pl)->getSpawnPoint();
         return {res.first, res.second};
     });
     RemoteCall::exportAs("GMLIB_API", "setPlayerSpawnPoint", [](Player* pl, std::pair<BlockPos, int> pos) -> void {
-        auto player = (GMLIB_Player*)pl;
-        player->setSpawnPoint(pos.first, pos.second);
+        ((gmlib::world::Player*)pl)->setSpawnPoint(pos.first, pos.second);
     });
     RemoteCall::exportAs("GMLIB_API", "clearPlayerSpawnPoint", [](Player* pl) -> void {
-        auto player = (GMLIB_Player*)pl;
-        player->clearSpawnPoint();
+        ((gmlib::world::Player*)pl)->clearSpawnPoint();
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -554,55 +472,46 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getXuidByUuid", [](std::string const& uuid) -> std::string {
-        auto uid    = mce::UUID::fromString(uuid);
-        auto result = UserCache::getXuidByUuid(uid);
-        return result ? result.value() : "";
-    });
-    RemoteCall::exportAs("GMLIB_API", "getNameByUuid", [](std::string const& uuid) -> std::string {
-        auto uid    = mce::UUID::fromString(uuid);
-        auto result = UserCache::getNameByUuid(uid);
-        return result ? result.value() : "";
-    });
-    RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string const& xuid) -> std::string {
-        auto result = UserCache::getUuidByXuid(xuid);
-        return result ? result.value().asString() : "";
-    });
-    RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string const& xuid) -> std::string {
-        auto result = UserCache::getNameByXuid(xuid);
-        return result ? result.value() : "";
+        return gmlib::tools::UserCache::getXuidByUuid(mce::UUID::fromString(uuid)).value_or("");
     });
     RemoteCall::exportAs("GMLIB_API", "getXuidByName", [](std::string const& name) -> std::string {
-        auto result = UserCache::getXuidByName(name);
-        return result ? result.value() : "";
+        return gmlib::tools::UserCache::getXuidByName(name).value_or("");
+    });
+    RemoteCall::exportAs("GMLIB_API", "getNameByUuid", [](std::string const& uuid) -> std::string {
+        return gmlib::tools::UserCache::getNameByUuid(mce::UUID::fromString(uuid)).value_or("");
+    });
+    RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string const& xuid) -> std::string {
+        return gmlib::tools::UserCache::getNameByXuid(xuid).value_or("");
+    });
+    RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string const& xuid) -> std::string {
+        return gmlib::tools::UserCache::getUuidByXuid(xuid)
+            .transform([](mce::UUID&& uuid) -> std::string { return uuid.asString(); })
+            .value_or("");
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        auto result = UserCache::getUuidByName(name);
-        return result ? result.value().asString() : "";
-    });
-    RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        auto result = UserCache::getUuidByName(name);
-        return result ? result.value().asString() : "";
+        return gmlib::tools::UserCache::getUuidByName(name)
+            .transform([](mce::UUID&& uuid) -> std::string { return uuid.asString(); })
+            .value_or("");
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "getAllPlayerInfo",
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
             std::vector<std::unordered_map<std::string, std::string>> result;
-            UserCache::forEach([&result](const UserCache::UserCacheEntry& entry) {
-                std::unordered_map<std::string, std::string> info;
-                info["Name"] = entry.mName;
-                info["Xuid"] = entry.mXuid;
-                info["Uuid"] = entry.mUuid.asString();
-                result.push_back(info);
+            gmlib::tools::UserCache::forEach([&result](const gmlib::tools::UserCache::UserCacheEntry& entry) -> void {
+                result.push_back({
+                    {"Name", entry.mName           },
+                    {"Xuid", entry.mXuid           },
+                    {"Uuid", entry.mUuid.asString()}
+                });
             });
             return result;
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getBlockRuntimeId", [](std::string const& blockName, short legacyData) -> uint {
-        if (auto block = Block::tryGetFromRegistry(blockName, legacyData)) {
-            return block->getRuntimeId();
-        }
-        return 0;
+        return Block::tryGetFromRegistry(blockName, legacyData)
+            .transform([](const Block& block) -> uint { return block.getRuntimeId(); })
+            .value_or(0);
     });
     RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKey", [](Block const* block) -> std::string {
         return block->buildDescriptionId();
@@ -617,7 +526,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "readNbtFromFile",
         [](std::string const& path, bool isBinary) -> std::unique_ptr<CompoundTag> {
-            if (auto nbt = GMLIB_CompoundTag::readFromFile(path, isBinary)) {
+            if (auto nbt = gmlib::world::CompoundTag::readFromFile(path, isBinary)) {
                 return std::make_unique<CompoundTag>(nbt.value());
             }
             return nullptr;
@@ -627,7 +536,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "saveNbtToFile",
         [](std::string const& path, CompoundTag* nbt, bool isBinary) -> bool {
-            return GMLIB_CompoundTag::saveToFile(path, *nbt, isBinary);
+            return gmlib::world::CompoundTag::saveToFile(path, *nbt, isBinary);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getBlockDestroySpeed", [](Block const* block) -> float {
@@ -675,55 +584,57 @@ void Export_Compatibility_API() {
         return player->pullInEntity(*entity);
     });
     RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKeyFromName", [](std::string const& blockName) -> std::string {
-        if (auto block = Block::tryGetFromRegistry(blockName)) {
-            return block->buildDescriptionId();
-        }
-        return "tile.unknown.name";
+        return Block::tryGetFromRegistry(blockName)
+            .transform([](const Block& block) -> std::string { return block.buildDescriptionId(); })
+            .value_or("tile.unknown.name");
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "getBlockLightEmission",
         [](std::string const& blockName, short legacyData) -> char {
-            if (auto block = Block::tryGetFromRegistry(blockName, legacyData)) {
-                return (char)block->getLightEmission().value;
-            }
-            return -1;
+            return Block::tryGetFromRegistry(blockName)
+                .transform([](const Block& block) -> char { return (char)block.getLightEmission().value; })
+                .value_or(-1);
         }
     );
     RemoteCall::exportAs(
         "GMLIB_API",
         "getGameRules",
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
-            auto gameRules = ll::service::getLevel()->getGameRules().getRules();
             std::vector<std::unordered_map<std::string, std::string>> result;
-            for (auto& gameRule : gameRules) {
-                std::unordered_map<std::string, std::string> data;
-                data["Name"] = gameRule.getName();
+            for (auto& gameRule : ll::service::getLevel()->getGameRules().getRules()) {
                 switch (gameRule.getType()) {
                 case GameRule::Type::Bool:
-                    data["Type"]  = "Bool";
-                    data["Value"] = std::to_string(gameRule.getBool());
+                    result.push_back({
+                        {"Name",  gameRule.getName()                },
+                        {"Type",  "Bool"                            },
+                        {"Value", std::to_string(gameRule.getBool())}
+                    });
                     break;
                 case GameRule::Type::Float:
-                    data["Type"]  = "Float";
-                    data["Value"] = std::to_string(gameRule.getFloat());
+                    result.push_back({
+                        {"Name",  gameRule.getName()                 },
+                        {"Type",  "Float"                            },
+                        {"Value", std::to_string(gameRule.getFloat())}
+                    });
                     break;
                 case GameRule::Type::Int:
-                    data["Type"]  = "Int";
-                    data["Value"] = std::to_string(gameRule.getInt());
+                    result.push_back({
+                        {"Name",  gameRule.getName()               },
+                        {"Type",  "Int"                            },
+                        {"Value", std::to_string(gameRule.getInt())}
+                    });
                     break;
                 case GameRule::Type::Invalid:
                     break;
                 }
-                result.push_back(data);
             }
             return result;
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getLegalEnchants", [](ItemStack const* item) -> std::vector<std::string> {
-        std::vector<int>         enchants = EnchantUtils::getLegalEnchants(item->getItem());
         std::vector<std::string> result;
-        for (auto& enchant : enchants) {
+        for (auto& enchant : EnchantUtils::getLegalEnchants(item->getItem())) {
             result.push_back(Enchant::getEnchant((Enchant::Type)enchant)->getStringId());
         }
         return result;
@@ -737,29 +648,23 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs(
         "GMLIB_API",
         "applyEnchant",
-        [](ItemStack const* item, std::string const& typeName, int level, bool allowNonVanilla) -> bool {
+        [](ItemStack* item, std::string const& typeName, int level, bool allowNonVanilla) -> bool {
             return EnchantUtils::applyEnchant(
-                *(const_cast<ItemStack*>(item)),
+                *item,
                 Enchant::getEnchantTypeFromName(HashedString(typeName)),
                 level,
                 allowNonVanilla
             );
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack const* item) -> void {
-        EnchantUtils::removeEnchants((ItemStack&)*item);
+    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack* item) -> void {
+        EnchantUtils::removeEnchants(*item);
     });
-    RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack const* item, std::string const& typeName) -> bool {
-        return EnchantUtils::hasEnchant(
-            Enchant::getEnchantTypeFromName(HashedString(typeName)),
-            *(const_cast<ItemStack*>(item))
-        );
+    RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack* item, std::string const& typeName) -> bool {
+        return EnchantUtils::hasEnchant(Enchant::getEnchantTypeFromName(HashedString(typeName)), *item);
     });
-    RemoteCall::exportAs("GMLIB_API", "getEnchantLevel", [](ItemStack const* item, std::string const& typeName) -> int {
-        return EnchantUtils::getEnchantLevel(
-            Enchant::getEnchantTypeFromName(HashedString(typeName)),
-            *(const_cast<ItemStack*>(item))
-        );
+    RemoteCall::exportAs("GMLIB_API", "getEnchantLevel", [](ItemStack* item, std::string const& typeName) -> int {
+        return EnchantUtils::getEnchantLevel(Enchant::getEnchantTypeFromName(HashedString(typeName)), *item);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -783,32 +688,32 @@ void Export_Compatibility_API() {
         return entity->getNameTag();
     });
     RemoteCall::exportAs("GMLIB_API", "ItemisUnbreakable", [](ItemStack const* item) -> bool {
-        return ((GMLIB_ItemStack*)item)->isUnbreakable();
+        return ((gmlib::world::ItemStack*)item)->isUnbreakable();
     });
     RemoteCall::exportAs("GMLIB_API", "setItemUnbreakable", [](ItemStack const* item, bool value) -> void {
-        ((GMLIB_ItemStack*)item)->setUnbreakable(value);
+        ((gmlib::world::ItemStack*)item)->setUnbreakable(value);
     });
     RemoteCall::exportAs("GMLIB_API", "getItemShouldKeepOnDeath", [](ItemStack const* item) -> bool {
-        return ((GMLIB_ItemStack*)item)->getShouldKeepOnDeath();
+        return ((gmlib::world::ItemStack*)item)->getShouldKeepOnDeath();
     });
     RemoteCall::exportAs("GMLIB_API", "setItemShouldKeepOnDeath", [](ItemStack const* item, bool value) -> void {
-        ((GMLIB_ItemStack*)item)->setShouldKeepOnDeath(value);
+        ((gmlib::world::ItemStack*)item)->setShouldKeepOnDeath(value);
     });
     RemoteCall::exportAs("GMLIB_API", "getItemLockMode", [](ItemStack const* item) -> int {
-        return (int)((GMLIB_ItemStack*)item)->getItemLockMode();
+        return (int)((gmlib::world::ItemStack*)item)->getItemLockMode();
     });
     RemoteCall::exportAs("GMLIB_API", "setItemLockMode", [](ItemStack const* item, int value) -> void {
-        ((GMLIB_ItemStack*)item)->setItemLockMode((ItemLockMode)value);
+        ((gmlib::world::ItemStack*)item)->setItemLockMode((ItemLockMode)value);
     });
     RemoteCall::exportAs("GMLIB_API", "getItemRepairCost", [](ItemStack const* item) -> int {
         return item->getBaseRepairCost();
     });
-    RemoteCall::exportAs("GMLIB_API", "setItemRepairCost", [](ItemStack const* item, int cost) -> void {
-        (*(const_cast<ItemStack*>(item))).setRepairCost(cost);
+    RemoteCall::exportAs("GMLIB_API", "setItemRepairCost", [](ItemStack* item, int cost) -> void {
+        (*item).setRepairCost(cost);
     });
     RemoteCall::exportAs("GMLIB_API", "getItemCanDestroy", [](ItemStack const* item) -> std::vector<std::string> {
         std::vector<std::string> result = {};
-        for (auto& block : ((GMLIB_ItemStack*)item)->getCanDestroy()) {
+        for (auto& block : ((gmlib::world::ItemStack*)item)->getCanDestroy()) {
             result.push_back(block->getTypeName());
         }
         return result;
@@ -817,12 +722,12 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setItemCanDestroy",
         [](ItemStack const* item, std::vector<std::string> blocks) -> void {
-            ((GMLIB_ItemStack*)item)->setCanDestroy(blocks);
+            ((gmlib::world::ItemStack*)item)->setCanDestroy(blocks);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getItemCanPlaceOn", [](ItemStack const* item) -> std::vector<std::string> {
         std::vector<std::string> result = {};
-        for (auto& block : ((GMLIB_ItemStack*)item)->getCanPlaceOn()) {
+        for (auto& block : ((gmlib::world::ItemStack*)item)->getCanPlaceOn()) {
             result.push_back(block->getTypeName());
         }
         return result;
@@ -831,7 +736,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setItemCanPlaceOn",
         [](ItemStack const* item, std::vector<std::string> blocks) -> void {
-            ((GMLIB_ItemStack*)item)->setCanPlaceOn(blocks);
+            ((gmlib::world::ItemStack*)item)->setCanPlaceOn(blocks);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getPlayerHungry", [](Player* player) -> float {
@@ -878,8 +783,7 @@ void Export_Compatibility_API() {
         return magic_enum::enum_name(container->getContainerType()).data();
     });
     RemoteCall::exportAs("GMLIB_API", "hasPlayerNbt", [](std::string const& uuid) -> bool {
-        auto uid = mce::UUID::fromString(uuid);
-        return GMLIB_Player::getPlayerNbt(uid) ? true : false;
+        return gmlib::world::Player::getPlayerNbt(mce::UUID::fromString(uuid)) != nullptr;
     });
     RemoteCall::exportAs("GMLIB_API", "getItemMaxCount", [](ItemStack const* item) -> int {
         return item->getMaxStackSize();
@@ -936,10 +840,9 @@ void Export_Compatibility_API() {
         return entity->hasEffect(*MobEffect::getById(effectId));
     });
     RemoteCall::exportAs("GMLIB_API", "getGameDifficulty", []() -> int {
-        if (auto level = ll::service::getLevel()) {
-            return (int)level->getDifficulty();
-        }
-        return -1;
+        return ll::service::getLevel().transform(
+                                          [](Level& level) -> int { return (int)level.getDifficulty(); }
+        ).value_or(-1);
     });
     RemoteCall::exportAs("GMLIB_API", "setGameDifficulty", [](int difficulty) -> void {
         if (auto level = ll::service::getLevel()) {
@@ -947,10 +850,7 @@ void Export_Compatibility_API() {
         }
     });
     RemoteCall::exportAs("GMLIB_API", "getDefaultGameMode", []() -> int {
-        if (auto level = ll::service::getLevel()) {
-            return (int)level->getDefaultGameType();
-        }
-        return -1;
+        return ll::service::getLevel().transform([](Level& level) -> int { return (int)level.getDefaultGameType(); }).value_or(-1);
     });
     RemoteCall::exportAs("GMLIB_API", "setDefaultGameMode", [](int gameMode) -> void {
         if (auto level = ll::service::getLevel()) {
@@ -961,18 +861,13 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "registerCustomShapelessRecipe",
         [](std::string const& recipe_id, std::vector<std::string> ingredients, ItemStack* result) -> void {
-            auto level = GMLIB_Level::getInstance();
-            if (!level) {
-                return;
-            }
+            if (!gmlib::world::Level::getInstance().has_value()) return;
             std::vector<Recipes::Type> types;
             char                       rt = 'A';
             for (auto& ing : ingredients) {
-                auto key = Recipes::Type(ing, rt, 1, 0);
-                types.push_back(key);
-                rt++;
+                types.emplace_back(ing, rt++, 1, 0);
             }
-            CustomRecipe::registerShapelessCraftingTableRecipe(recipe_id, types, *result);
+            gmlib::mod::recipe::RecipeRegistry::registerShapelessCraftingTableRecipe(recipe_id, types, *result);
         }
     );
     RemoteCall::exportAs(
@@ -982,18 +877,13 @@ void Export_Compatibility_API() {
            std::vector<std::string> shape,
            std::vector<std::string> ingredients,
            ItemStack*               result) -> void {
-            auto level = GMLIB_Level::getInstance();
-            if (!level) {
-                return;
-            }
+            if (!gmlib::world::Level::getInstance().has_value()) return;
             std::vector<Recipes::Type> types;
             char                       rt = 'A';
             for (auto& ing : ingredients) {
-                auto key = Recipes::Type(ing, rt, 1, 0);
-                types.push_back(key);
-                rt++;
+                types.emplace_back(ing, rt++, 1, 0);
             }
-            CustomRecipe::registerShapedCraftingTableRecipe(recipe_id, shape, types, *result);
+            gmlib::mod::recipe::RecipeRegistry::registerShapedCraftingTableRecipe(recipe_id, shape, types, *result);
         }
     );
 }

@@ -1364,7 +1364,7 @@ interface Player {
     /** (GMLIB)获取玩家的rumtimeId */
     getRuntimeId(): number;
 
-    /** (GMLIB)获取玩家饱食度 */
+    /** (GMLIB)获取玩家饥饿值 */
     getHungry(): number;
 
     /** (GMLIB)获取玩家盔甲覆盖百分比 */
