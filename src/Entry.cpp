@@ -35,4 +35,4 @@ bool LegacyRemoteCallApi::disable() { return true; }
 
 } // namespace gmlib
 
-LL_REGISTER_MOD(GMLIB::LegacyRemoteCallApi, GMLIB::LegacyRemoteCallApi::getInstance());
+LL_REGISTER_MOD(gmlib::LegacyRemoteCallApi, gmlib::LegacyRemoteCallApi::getInstance());
