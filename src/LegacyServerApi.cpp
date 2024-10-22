@@ -2,81 +2,78 @@
 
 void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", []() -> void {
-        world::Level::tryEnableEducationEdition();
+        gmlib::world::Level::tryEnableEducationEdition();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "registerAbilityCommand", []() -> void {
-        world::Level::tryRegisterAbilityCommand();
+        gmlib::world::Level::tryRegisterAbilityCommand();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setEnableAchievement", []() -> void {
-        world::Level::setForceAchievementsEnabled();
+        gmlib::world::Level::setForceAchievementsEnabled();
     });
-    RemoteCall::exportAs("GMLib_ServerAPI", "setForceTrustSkins", []() -> void { world::Level::trustAllSkins(); });
+    RemoteCall::exportAs("GMLib_ServerAPI", "setForceTrustSkins", []() -> void {
+        gmlib::world::Level::trustAllSkins();
+    });
     RemoteCall::exportAs("GMLib_ServerAPI", "enableCoResourcePack", []() -> void {
-        world::Level::requireServerResourcePackAndAllowClientResourcePack();
+        gmlib::world::Level::requireServerResourcePackAndAllowClientResourcePack();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "getLevelName", []() -> std::string {
-        if (auto level = world::Level::getInstance()) {
-            return level->getLevelName();
-        }
-        return {};
+        return gmlib::world::Level::getInstance()
+            .transform([](gmlib::world::Level& level) -> std::string { return level.getLevelName(); })
+            .value_or("");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setLevelName", [](std::string const& name) -> void {
-        if (auto level = world::Level::getInstance()) {
+        if (auto level = gmlib::world::Level::getInstance()) {
             level->setLevelName(name);
         }
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "getLevelSeed", []() -> std::string {
-        if (auto level = world::Level::getInstance()) {
-            return std::to_string(level->getSeed());
-        }
-        return {};
+        return gmlib::world::Level::getInstance()
+            .transform([](gmlib::world::Level& level) -> std::string { return std::to_string(level.getSeed()); })
+            .value_or("");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setFakeSeed", [](int64_t seed) -> void {
-        return world::Level::setFakeSeed(seed);
+        return gmlib::world::Level::setFakeSeed(seed);
     });
     RemoteCall::exportAs(
         "GMLib_ServerAPI",
         "spawnEntity",
-        [](std::pair<Vec3, int> pos, std::string const& name) -> ::Actor* {
-            return world::Spawner::spawnEntity(pos.first, pos.second, name).as_ptr();
+        [](std::pair<Vec3, int> pos, std::string const& name) -> Actor* {
+            return gmlib::world::Spawner::spawnEntity(pos.first, pos.second, name).as_ptr();
         }
     );
     RemoteCall::exportAs(
         "GMLib_ServerAPI",
         "shootProjectile",
-        [](::Actor* owner, std::string const& name, float speed, float offset) -> ::Actor* {
-            auto ac = (world::Actor*)owner;
+        [](Actor* owner, std::string const& name, float speed, float offset) -> Actor* {
+            auto ac = (gmlib::world::Actor*)owner;
             return ac->shootProjectile(name, speed, offset).as_ptr();
         }
     );
     RemoteCall::exportAs(
         "GMLib_ServerAPI",
         "throwEntity",
-        [](::Actor* owner, ::Actor* actor, float speed, float offset) -> bool {
-            auto ac = (world::Actor*)owner;
+        [](Actor* owner, Actor* actor, float speed, float offset) -> bool {
+            auto ac = (gmlib::world::Actor*)owner;
             return ac->throwEntity(*actor, speed, offset);
         }
     );
-    RemoteCall::exportAs("GMLib_ServerAPI", "PlayerToEntity", [](::Player* player) -> ::Actor* {
-        return (::Actor*)player;
-    });
+    RemoteCall::exportAs("GMLib_ServerAPI", "PlayerToEntity", [](Player* player) -> Actor* { return (Actor*)player; });
     RemoteCall::exportAs(
         "GMLib_ServerAPI",
         "addFakeList",
         [](const std::string& name, const std::string& xuid) -> bool {
-            return FakeList::addFakeList(name, xuid, ActorUniqueID(-1));
+            return gmlib::tools::FakeList::addFakeList(name, xuid, ActorUniqueID(-1));
         }
     );
     RemoteCall::exportAs("GMLib_ServerAPI", "removeFakeList", [](const std::string& nameOrXuid) -> bool {
-        return FakeList::removeFakeList(nameOrXuid);
+        return gmlib::tools::FakeList::removeFakeList(nameOrXuid);
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "removeAllFakeList", []() -> void {
-        return FakeList::removeAllFakeLists();
+        return gmlib::tools::FakeList::removeAllFakeLists();
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "getMaxPlayers", []() -> int {
-        if (auto level = world::Level::getInstance()) {
-            return level->getMaxPlayerCount();
-        }
-        return {};
+        return gmlib::world::Level::getInstance()
+            .transform([](gmlib::world::Level& level) -> int { return level.getMaxPlayerCount(); })
+            .value_or(0);
     });
 }

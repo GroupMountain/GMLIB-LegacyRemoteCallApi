@@ -1054,6 +1054,289 @@ declare class UserCache {
     static getAllPlayerInfo(): { Xuid: String; Uuid: string; Name: string; }[]
 }
 
+type PacketDataItem = (
+    {
+        id: number,
+        type: 0x0 | 0x1 | 0x2 | 0x3 | 0x7,
+        value: number
+    }
+    | {
+        id: number,
+        type: 0x4,
+        value: string
+    }
+    | {
+        id: number,
+        type: 0x5,
+        value: NbtCompound
+    }
+    | {
+        id: number,
+        type: 0x6 | 0x8,
+        value: IntPos | FloatPos
+    }
+);
+
+type PacketData = (
+    | { type: "", value: PacketData | PacketData[] }
+    | { type: "Item", value: Item }
+    | { type: "CompoundTag", value: NbtCompound }
+    | {
+        type: "DataItem",
+        value: PacketDataItem[],
+    }
+    | {
+        type: "ActorLink",
+        value: {
+            mA: number,
+            mB: number,
+            mType: number,
+            mImmediate: boolean,
+            mPassengerInitiated: boolean,
+        },
+    }
+    | { type: "Vec3" | "BlockPos", value: FloatPos | IntPos }
+    | { type: "Vec2", value: DirectionAngle }
+    | { type: "String" | "Uuid", value: string }
+    | { type: "Bool", value: boolean }
+    | {
+        type:
+        "PacketHeader"
+        | "Byte"
+        | "Double"
+        | "Float"
+        | "SignedBigEndianInt"
+        | "SignedInt"
+        | "SignedInt64"
+        | "SignedShort"
+        | "UnsignedChar"
+        | "UnsignedInt"
+        | "UnsignedInt64"
+        | "UnsignedShort"
+        | "UnsignedVarInt"
+        | "UnsignedVarInt64"
+        | "VarInt"
+        | "VarInt64",
+        value: number,
+    }
+);
+
+/** 二进制流数据包类 */
+declare class GMLIB_BinaryStream {
+    /** 数据包ID */
+    #id: number;
+    /** 数据包是否被销毁 */
+    #destroy: boolean;
+
+    constructor(
+        /** 数据包数据 */
+        data: PacketData[]?
+    );
+
+    /** 发送数据包 */
+    sendTo(
+        /** 要发送数据包的玩家对象 */
+        player: Player,
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): GMLIB_BinaryStream;
+
+    /** 发送数据包到玩家数组 */
+    sendToPlayers(
+        /** 要发送数据包的玩家对象数组 */
+        players: Player[],
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): GMLIB_BinaryStream;
+
+    /** 发送数据包到所有玩家 */
+    sendToAll(
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): GMLIB_BinaryStream;
+
+    /** 发送数据包到维度 */
+    sendToDimension(
+        /** 维度ID */
+        dimid: number,
+        /** 数据包发送后是否销毁 */
+        free: boolean = true
+    ): GMLIB_BinaryStream;
+
+    /** 销毁数据包 */
+    destroy(): GMLIB_BinaryStream;
+
+    /** 数据包是否已被销毁 */
+    isDestroy(): boolean;
+
+    /** 重置数据包 */
+    reset(): GMLIB_BinaryStream;
+
+    /** 转换成字符串 */
+    toString(): string;
+
+    /** 写入数据 */
+    write(
+        /** 数据 */
+        data: PacketData | PacketData[]?
+    ): GMLIB_BinaryStream;
+
+    /** 写入数据包头部 */
+    writePacketHeader(
+        /** 数据包ID */
+        id: number
+    ): GMLIB_BinaryStream;
+
+    /** 写入UUID */
+    writeUuid(
+        /** UUID */
+        value: string
+    ): GMLIB_BinaryStream;
+
+    /** 写入物品 */
+    writeItem(
+        /** 物品对象 */
+        value: Item
+    ): GMLIB_BinaryStream;
+
+    /** 写入NBT */
+    writeCompoundTag(
+        /** NBT */
+        value: NbtCompound
+    ): GMLIB_BinaryStream;
+
+    /** */
+    writeDataItem(
+        /** 数据项 */
+        value: PacketDataItem[]
+    ): GMLIB_BinaryStream;
+
+    writeActorLink(
+        /** 数据项 */
+        value: { "mA": number, "mB": number, "mType": number, "mImmediate": boolean, "mPassengerInitiated": boolean }
+    ): GMLIB_BinaryStream;
+
+    /** 写入浮点数坐标对象 */
+    writeVec3(
+        /** 浮点数坐标对象 */
+        value: FloatPos
+    ): GMLIB_BinaryStream;
+
+    /** 写入整数坐标对象 */
+    writeBlockPos(
+        /** 整数坐标对象 */
+        value: IntPos
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeVec2(
+        /** 数据 */
+        value: { "x": number, "z": number }
+    ): GMLIB_BinaryStream;
+
+    /** 写入字符串 */
+    writeString(
+        /** 字符串 */
+        value: string
+    ): GMLIB_BinaryStream;
+
+    /** 写入布尔值 */
+    writeBool(
+        /** 布尔值 */
+        value: boolean
+    ): GMLIB_BinaryStream;
+
+    /** 写入字节 */
+    writeByte(
+        /** 字节 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /** 写入(双精度)浮点数 */
+    writeDouble(
+        /** 浮点数 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /** 写入(单精度)浮点数 */
+    writeFloat(
+        /** 浮点数 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeSignedBigEndianInt(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeSignedInt(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /** 写入 */
+    writeSignedInt64(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeSignedShort(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeUnsignedChar(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeUnsignedInt(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeUnsignedInt64(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeUnsignedShort(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeUnsignedVarInt(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeUnsignedVarInt64(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeVarInt(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+
+    /**  */
+    writeVarInt64(
+        /** 数值 */
+        value: number
+    ): GMLIB_BinaryStream;
+}
+
 interface Player {
     /** (GMLIB)转换成实体对象 */
     toEntity(): Entity;
@@ -1081,7 +1364,7 @@ interface Player {
     /** (GMLIB)获取玩家的rumtimeId */
     getRuntimeId(): number;
 
-    /** (GMLIB)获取玩家饱食度 */
+    /** (GMLIB)获取玩家饥饿值 */
     getHungry(): number;
 
     /** (GMLIB)获取玩家盔甲覆盖百分比 */

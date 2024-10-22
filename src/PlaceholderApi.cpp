@@ -13,9 +13,11 @@ bool isParameters(std::string const& str) {
     return std::regex_search(removeBrackets(str), reg);
 }
 
-std::string GetValue(std::string const& from) { return PlaceholderAPI::getValue(from); }
+std::string GetValue(std::string const& from) { return gmlib::tools::PlaceholderAPI::getValue(from); }
 
-std::string GetValueWithPlayer(std::string const& key, ::Player* player) { return PlaceholderAPI::getValue(key, player); }
+std::string GetValueWithPlayer(std::string const& key, Player* player) {
+    return gmlib::tools::PlaceholderAPI::getValue(key, player);
+}
 
 bool registerPlayerPlaceholder(
     std::string const& PluginName,
@@ -23,20 +25,24 @@ bool registerPlayerPlaceholder(
     std::string const& PAPIName
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
-        PlaceholderAPI::unregisterPlaceholder(PAPIName);
+        gmlib::tools::PlaceholderAPI::unregisterPlaceholder(PAPIName);
         if (isParameters(PAPIName)) {
-            auto Call = RemoteCall::importAs<std::string(::Player * pl, std::unordered_map<std::string, std::string>)>(
+            auto Call = RemoteCall::importAs<std::string(Player * pl, std::unordered_map<std::string, std::string>)>(
                 PluginName,
                 FuncName
             );
-            PlaceholderAPI::registerPlayerPlaceholder(
+            gmlib::tools::PlaceholderAPI::registerPlayerPlaceholder(
                 PAPIName,
-                [Call](::Player* sp, std::unordered_map<std::string, std::string> map) { return Call(sp, map); },
+                [Call](Player* sp, std::unordered_map<std::string, std::string> map) { return Call(sp, map); },
                 PluginName
             );
         } else {
-            auto Call = RemoteCall::importAs<std::string(::Player * pl)>(PluginName, FuncName);
-            PlaceholderAPI::registerPlayerPlaceholder(PAPIName, [Call](::Player* sp) { return Call(sp); }, PluginName);
+            auto Call = RemoteCall::importAs<std::string(Player * pl)>(PluginName, FuncName);
+            gmlib::tools::PlaceholderAPI::registerPlayerPlaceholder(
+                PAPIName,
+                [Call](Player* sp) { return Call(sp); },
+                PluginName
+            );
         }
         return true;
     }
@@ -49,18 +55,18 @@ bool registerServerPlaceholder(
     std::string const& PAPIName
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
-        PlaceholderAPI::unregisterPlaceholder(PAPIName);
+        gmlib::tools::PlaceholderAPI::unregisterPlaceholder(PAPIName);
         if (isParameters(PAPIName)) {
             auto Call =
                 RemoteCall::importAs<std::string(std::unordered_map<std::string, std::string>)>(PluginName, FuncName);
-            PlaceholderAPI::registerServerPlaceholder(
+            gmlib::tools::PlaceholderAPI::registerServerPlaceholder(
                 PAPIName,
                 [Call](std::unordered_map<std::string, std::string> map) { return Call(map); },
                 PluginName
             );
         } else {
             auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
-            PlaceholderAPI::registerServerPlaceholder(PAPIName, [Call]() { return Call(); }, PluginName);
+            gmlib::tools::PlaceholderAPI::registerServerPlaceholder(PAPIName, [Call]() { return Call(); }, PluginName);
         }
         return true;
     }
@@ -74,13 +80,22 @@ bool registerStaticPlaceholder(
     int                num
 ) {
     if (RemoteCall::hasFunc(PluginName, FuncName)) {
-        PlaceholderAPI::unregisterPlaceholder(PAPIName);
+        gmlib::tools::PlaceholderAPI::unregisterPlaceholder(PAPIName);
         if (isParameters(PAPIName)) {
             auto Call = RemoteCall::importAs<std::string()>(PluginName, FuncName);
             if (num == -1) {
-                PlaceholderAPI::registerStaticPlaceholder(PAPIName, [Call] { return Call(); }, PluginName);
+                gmlib::tools::PlaceholderAPI::registerStaticPlaceholder(
+                    PAPIName,
+                    [Call] { return Call(); },
+                    PluginName
+                );
             } else {
-                PlaceholderAPI::registerStaticPlaceholder(PAPIName, num, [Call] { return Call(); }, PluginName);
+                gmlib::tools::PlaceholderAPI::registerStaticPlaceholder(
+                    PAPIName,
+                    num,
+                    [Call] { return Call(); },
+                    PluginName
+                );
             }
         }
         return true;
@@ -88,15 +103,15 @@ bool registerStaticPlaceholder(
     return false;
 }
 
-std::string translateStringWithPlayer(std::string const& str, ::Player* pl) {
-    return PlaceholderAPI::translateString(str, pl);
+std::string translateStringWithPlayer(std::string const& str, Player* pl) {
+    return gmlib::tools::PlaceholderAPI::translateString(str, pl);
 }
 
-std::string translateString(std::string const& str) { return PlaceholderAPI::translateString(str); }
+std::string translateString(std::string const& str) { return gmlib::tools::PlaceholderAPI::translateString(str); }
 
-bool unRegisterPlaceholder(std::string const& str) { return PlaceholderAPI::unregisterPlaceholder(str); }
+bool unRegisterPlaceholder(std::string const& str) { return gmlib::tools::PlaceholderAPI::unregisterPlaceholder(str); }
 
-std::vector<std::string> getAllPAPI() { return PlaceholderAPI::getAllPAPI(); }
+std::vector<std::string> getAllPAPI() { return gmlib::tools::PlaceholderAPI::getAllPAPI(); }
 
 } // namespace PAPIRemoteCall
 
