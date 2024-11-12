@@ -4,16 +4,16 @@ using namespace ll::hash_utils;
 class LegacyScriptBinaryStreamManager {
 private:
     int64                                                           mNextBinaryStreamId = 0;
-    std::unordered_map<uint64, std::shared_ptr<gmlib::network::BinaryStream>> mBinaryStream;
+    std::unordered_map<uint64, std::shared_ptr<GMLIB_BinaryStream>> mBinaryStream;
 
 public:
     uint getNextId() { return mNextBinaryStreamId++; }
 
-    void cretateBinaryStream(uint id) { mBinaryStream[id] = std::make_shared<gmlib::network::BinaryStream>(); }
+    void cretateBinaryStream(uint id) { mBinaryStream[id] = std::make_shared<GMLIB_BinaryStream>(); }
 
     void removeBinaryStream(uint64 id) { mBinaryStream.erase(id); }
 
-    std::shared_ptr<gmlib::network::BinaryStream> getBinaryStream(uint64 id) {
+    std::shared_ptr<GMLIB_BinaryStream> getBinaryStream(uint64 id) {
         return mBinaryStream.contains(id) ? mBinaryStream.at(id) : nullptr;
     }
 
@@ -38,7 +38,7 @@ template <typename T, typename R, typename A, typename... AS>
 struct Info<R (T::*)(A, AS...)> {
     using ArgT = A;
 };
-#define EXPORTAPI2(T) EXPORTAPI(#T, Info<decltype(&gmlib::network::BinaryStream::T)>::ArgT, bs->T(value))
+#define EXPORTAPI2(T) EXPORTAPI(#T, Info<decltype(&GMLIB_BinaryStream::T)>::ArgT, bs->T(value))
 
 void Export_BinaryStream_API() {
     RemoteCall::exportAs("GMLIB_BinaryStream_API", "create", []() -> uint64 {
