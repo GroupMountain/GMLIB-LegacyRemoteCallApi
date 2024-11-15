@@ -17,12 +17,12 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       result,
            int                      count,
            std::string const&       unlock) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
+            if (!GMLIB_Level::getInstance().has_value()) return;
             std::vector<RecipeIngredient> types;
             for (auto ing : ingredients) {
                 types.emplace_back(ing, 0, 1);
             }
-            gmlib::mod::recipe::JsonRecipeRegistry::registerShapelessCraftingTableRecipe(
+            GMLIB::Mod::JsonRecipe::registerShapelessCraftingTableRecipe(
                 recipe_id,
                 types,
                 RecipeIngredient(result, 0, count),
@@ -39,12 +39,12 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       result,
            int                      count,
            std::string const&       unlock) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
+            if (!GMLIB_Level::getInstance().has_value()) return;
             std::vector<RecipeIngredient> types;
             for (auto ing : ingredients) {
                 types.push_back(RecipeIngredient(ing, 0, 1));
             }
-            gmlib::mod::recipe::JsonRecipeRegistry::registerShapedCraftingTableRecipe(
+            GMLIB::Mod::JsonRecipe::registerShapedCraftingTableRecipe(
                 recipe_id,
                 shape,
                 types,
@@ -60,8 +60,8 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       input,
            std::string const&       output,
            std::vector<std::string> tags) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
-            gmlib::mod::recipe::JsonRecipeRegistry::registerFurnaceRecipe(
+            if (!GMLIB_Level::getInstance().has_value()) return;
+            GMLIB::Mod::JsonRecipe::registerFurnaceRecipe(
                 recipe_id,
                 RecipeIngredient(input, 0, 1),
                 RecipeIngredient(output, 0, 1),
@@ -74,13 +74,8 @@ void Export_Legacy_GMLib_ModAPI() {
         "registerBrewingMixRecipe",
         [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
         ) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
-            gmlib::mod::recipe::JsonRecipeRegistry::registerBrewingMixRecipe(
-                recipe_id,
-                input,
-                output,
-                RecipeIngredient(reagent, 0, 1)
-            );
+            if (!GMLIB_Level::getInstance().has_value()) return;
+            GMLIB::Mod::JsonRecipe::registerBrewingMixRecipe(recipe_id, input, output, RecipeIngredient(reagent, 0, 1));
         }
     );
     RemoteCall::exportAs(
@@ -88,8 +83,8 @@ void Export_Legacy_GMLib_ModAPI() {
         "registerBrewingContainerRecipe",
         [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
         ) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
-            gmlib::mod::recipe::JsonRecipeRegistry::registerBrewingContainerRecipe(
+            if (!GMLIB_Level::getInstance().has_value()) return;
+            GMLIB::Mod::JsonRecipe::registerBrewingContainerRecipe(
                 recipe_id,
                 RecipeIngredient(input, 0, 1),
                 RecipeIngredient(output, 0, 1),
@@ -105,8 +100,8 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& base,
            std::string const& addition,
            std::string const& result) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
-            gmlib::mod::recipe::JsonRecipeRegistry::registerSmithingTransformRecipe(
+            if (!GMLIB_Level::getInstance().has_value()) return;
+            GMLIB::Mod::JsonRecipe::registerSmithingTransformRecipe(
                 recipe_id,
                 smithing_template,
                 base,
@@ -122,13 +117,8 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& smithing_template,
            std::string const& base,
            std::string const& addition) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
-            gmlib::mod::recipe::JsonRecipeRegistry::registerSmithingTrimRecipe(
-                recipe_id,
-                smithing_template,
-                base,
-                addition
-            );
+            if (!GMLIB_Level::getInstance().has_value()) return;
+            GMLIB::Mod::JsonRecipe::registerSmithingTrimRecipe(recipe_id, smithing_template, base, addition);
         }
     );
     RemoteCall::exportAs(
@@ -140,8 +130,8 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& output,
            int                output_data,
            int                output_count) -> void {
-            if (!gmlib::world::Level::getInstance().has_value()) return;
-            gmlib::mod::recipe::JsonRecipeRegistry::registerStoneCutterRecipe(
+            if (!GMLIB_Level::getInstance().has_value()) return;
+            GMLIB::Mod::JsonRecipe::registerStoneCutterRecipe(
                 recipe_id,
                 RecipeIngredient(input, 0, 1),
                 RecipeIngredient(output, 0, 1)
@@ -150,39 +140,39 @@ void Export_Legacy_GMLib_ModAPI() {
     );
     // 错误方块清理
     RemoteCall::exportAs("GMLib_ModAPI", "setUnknownBlockCleaner", []() -> void {
-        gmlib::tools::VanillaFix::setAutoCleanUnknownBlockEnabled();
+        GMLIB::Mod::VanillaFix::setAutoCleanUnknownBlockEnabled();
     });
     // 实验性
     RemoteCall::exportAs("GMLib_ModAPI", "registerExperimentsRequire", [](int experiment_id) -> void {
-        auto                               list = gmlib::world::Level::getAllExperiments();
+        auto                               list = GMLIB_Level::getAllExperiments();
         std::unordered_set<AllExperiments> set(list.begin(), list.end());
         if (set.contains((AllExperiments)experiment_id)) {
-            gmlib::world::Level::addExperimentsRequire((AllExperiments)experiment_id);
+            GMLIB_Level::addExperimentsRequire((AllExperiments)experiment_id);
         } else {
             ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
         }
     });
     RemoteCall::exportAs("GMLib_ModAPI", "setExperimentEnabled", [](int experiment_id, bool value) -> void {
-        if (gmlib::world::Level::getInstance()) {
-            auto                               list = gmlib::world::Level::getAllExperiments();
+        if (GMLIB_Level::getInstance()) {
+            auto                               list = GMLIB_Level::getAllExperiments();
             std::unordered_set<AllExperiments> set(list.begin(), list.end());
             if (set.contains((AllExperiments)experiment_id)) {
-                gmlib::world::Level::getInstance()->setExperimentEnabled(((AllExperiments)experiment_id), value);
+                GMLIB_Level::getInstance()->setExperimentEnabled(((AllExperiments)experiment_id), value);
             } else ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
         }
     });
     RemoteCall::exportAs("GMLib_ModAPI", "getExperimentEnabled", [](int experiment_id) -> bool {
-        if (gmlib::world::Level::getInstance()) {
-            auto                               list = gmlib::world::Level::getAllExperiments();
+        if (GMLIB_Level::getInstance()) {
+            auto                               list = GMLIB_Level::getAllExperiments();
             std::unordered_set<AllExperiments> set(list.begin(), list.end());
             if (set.contains((AllExperiments)experiment_id)) {
-                return gmlib::world::Level::getInstance()->getExperimentEnabled(((AllExperiments)experiment_id));
+                return GMLIB_Level::getInstance()->getExperimentEnabled(((AllExperiments)experiment_id));
             }
             ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
         }
         return false;
     });
     RemoteCall::exportAs("GMLib_ModAPI", "setFixI18nEnabled", []() -> void {
-        gmlib::tools::VanillaFix::setFixI18nEnabled();
+        GMLIB::Mod::VanillaFix::setFixI18nEnabled();
     });
 }

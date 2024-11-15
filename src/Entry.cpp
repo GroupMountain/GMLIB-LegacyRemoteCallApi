@@ -17,11 +17,11 @@ bool LegacyRemoteCallApi::load() {
     ExportPAPI();
     Export_Event_API();
     Export_BinaryStream_API();
-    Export_Form_API();
+    // Export_Form_API();
     logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
     logger.info(
         "Loaded Version: {} with {}",
-        fmt::format(fg(fmt::color::pink), "GMLIB-" + gmlib::Version::getLibVersionString()),
+        fmt::format(fg(fmt::color::pink), "GMLIB-" + GMLIB::Version::getLibVersionString()),
         fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-" + LIB_VERSION.asString())
     );
     logger.info("Author: GroupMountain");
