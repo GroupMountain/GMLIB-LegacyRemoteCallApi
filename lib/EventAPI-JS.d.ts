@@ -347,8 +347,8 @@ export namespace Event {
         callback: (event: {
             /** 事件参数 */
             params: {
-                /** 物品 */
-                0: Item,
+                /** 物品实体对象 */
+                0: Entity,
                 /** 生成坐标坐标 */
                 1: FloatPos,
                 /** 生成此物品主人的uniqueId (-1为不存在) */

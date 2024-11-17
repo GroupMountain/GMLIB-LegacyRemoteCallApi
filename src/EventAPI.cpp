@@ -117,8 +117,8 @@ void Export_Event_API() {
             case doHash("gmlib::ItemActorSpawnAfterEvent"): {
                 REGISTER_EVENT_LISTEN(
                     GMLIB::Event::EntityEvent::ItemActorSpawnAfterEvent,
-                    (ItemStack * item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
-                    (&event.getItem(),
+                    (Actor * item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
+                    (&event.self(),
                      {event.getPosition(), event.getBlockSource().getDimensionId().id},
                      event.getSpawner().has_value() ? event.getSpawner()->getOrCreateUniqueID().id : -1),
                     ,
