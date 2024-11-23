@@ -23,13 +23,13 @@ jobs:
       - run: |
           xmake -w -y
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-windows-x64-${{ github.sha }}
           path: |
             bin/DLL/
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: PDB
           path: |
@@ -46,13 +46,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Plugin
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-windows-x64-${{ github.sha }}
           path: release/Plugin/
 
       - name: Download PDB
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: PDB
           path: release/PDB/
