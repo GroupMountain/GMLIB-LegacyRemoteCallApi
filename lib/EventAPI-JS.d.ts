@@ -636,10 +636,7 @@ export namespace Event {
         /** 回调 */
         callback: (event: {
             /** 事件参数 */
-            params: {
-                /** 末影龙复活后的uniqueId */
-                0: number
-            },
+            params: {},
             /** 拦截事件 */
             cancel: () => void,
             /** 设置拦截状态 */
@@ -668,7 +665,7 @@ export namespace Event {
         callback: (event: {
             /** 事件参数 */
             params: {
-                /** 末影人实体 */
+                /** 末影龙实体 */
                 0: Entity
             },
             /** 获取事件ID */

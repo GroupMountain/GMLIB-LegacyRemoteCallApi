@@ -10,7 +10,7 @@ end
 -- Option 1: Use the latest version of LeviLamina released on GitHub.
 add_requires("levilaminalibrary")
 add_requires("legacyremotecall")
-add_requires("gmlib 0.13.7")
+add_requires("gmlib")
 
 -- Option 2: Use a specific version of LeviLamina released on GitHub.
 -- add_requires("levilamina x.x.x")

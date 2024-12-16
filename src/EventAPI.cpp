@@ -1,42 +1,72 @@
 #include "Global.h"
 using namespace ll::hash_utils;
 
+class EventManager {
+private:
+    std::unordered_map<ullong, ll::event::ListenerPtr> mEventIds;
+
+public:
+    static EventManager& getInstance() {
+        static std::unique_ptr<EventManager> instance;
+        if (!instance) instance = std::make_unique<EventManager>();
+        return *instance;
+    }
+
+    ullong getNextId() {
+        auto id = mEventIds.size();
+        mEventIds.emplace(id, nullptr);
+        return id;
+    }
+
+    bool addListener(ullong id, ll::event::ListenerPtr const& listener) {
+        if (mEventIds.contains(id) && mEventIds[id]) return false;
+        mEventIds[id] = listener;
+        return true;
+    }
+
+    bool removeListener(ullong id) {
+        if (ll::event::EventBus::getInstance().removeListener(mEventIds[id])) {
+            mEventIds[id] = nullptr;
+            return true;
+        }
+        return false;
+    }
+
+    bool hasListener(ullong id) { return mEventIds.contains(id) && mEventIds[id]; }
+
+    ll::event::ListenerPtr getListener(ullong id) { return mEventIds.contains(id) ? mEventIds[id] : nullptr; }
+};
+
 #define REGISTER_EVENT_LISTEN(eventType, paramType, params, cancelFun, ...)                                            \
-    ll::event::ListenerPtr eventPtr = eventBus.emplaceListener<eventType>(                                             \
-        [&eventBus, pluginName, eventName, eventId = (llong)mEventIds.size()](eventType& event) -> void {              \
-            if (!RemoteCall::hasFunc(pluginName, eventName + "_" + std::to_string(mEventIds.at(eventId)))) {           \
-                eventBus.removeListener(mEventIds.at(eventId));                                                        \
+    auto eventPtr = ll::event::EventBus::getInstance().emplaceListener<eventType>(                                     \
+        [pluginName, eventName, eventId](eventType& event) -> void {                                                   \
+            if (!RemoteCall::hasFunc(pluginName, eventName + "_" + std::to_string(eventId))) {                         \
+                EventManager::getInstance().removeListener(eventId);                                                   \
                 return;                                                                                                \
             }                                                                                                          \
             try {                                                                                                      \
                 __VA_ARGS__                                                                                            \
-                auto result = RemoteCall::importAs<bool paramType>(                                                    \
-                    pluginName,                                                                                        \
-                    eventName + "_" + std::to_string(mEventIds.at(eventId))                                            \
-                ) params;                                                                                              \
-                cancelFun;                                                                                             \
+                auto result =                                                                                          \
+                    RemoteCall::importAs<bool paramType>(pluginName, eventName + "_" + std::to_string(eventId))        \
+                        params;                                                                                        \
+                cancelFun                                                                                              \
             } catch (...) {}                                                                                           \
         },                                                                                                             \
         ll::event::EventPriority(priority)                                                                             \
     );                                                                                                                 \
-    mEventIds[mEventIds.size()] = eventPtr->getId();                                                                   \
-    return (llong)eventPtr->getId()
+    return eventId
 
 void Export_Event_API() {
-    static std::unordered_map<llong, ullong> mEventIds = {};
-
-    auto& eventBus = ll::event::EventBus::getInstance();
-
-    RemoteCall::exportAs("GMLIB_Event_API", "removeListener", [&eventBus](ll::event::ListenerId eventId) -> bool {
-        return eventBus.removeListener(eventId);
+    RemoteCall::exportAs("GMLIB_Event_API", "removeListener", [](ll::event::ListenerId eventId) -> bool {
+        return EventManager::getInstance().removeListener(eventId);
     });
 
-    RemoteCall::exportAs("GMLIB_Event_API", "hasListener", [&eventBus](ll::event::ListenerId eventId) -> bool {
-        return eventBus.hasListener(eventId);
+    RemoteCall::exportAs("GMLIB_Event_API", "hasListener", [](ll::event::ListenerId eventId) -> bool {
+        return EventManager::getInstance().hasListener(eventId);
     });
 
-    RemoteCall::exportAs("GMLIB_Event_API", "getListenerPriority", [&eventBus](ll::event::ListenerId eventId) -> int {
-        if (auto event = eventBus.getListener(eventId); event != nullptr) {
+    RemoteCall::exportAs("GMLIB_Event_API", "getListenerPriority", [](ll::event::ListenerId eventId) -> int {
+        if (auto event = EventManager::getInstance().getListener(eventId); event != nullptr) {
             return (int)event->getPriority();
         }
         return -1;
@@ -45,7 +75,8 @@ void Export_Event_API() {
     RemoteCall::exportAs(
         "GMLIB_Event_API",
         "emplaceListener",
-        [&eventBus](std::string const& pluginName, std::string const& eventName, int priority) -> llong {
+        [](std::string const& pluginName, std::string const& eventName, int priority) -> llong {
+            auto eventId = EventManager::getInstance().getNextId();
             switch (doHash(eventName)) {
             case doHash("ll::ServerStoppingEvent"): {
                 REGISTER_EVENT_LISTEN(ll::event::ServerStoppingEvent, (), (), , );
@@ -61,7 +92,7 @@ void Export_Event_API() {
                      event.getUuid().asString(),
                      event.getServerAuthXuid(),
                      event.getClientAuthXuid()),
-                    if (result) event.disConnectClient()
+                    if (result) event.disConnectClient();
                 );
             }
             case doHash("gmlib::WeatherUpdateBeforeEvent"): {
@@ -73,7 +104,7 @@ void Export_Event_API() {
                      event.getLightningLevel(),
                      event.getLightningLastTick(),
                      event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::WeatherUpdateAfterEvent"): {
@@ -92,7 +123,7 @@ void Export_Event_API() {
                     GMLIB::Event::EntityEvent::MobPickupItemBeforeEvent,
                     (Actor * mob, Actor * item, bool isCancelled),
                     (&event.self(), (Actor*)&event.getItemActor(), event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::MobPickupItemAfterEvent"): {
@@ -111,7 +142,7 @@ void Export_Event_API() {
                      {event.getPosition(), event.getBlockSource().getDimensionId().id},
                      event.getSpawner().has_value() ? event.getSpawner()->getOrCreateUniqueID().id : -1,
                      event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::ItemActorSpawnAfterEvent"): {
@@ -129,7 +160,7 @@ void Export_Event_API() {
                     GMLIB::Event::EntityEvent::ActorChangeDimensionBeforeEvent,
                     (Actor * entity, int toDimId, bool isCancelled),
                     (&event.self(), event.getToDimensionId(), event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::ActorChangeDimensionAfterEvent"): {
@@ -145,7 +176,7 @@ void Export_Event_API() {
                     GMLIB::Event::PlayerEvent::PlayerStartSleepBeforeEvent,
                     (Player * entity, BlockPos pos, bool isCancelled),
                     (&event.self(), event.getPosition(), event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::PlayerStartSleepAfterEvent"): {
@@ -161,7 +192,7 @@ void Export_Event_API() {
                     GMLIB::Event::PlayerEvent::PlayerStopSleepBeforeEvent,
                     (Player * entity, bool forcefulWakeUp, bool updateLevelList, bool isCancelled),
                     (&event.self(), event.isForcefulWakeUp(), event.isUpdateLevelList(), event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::PlayerStopSleepAfterEvent"): {
@@ -200,15 +231,15 @@ void Export_Event_API() {
                     GMLIB::Event::EntityEvent::EndermanTakeBlockBeforeEvent,
                     (Actor * mob, bool isCancelled),
                     (&event.self(), event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::DragonRespawnBeforeEvent"): {
                 REGISTER_EVENT_LISTEN(
                     GMLIB::Event::EntityEvent::DragonRespawnBeforeEvent,
-                    (int64 uniqueId, bool isCancelled),
-                    (event.getEnderDragon().id, event.isCancelled()),
-                    event.setCancelled(result)
+                    (bool isCancelled),
+                    (event.isCancelled()),
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::DragonRespawnAfterEvent"): {
@@ -225,7 +256,7 @@ void Export_Event_API() {
                     (&event.self(),
                      event.getShooter() ? event.getShooter()->getOrCreateUniqueID().id : -1,
                      event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::ProjectileCreateAfterEvent"): {
@@ -240,7 +271,7 @@ void Export_Event_API() {
                     GMLIB::Event::EntityEvent::SpawnWanderingTraderBeforeEvent,
                     (std::pair<BlockPos, int> pos, bool isCancelled),
                     ({event.getPos(), event.getRegion().getDimensionId()}, event.isCancelled()),
-                    event.setCancelled(result)
+                    event.setCancelled(result);
                 );
             }
             case doHash("gmlib::SpawnWanderingTraderAfterEvent"): {
@@ -274,7 +305,7 @@ void Export_Event_API() {
                             (int)requestAction.mDst.mSlot,
                             event.isCancelled()
                         ),
-                        event.setCancelled(result),
+                        event.setCancelled(result);,
                         auto& requestAction = (ItemStackRequestActionTransferBase&)event.getRequestAction();
                     );
                 // clang-format on
