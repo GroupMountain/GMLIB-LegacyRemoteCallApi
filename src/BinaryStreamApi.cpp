@@ -11,6 +11,15 @@ public:
 
     void cretateBinaryStream(uint id) { mBinaryStream[id] = std::make_shared<GMLIB_BinaryStream>(); }
 
+    uint64 copyBinaryStream(uint id) {
+        auto nextId = getNextId();
+        cretateBinaryStream(nextId);
+        if(auto bs = getBinaryStream(nextId); bs !=nullptr){
+            *getBinaryStream(nextId)->mBuffer = *getBinaryStream(id)->mBuffer;
+        }
+        return nextId;
+    }
+
     void removeBinaryStream(uint64 id) { mBinaryStream.erase(id); }
 
     std::shared_ptr<GMLIB_BinaryStream> getBinaryStream(uint64 id) {
@@ -45,6 +54,9 @@ void Export_BinaryStream_API() {
         auto id = BinaryStreamManager.getNextId();
         BinaryStreamManager.cretateBinaryStream(id);
         return id;
+    });
+    RemoteCall::exportAs("GMLIB_BinaryStream_API", "copy", [](uint64 id) -> uint64 {
+        return BinaryStreamManager.copyBinaryStream(id);
     });
     RemoteCall::exportAs("GMLIB_BinaryStream_API", "reset", [](uint64 id) -> void {
         if (BinaryStreamManager.getBinaryStream(id) == nullptr) BinaryStreamManager.cretateBinaryStream(id);

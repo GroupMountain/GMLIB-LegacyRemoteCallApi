@@ -1128,15 +1128,25 @@ export class GMLIB_BinaryStream {
     /** 数据包是否被销毁 */
     #destroy: boolean;
 
+    /** 构造二进流数据包 */
     constructor(
         /** 数据包数据 */
         data: PacketData[]?
     );
 
+    /** 拷贝二进制流数据包 */
+    constructor(
+        /** 要拷贝的二进制流数据包 */
+        stream: GMLIB_BinaryStream
+    );
+
+    /** 获取数据包的ID */
+    getId(): number;
+
     /** 发送数据包 */
     sendTo(
         /** 要发送数据包的玩家对象 */
-        player: Player,
+        player: Player | Entity,
         /** 数据包发送后是否销毁 */
         free: boolean = true
     ): GMLIB_BinaryStream;
@@ -1144,7 +1154,7 @@ export class GMLIB_BinaryStream {
     /** 发送数据包到玩家数组 */
     sendToPlayers(
         /** 要发送数据包的玩家对象数组 */
-        players: Player[],
+        players: Player[] | Entity[],
         /** 数据包发送后是否销毁 */
         free: boolean = true
     ): GMLIB_BinaryStream;
