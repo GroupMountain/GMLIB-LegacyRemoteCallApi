@@ -878,4 +878,13 @@ void Export_Compatibility_API() {
             GMLIB::Mod::CustomRecipe::registerShapedCraftingTableRecipe(recipe_id, shape, types, *result);
         }
     );
+    RemoteCall::exportAs("GMLIB_API", "entityIsType", [](Actor* entity, int type) -> bool {
+        return entity->isType((ActorType)type);
+    });
+    RemoteCall::exportAs("GMLIB_API", "entityHasType", [](Actor* entity, int type) -> bool {
+        return entity->hasType((ActorType)type);
+    });
+    RemoteCall::exportAs("GMLIB_API", "getEntityTypeId", [](Actor* entity) -> int {
+        return (int)entity->getEntityTypeId();
+    });
 }
