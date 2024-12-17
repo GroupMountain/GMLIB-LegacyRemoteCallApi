@@ -1,5 +1,5 @@
 /** 静态悬浮字类 */
-declare class StaticFloatingText {
+export class StaticFloatingText {
     constructor(
         /** 生成的坐标 */
         pos: FloatPos,
@@ -73,7 +73,7 @@ declare class StaticFloatingText {
 }
 
 /** 动态悬浮字类 */
-declare class DynamicFloatingText extends StaticFloatingText {
+export class DynamicFloatingText extends StaticFloatingText {
     constructor(
         /** 生成的坐标 */
         pos: FloatPos,
@@ -113,7 +113,7 @@ declare class DynamicFloatingText extends StaticFloatingText {
 }
 
 /** 基础游戏API类 */
-declare class Minecraft {
+export class Minecraft {
     private constructor();
 
     /** 获取服务器平均tps */
@@ -393,7 +393,7 @@ declare class Minecraft {
 }
 
 /** 合成表类 */
-declare class Recipes {
+export class Recipes {
     private constructor();
 
     /** 注销合成表 */
@@ -534,7 +534,7 @@ declare class Recipes {
 }
 
 /** 实验性功能类 */
-declare class Experiments {
+export class Experiments {
     private constructor();
 
     /** 获取所有实验的id */
@@ -568,7 +568,7 @@ declare class Experiments {
 }
 
 /** 计分板类 */
-declare class Scoreboard {
+export class Scoreboard {
     private constructor();
 
     /** 获取所有跟踪实体 */
@@ -788,7 +788,7 @@ declare class Scoreboard {
 }
 
 /** 仿LSE的JsonConfigFile类 */
-declare class JsonConfig {
+export class JsonConfig {
     constructor(
         /** 文件路径 */
         path: string,
@@ -832,7 +832,7 @@ declare class JsonConfig {
 }
 
 /** JSON语言文件 */
-declare class JsonLanguage extends JsonConfig {
+export class JsonLanguage extends JsonConfig {
     /** 创建或打开一个 Json 语言文件 */
     constructor(
         /** 文件路径 */
@@ -851,7 +851,7 @@ declare class JsonLanguage extends JsonConfig {
 }
 
 /** JSON版翻译类 */
-declare class JsonI18n {
+export class JsonI18n {
     /** 加载翻译数据目录 */
     constructor(
         /** 目录 */
@@ -895,7 +895,7 @@ declare class JsonI18n {
 }
 
 /** 版本类 */
-declare class Version {
+export class Version {
     /** 创建版本对象 */
     constructor(
         /** 主版本号 */
@@ -944,7 +944,7 @@ declare class Version {
 }
 
 /** 翻译API类 */
-declare class I18nAPI {
+export class I18nAPI {
     private constructor();
 
     /** 获取键翻译 */
@@ -1005,7 +1005,7 @@ declare class I18nAPI {
 }
 
 /** 玩家信息存储类 */
-declare class UserCache {
+export class UserCache {
     private constructor();
 
     /** 根据uuid查xuid */
@@ -1122,7 +1122,7 @@ type PacketData = (
 );
 
 /** 二进制流数据包类 */
-declare class GMLIB_BinaryStream {
+export class GMLIB_BinaryStream {
     /** 数据包ID */
     #id: number;
     /** 数据包是否被销毁 */

@@ -1,4 +1,4 @@
-declare class PAPI {
+export class PAPI {
     /** 注册一个玩家PAPI变量 */
     static registerPlayerPlaceholder(
         /** PAPI调用函数 */
