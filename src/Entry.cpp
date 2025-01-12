@@ -1,12 +1,10 @@
 #include "Entry.h"
 #include "Global.h"
 
-ll::Logger logger(PLUGIN_NAME);
-
 namespace gmlib {
 
-std::unique_ptr<LegacyRemoteCallApi>& LegacyRemoteCallApi::getInstance() {
-    static std::unique_ptr<LegacyRemoteCallApi> instance;
+LegacyRemoteCallApi& LegacyRemoteCallApi::getInstance() {
+    static LegacyRemoteCallApi instance;
     return instance;
 }
 
@@ -18,14 +16,15 @@ bool LegacyRemoteCallApi::load() {
     Export_Event_API();
     Export_BinaryStream_API();
     // Export_Form_API();
-    logger.info("GMLIB-LegacyRemoteCallApi Loaded!");
-    logger.info(
+    auto logger = ll::io::LoggerRegistry::getInstance().getOrCreate(PLUGIN_NAME);
+    logger->info("GMLIB-LegacyRemoteCallApi Loaded!");
+    logger->info(
         "Loaded Version: {} with {}",
         fmt::format(fg(fmt::color::pink), "GMLIB-" + GMLIB::Version::getLibVersionString()),
         fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-" + LIB_VERSION.asString())
     );
-    logger.info("Author: GroupMountain");
-    logger.info("Repository: https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi");
+    logger->info("Author: GroupMountain");
+    logger->info("Repository: https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi");
     return true;
 }
 

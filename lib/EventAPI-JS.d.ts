@@ -1,251 +1,894 @@
-/** 事件监听接口 */
-declare class Event {
-    /** 生物捡起物品 */
-    static listen(
+export namespace Event {
+    /** 事件优先级 */
+    export enum EventPriority {
+        /** 最高 */
+        Highest = 0,
+        /** 高 */
+        High = 100,
+        /** 正常(推荐) */
+        Normal = 200,
+        /** 低 */
+        Low = 300,
+        /** 最低 */
+        Lowest = 400
+    }
+
+    /** 获取所有事件订阅 */
+    export function getListener(): Record<string, number[]>;
+
+    /** 获取事件订阅列表 */
+    export function getListener(
         /** 事件名 */
-        event: "onMobDie",
-        /** 监听函数 */
-        listener: (
-            /** 尝试捡起物品的实体对象 */
-            entity: Entity,
-            /** 掉落物实体对象 */
-            itemEntity: Entity
-        ) => boolean | void
+        eventName:
+            "ll::ServerStoppingEvent"
+            | "gmlib::ClientLoginAfterEvent"
+            | "gmlib::WeatherUpdateBeforeEvent"
+            | "gmlib::MobPickupItemBeforeEvent"
+            | "gmlib::ItemActorSpawnBeforeEvent"
+            | "gmlib::ItemActorSpawnAfterEvent"
+            | "gmlib::ActorChangeDimensionBeforeEvent"
+            | "gmlib::PlayerStopSleepBeforeEvent"
+            | "gmlib::DeathMessageAfterEvent"
+            | "gmlib::MobHurtAfterEvent"
+            | "gmlib::EndermanTakeBlockBeforeEvent"
+            | "gmlib::ActorChangeDimensionAfterEvent"
+            | "gmlib::DragonRespawnBeforeEvent"
+            | "gmlib::ProjectileCreateBeforeEvent"
+            | "gmlib::ProjectileCreateAfterEvent"
+            | "gmlib::SpawnWanderingTraderBeforeEvent"
+            | "gmlib::HandleRequestActionBeforeEvent"
+            | "gmlib::ContainerClosePacketSendAfterEvent"
+    ): number[];
+
+    /** 订阅事件是否存在 */
+    export function hasListener(
+        /** 事件ID */
+        eventId: number
     ): boolean;
 
-    /** 客户端登录后事件(不可以拦截) */
-    static listen(
-        /** 事件名 */
-        event: "onClientLogin",
-        /** 监听函数 */
-        listener: (
-            /** 玩家的游戏名字 */
-            realName: string,
-            /** 玩家的uuid */
-            uuid: string,
-            /** 玩家在服务端的xuid */
-            serverXuid: string,
-            /** 玩家在客户端的xuid */
-            clientXuid: string
+    /** 取消事件订阅 */
+    export function removeListener(
+        /** 事件ID */
+        eventId: number
+    ): boolean;
+
+    /** 获取订阅事件优先级 */
+    export function getListenerPriority(
+        /** 事件ID */
+        eventId: number
+    ): EventPriority | undefined;
+
+    /** 设置事件异常处理回调 */
+    export function setErrorHanlerCallback(
+        /** 回调 */
+        callback: (
+            /** 错误 */
+            error: Error,
+            /** 事件名 */
+            eventName: string,
+            /** 事件ID */
+            eventId: number,
+            /** 插件名 */
+            pluginName: string
         ) => void
     ): boolean;
 
-    /** 天气改变事件事件 */
-    static listen(
+    /** 监听事件(兼容旧版) */
+    export function listen(
         /** 事件名 */
-        event: "onWeatherChange",
-        /** 监听函数 */
-        listener: (
-            /** 雷暴天气等级 */
-            lightningLevel: number,
-            /** 雨天天气等级 */
-            rainLevel: number,
-            /** 雷暴持续时间（刻） */
-            lightningLastTick: number,
-            /** 雨天持续时间(刻) */
-            rainingLastTick: number
-        ) => boolean | void
+        eventName: "onServerStopping"
+            | "onClientLogin"
+            | "onWeatherChange"
+            | "onMobPick"
+            | "onItemTrySpawn"
+            | "onItemSpawned"
+            | "onEntityTryChangeDim"
+            | "onLeaveBed"
+            | "onDeathMessage"
+            | "onMobHurted"
+            | "onEndermanTake"
+            | "onEntityChangeDim"
+            | "onDragonRespawn"
+            | "onProjectileTryCreate"
+            | "onProjectileCreate"
+            | "onSpawnWanderingTrader"
+            | "onHandleRequestAction"
+            | "onSendContainerClosePacket",
+        /** 回调 */
+        callback: Function
     ): boolean;
 
-    /** 掉落物尝试生成 */
-    static listen(
-        event: "onItemTrySpawn",
-        listener: (
-            /** 物品对象 */
-            item: Item,
-            /** 尝试生成的坐标对象 */
-            pos: FloatPos,
-            /** 创建掉落物的实体uniqueId */
-            spawnerUniqueId: number
-        ) => boolean | void
-    ): boolean;
-
-    /** 掉落物生成完毕(不可以拦截) */
-    static listen(
+    /** 订阅事件 */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onItemSpawned",
-        /** 回调函数 */
-        listener: (
-            /** 物品对象 */
-            item: Item,
-            /** 掉落物实体对象 */
-            entity: Entity,
-            /** 实体生成的坐标 */
-            pos: FloatPos,
-            /** 创建掉落物的实体uniqueId */
-            spawnerUniqueId: number
-        ) => void
-    ): boolean;
+        eventName: string,
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: any[],
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 实体切换维度 */
-    static listen(
+    /** 订阅事件(服务器关闭事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onEntityTryChangeDim",
-        /** 回调函数 */
-        listener: (
-            /** 切换维度的实体对象 */
-            entity: Entity,
-            /** 前往到的维度ID */
-            dimid: number
-        ) => boolean | void
-    ): boolean;
+        eventName: "ll::ServerStoppingEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {},
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 实体切换维度后(不可拦截) */
-    static listen(
+    /** 订阅事件(客户端登录后事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onEntityChangeDim",
-        /** 回调函数 */
-        listener: (
-            /** 切换维度的实体对象 */
-            entity: Entity,
-            /** 前往到的维度ID */
-            fromDimid: number
-        ) => void
-    ): boolean;
+        eventName: "gmlib::ClientLoginAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 玩家名 */
+                0: string,
+                /** 玩家uuid */
+                1: string,
+                /** 玩家服务端xuid */
+                2: string,
+                /** 玩家客户端xuid */
+                3: string,
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 玩家下床 */
-    static listen(
+    /** 订阅事件(天气更新前事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onLeaveBed",
-        /** 回调函数 */
-        listener: (
-            /** 下床的玩家对象 */
-            player: Player
-        ) => boolean | void
-    ): boolean;
+        eventName: "gmlib::WeatherUpdateBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 雨天等级 */
+                0: number,
+                /** 雨天时间(tick) */
+                1: number,
+                /** 暴雨等级 */
+                2: number,
+                /** 暴雨时间(tick) */
+                3: number,
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 触发死亡信息(不可以拦截) */
-    static listen(
+    /** 订阅事件(天气更新后事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onDeathMessage",
-        /** 回调函数 */
-        listener: (
-            /** 死亡信息键名 */
-            deathMsgKey: string,
-            /** 死亡信息翻译参数 */
-            deathMsgParams: string[],
-            /** 死亡实体的实体对象 */
-            entity: Entity
-        ) => void
-    ): boolean;
+        eventName: "gmlib::WeatherUpdateAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 雨天等级 */
+                0: number,
+                /** 雨天时间(tick) */
+                1: number,
+                /** 暴雨等级 */
+                2: number,
+                /** 暴雨时间(tick) */
+                3: number,
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 实体受伤后事件 */
-    static listen(
+    /** 订阅事件(实体捡起物品前事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onMobHurted",
-        /** 回调函数 */
-        listener: (
-            /** 受伤的实体对象 */
-            entity: Entity,
-            /** 造成伤害的实体对象 */
-            source: Entity,
-            /** 伤害值 */
-            damage: number,
-            /** 伤害类型 */
-            cause: number
-        ) => void
-    ): boolean;
+        eventName: "gmlib::MobPickupItemBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 捡起物品的实体 */
+                0: Entity,
+                /** 掉落物 */
+                1: Entity
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 末影人搬起方块 */
-    static listen(
+    /** 订阅事件(实体捡起物品后事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onEndermanTake",
-        /** 回调函数 */
-        listener: (
-            /** 末影人实体对象 */
-            entity: Entity
-        ) => boolean | void
-    ): boolean;
+        eventName: "gmlib::MobPickupItemAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 捡起物品的实体 */
+                0: Entity,
+                /** 掉落物 */
+                1: Entity
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 末影龙重生事件 */
-    static listen(
+    /** 订阅事件(掉落物生成前事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onDragonRespawn",
-        /** 回调函数 */
-        listener: (
-            /** 末影龙重生后的UniqueID */
-            uniqueID: number
-        ) => boolean | void
-    ): boolean;
+        eventName: "gmlib::ItemActorSpawnBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 物品 */
+                0: Item,
+                /** 生成坐标坐标 */
+                1: FloatPos,
+                /** 生成此物品主人的uniqueId (-1为不存在) */
+                2: number
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 弹射物实体尝试创建 */
-    static listen(
+    /** 订阅事件(掉落物生成后事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onProjectileTryCreate",
-        /** 回调函数 */
-        listener: (
-            /** 弹射物实体对象 */
-            entity: Entity,
-            /** 创建弹射的实体的uniqueID */
-            uniqueId: number
-        ) => boolean | void
-    ): boolean;
+        eventName: "gmlib::ItemActorSpawnAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 物品实体对象 */
+                0: Entity,
+                /** 生成坐标坐标 */
+                1: FloatPos,
+                /** 生成此物品主人的uniqueId (-1为不存在) */
+                2: number
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 弹射物实体成功后(不可拦截) */
-    static listen(
+    /** 订阅事件(实体切换维度前事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onProjectileCreate",
-        /** 回调函数 */
-        listener: (
-            /** 弹射物实体对象 */
-            entity: Entity,
-            /** 创建弹射的实体的uniqueID */
-            uniqueId: number
-        ) => void
-    ): boolean;
+        eventName: "gmlib::ActorChangeDimensionBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 切换维度的实体 */
+                0: Entity,
+                /** 前往的维度ID */
+                1: number
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 生成流浪商人 */
-    static listen(
+    /** 订阅事件(事件切换维度后事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onSpawnWanderingTrader",
-        /** 回调函数 */
-        listener: (
-            /** 生成的坐标 */
-            pos: IntPos
-        ) => boolean | void
-    ): boolean;
+        eventName: "gmlib::ActorChangeDimensionAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 切换维度的实体 */
+                0: Entity,
+                /** 原来的维度ID */
+                1: number,
+                /** 前往的维度ID */
+                2: number
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 处理物品请求 */
-    static listen(
+    /** 订阅事件(玩家开始睡觉前事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onHandleRequestAction",
-        /** 回调函数 */
-        listener: (
-            /** 请求玩家 */
-            player: Player,
-            /** 请求类型 */
-            actionType: string,
-            /** 请求数量 */
-            count: number,
-            /** 第一个格子的容器类型 */
-            sourceContainerNetId: string,
-            /** 第一个格子的槽位 */
-            sourceSlot: number,
-            /** 第二个格子的容器类型 */
-            destinationContainerNetId: string,
-            /** 第二个格子的槽位 */
-            destinationSlot: number
-        ) => boolean | void
-    ): boolean;
+        eventName: "gmlib::PlayerStartSleepBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 睡觉的玩家 */
+                0: Player,
+                /** 床的坐标 */
+                1: IntPos
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 发送容器关闭数据包后(不可拦截) */
-    static listen(
+    /** 订阅事件(玩家开始睡觉后事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onSendContainerClosePacket",
-        /** 回调函数 */
-        listener: (
-            /** 要被关闭的玩家 */
-            player: Player,
-            /** 容器ID */
-            containerId: number
-        ) => void
-    ): boolean;
+        eventName: "gmlib::PlayerStartSleepAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 睡觉的玩家 */
+                0: Player,
+                /** 床的坐标 */
+                1: IntPos,
+                /** 睡觉的结果 */
+                2: number
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 
-    /** 关闭服务器(不可拦截) */
-    static listen(
+    /** 订阅事件(玩家停止睡觉前事件) */
+    export function emplaceListener(
         /** 事件名 */
-        event: "onServerStopping",
-        /** 回调函数 */
-        listener: () => void
-    ): boolean;
+        eventName: "gmlib::PlayerStopSleepBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 睡觉的玩家 */
+                0: Player,
+                /** forcefulWakeUp */
+                1: boolean,
+                /** updateLevelList */
+                2: boolean
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(玩家停止睡觉后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::PlayerStopSleepAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 睡觉的玩家 */
+                0: Player,
+                /** forcefulWakeUp */
+                1: boolean,
+                /** updateLevelList */
+                2: boolean
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(生成死亡消息后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::DeathMessageAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 键名 */
+                0: string,
+                /** 翻译参数 */
+                1: string[],
+                /** 死亡的实体 */
+                2: Entity
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(实体受伤后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::MobHurtAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 受伤的实体 */
+                0: Entity,
+                /** 伤害来源 */
+                1: Entity,
+                /** 伤害值 */
+                2: number,
+                /** 伤害类型 */
+                3: DamageCause
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(末影人搬运方块前事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::EndermanTakeBlockBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 末影人实体 */
+                0: Entity
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(末影龙复活前事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::DragonRespawnBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {},
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(末影龙复活后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::DragonRespawnAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 末影龙实体 */
+                0: Entity
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(投射物创建前事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::ProjectileCreateBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 投射物实体 */
+                0: Entity,
+                /** 创建投射物实体的uniqueId */
+                1: number
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(投射物创建后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::ProjectileCreateAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 投射物实体 */
+                0: Entity,
+                /** 创建投射物实体的uniqueId */
+                1: number
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(生成流浪商人前事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::SpawnWanderingTraderBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 出现的坐标 */
+                0: IntPos
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(生成流浪商人后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::SpawnWanderingTraderAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 出现的坐标 */
+                0: IntPos
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(处理物品请求前事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::HandleRequestActionBeforeEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 请求的玩家 */
+                0: Player,
+                /** 请求类型 */
+                1: string,
+                /** 请求数量 */
+                2: number,
+                /** 请求原容器类型 */
+                3: string,
+                /** 请求原容器槽位 */
+                4: number,
+                /** 请求前往的容器类型 */
+                5: string,
+                /** 请求前往的槽位 */
+                6: number
+            },
+            /** 拦截事件 */
+            cancel: () => void,
+            /** 设置拦截状态 */
+            setCancelled: (
+                /** 是否拦截  */
+                value: boolean
+            ) => void,
+            /** 是否被拦截 */
+            isCancelled: () => boolean,
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(处理物品请求后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::HandleRequestActionAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 请求的玩家 */
+                0: Player,
+                /** 请求类型 */
+                1: string,
+                /** 请求数量 */
+                2: number,
+                /** 请求原容器类型 */
+                3: string,
+                /** 请求原容器槽位 */
+                4: number,
+                /** 请求前往的容器类型 */
+                5: string,
+                /** 请求前往的槽位 */
+                6: number
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
+
+    /** 订阅事件(玩家关闭容器后事件) */
+    export function emplaceListener(
+        /** 事件名 */
+        eventName: "gmlib::ContainerClosePacketSendAfterEvent",
+        /** 回调 */
+        callback: (event: {
+            /** 事件参数 */
+            params: {
+                /** 关闭的玩家 */
+                0: Player,
+                /** 容器会话ID */
+                1: number,
+                /** 由服务器关闭 */
+                2: boolean
+            },
+            /** 获取事件ID */
+            getId: () => number,
+            /** 获取事件类型 */
+            getEventType: () => string
+        }) => void,
+        /** 优先级 */
+        priority?: Event.EventPriority,
+        /** 插件名 */
+        pluginName?: string
+    ): number;
 }

@@ -1,5 +1,5 @@
 /** 静态悬浮字类 */
-declare class StaticFloatingText {
+export class StaticFloatingText {
     constructor(
         /** 生成的坐标 */
         pos: FloatPos,
@@ -73,7 +73,7 @@ declare class StaticFloatingText {
 }
 
 /** 动态悬浮字类 */
-declare class DynamicFloatingText extends StaticFloatingText {
+export class DynamicFloatingText extends StaticFloatingText {
     constructor(
         /** 生成的坐标 */
         pos: FloatPos,
@@ -113,7 +113,7 @@ declare class DynamicFloatingText extends StaticFloatingText {
 }
 
 /** 基础游戏API类 */
-declare class Minecraft {
+export class Minecraft {
     private constructor();
 
     /** 获取服务器平均tps */
@@ -393,7 +393,7 @@ declare class Minecraft {
 }
 
 /** 合成表类 */
-declare class Recipes {
+export class Recipes {
     private constructor();
 
     /** 注销合成表 */
@@ -534,7 +534,7 @@ declare class Recipes {
 }
 
 /** 实验性功能类 */
-declare class Experiments {
+export class Experiments {
     private constructor();
 
     /** 获取所有实验的id */
@@ -568,7 +568,7 @@ declare class Experiments {
 }
 
 /** 计分板类 */
-declare class Scoreboard {
+export class Scoreboard {
     private constructor();
 
     /** 获取所有跟踪实体 */
@@ -788,7 +788,7 @@ declare class Scoreboard {
 }
 
 /** 仿LSE的JsonConfigFile类 */
-declare class JsonConfig {
+export class JsonConfig {
     constructor(
         /** 文件路径 */
         path: string,
@@ -832,7 +832,7 @@ declare class JsonConfig {
 }
 
 /** JSON语言文件 */
-declare class JsonLanguage extends JsonConfig {
+export class JsonLanguage extends JsonConfig {
     /** 创建或打开一个 Json 语言文件 */
     constructor(
         /** 文件路径 */
@@ -851,7 +851,7 @@ declare class JsonLanguage extends JsonConfig {
 }
 
 /** JSON版翻译类 */
-declare class JsonI18n {
+export class JsonI18n {
     /** 加载翻译数据目录 */
     constructor(
         /** 目录 */
@@ -895,7 +895,7 @@ declare class JsonI18n {
 }
 
 /** 版本类 */
-declare class Version {
+export class Version {
     /** 创建版本对象 */
     constructor(
         /** 主版本号 */
@@ -944,7 +944,7 @@ declare class Version {
 }
 
 /** 翻译API类 */
-declare class I18nAPI {
+export class I18nAPI {
     private constructor();
 
     /** 获取键翻译 */
@@ -1005,7 +1005,7 @@ declare class I18nAPI {
 }
 
 /** 玩家信息存储类 */
-declare class UserCache {
+export class UserCache {
     private constructor();
 
     /** 根据uuid查xuid */
@@ -1122,21 +1122,31 @@ type PacketData = (
 );
 
 /** 二进制流数据包类 */
-declare class GMLIB_BinaryStream {
+export class GMLIB_BinaryStream {
     /** 数据包ID */
     #id: number;
     /** 数据包是否被销毁 */
     #destroy: boolean;
 
+    /** 构造二进流数据包 */
     constructor(
         /** 数据包数据 */
         data: PacketData[]?
     );
 
+    /** 拷贝二进制流数据包 */
+    constructor(
+        /** 要拷贝的二进制流数据包 */
+        stream: GMLIB_BinaryStream
+    );
+
+    /** 获取数据包的ID */
+    getId(): number;
+
     /** 发送数据包 */
     sendTo(
         /** 要发送数据包的玩家对象 */
-        player: Player,
+        player: Player | Entity,
         /** 数据包发送后是否销毁 */
         free: boolean = true
     ): GMLIB_BinaryStream;
@@ -1144,7 +1154,7 @@ declare class GMLIB_BinaryStream {
     /** 发送数据包到玩家数组 */
     sendToPlayers(
         /** 要发送数据包的玩家对象数组 */
-        players: Player[],
+        players: Player[] | Entity[],
         /** 数据包发送后是否销毁 */
         free: boolean = true
     ): GMLIB_BinaryStream;
@@ -1337,6 +1347,165 @@ declare class GMLIB_BinaryStream {
     ): GMLIB_BinaryStream;
 }
 
+export enum ActorType {
+    Undefined = 1,
+    TypeMask = 0b11111111,
+    None = 0,
+    Mob = 1 << 8,
+    PathfinderMob = 1 << 9 | Mob,
+    UnknownType = 1 << 10,
+    Monster = 1 << 11 | PathfinderMob,
+    Animal = 1 << 12 | PathfinderMob,
+    WaterAnimal = 1 << 13 | PathfinderMob,
+    TamableAnimal = 1 << 14 | Animal,
+    Ambient = 1 << 15 | Mob,
+    UndeadMob = 1 << 16 | Monster,
+    ZombieMonster = 1 << 17 | UndeadMob,
+    Arthropod = 1 << 18 | Monster,
+    Minecart = 1 << 19,
+    SkeletonMonster = 1 << 20 | UndeadMob,
+    EquineAnimal = 1 << 21 | TamableAnimal,
+    Projectile = 1 << 22,
+    AbstractArrow = 1 << 23,
+    VillagerBase = 1 << 24 | PathfinderMob,
+
+    Chicken = 10 | Animal,
+    Cow = 11 | Animal,
+    Pig = 12 | Animal,
+    Sheep = 13 | Animal,
+    Wolf = 14 | TamableAnimal,
+    Villager = 15 | VillagerBase,
+    MushroomCow = 16 | Animal,
+    Squid = 17 | WaterAnimal,
+    Rabbit = 18 | Animal,
+    Bat = 19 | Ambient,
+    IronGolem = 20 | PathfinderMob,
+    SnowGolem = 21 | PathfinderMob,
+    Ocelot = 22 | TamableAnimal,
+    Horse = 23 | EquineAnimal,
+    Donkey = 24 | EquineAnimal,
+    Mule = 25 | EquineAnimal,
+    SkeletonHorse = 26 | EquineAnimal | UndeadMob,
+    ZombieHorse = 27 | EquineAnimal | UndeadMob,
+    PolarBear = 28 | Animal,
+    Llama = 29 | Animal,
+    Parrot = 30 | TamableAnimal,
+    Dolphin = 31 | WaterAnimal,
+    Zombie = 32 | ZombieMonster,
+    Creeper = 33 | Monster,
+    Skeleton = 34 | SkeletonMonster,
+    Spider = 35 | Arthropod,
+    PigZombie = 36 | UndeadMob,
+    Slime = 37 | Monster,
+    EnderMan = 38 | Monster,
+    Silverfish = 39 | Arthropod,
+    CaveSpider = 40 | Arthropod,
+    Ghast = 41 | Monster,
+    LavaSlime = 42 | Monster,
+    Blaze = 43 | Monster,
+    ZombieVillager = 44 | ZombieMonster,
+    Witch = 45 | Monster,
+    Stray = 46 | SkeletonMonster,
+    Husk = 47 | ZombieMonster,
+    WitherSkeleton = 48 | SkeletonMonster,
+    Guardian = 49 | Monster,
+    ElderGuardian = 50 | Monster,
+    Npc = 51 | Mob,
+    WitherBoss = 52 | UndeadMob,
+    Dragon = 53 | Monster,
+    Shulker = 54 | Monster,
+    Endermite = 55 | Arthropod,
+    Agent = 56 | Mob,
+    Vindicator = 57 | Monster,
+    Phantom = 58 | UndeadMob,
+    IllagerBeast = 59 | Monster,
+    UNUSED60 = 60,
+    ArmorStand = 61 | Mob,
+    TripodCamera = 62 | Mob,
+    Player = 63 | Mob,
+    ItemEntity = 64 | None,
+    PrimedTnt = 65 | None,
+    FallingBlock = 66 | None,
+    MovingBlock = 67 | None,
+    ExperiencePotion = 68 | Projectile,
+    Experience = 69 | None,
+    EyeOfEnder = 70 | None,
+    EnderCrystal = 71 | None,
+    FireworksRocket = 72 | None,
+    Trident = 73 | Projectile | AbstractArrow,
+    Turtle = 74 | Animal,
+    Cat = 75 | TamableAnimal,
+    ShulkerBullet = 76 | Projectile,
+    FishingHook = 77 | None,
+    Chalkboard = 78 | None,
+    DragonFireball = 79 | Projectile,
+    Arrow = 80 | Projectile | AbstractArrow,
+    Snowball = 81 | Projectile,
+    ThrownEgg = 82 | Projectile,
+    Painting = 83 | None,
+    MinecartRideable = 84 | Minecart,
+    LargeFireball = 85 | Projectile,
+    ThrownPotion = 86 | Projectile,
+    Enderpearl = 87 | Projectile,
+    LeashKnot = 88 | None,
+    WitherSkull = 89 | Projectile,
+    BoatRideable = 90 | None,
+    WitherSkullDangerous = 91 | Projectile,
+    UNUSED92 = 92,
+    LightningBolt = 93 | None,
+    SmallFireball = 94 | Projectile,
+    AreaEffectCloud = 95 | None,
+    MinecartHopper = 96 | Minecart,
+    MinecartTNT = 97 | Minecart,
+    MinecartChest = 98 | Minecart,
+    MinecartFurnace = 99 | Minecart,
+    MinecartCommandBlock = 100 | Minecart,
+    LingeringPotion = 101 | Projectile,
+    LlamaSpit = 102 | Projectile,
+    EvocationFang = 103 | Projectile,
+    EvocationIllager = 104 | Monster,
+    Vex = 105 | Monster,
+    IceBomb = 106 | Projectile,
+    Balloon = 107 | None,
+    Pufferfish = 108 | WaterAnimal,
+    Salmon = 109 | WaterAnimal,
+    Drowned = 110 | ZombieMonster,
+    Tropicalfish = 111 | WaterAnimal,
+    Fish = 112 | WaterAnimal,
+    Panda = 113 | Animal,
+    Pillager = 114 | Monster,
+    VillagerV2 = 115 | VillagerBase,
+    ZombieVillagerV2 = 116 | ZombieMonster,
+    Shield = 117 | None,
+    WanderingTrader = 118 | PathfinderMob,
+    Lectern = 119 | None,
+    ElderGuardianGhost = 120 | Monster,
+    Fox = 121 | Animal,
+    Bee = 122 | Mob,
+    Piglin = 123 | Mob,
+    Hoglin = 124 | Animal,
+    Strider = 125 | Animal,
+    Zoglin = 126 | UndeadMob,
+    PiglinBrute = 127 | Mob,
+    Goat = 128 | Animal,
+    GlowSquid = 129 | WaterAnimal,
+    Axolotl = 130 | Animal,
+    Warden = 131 | Monster,
+    Frog = 132 | Animal,
+    Tadpole = 133 | WaterAnimal,
+    Allay = 134 | Mob,
+    ChestBoatRideable = 136 | BoatRideable,
+    TraderLlama = 137 | Llama,
+    Camel = 138 | Animal,
+    Sniffer = 139 | Animal,
+    Breeze = 140 | Monster,
+    BreezeWindChargeProjectile = 141 | Projectile,
+    Armadillo = 142 | Animal,
+    WindChargeProjectile = 143 | Projectile,
+    Bogged = 144 | SkeletonMonster,
+    OminousItemSpawner = 145
+}
+
 interface Player {
     /** (GMLIB)转换成实体对象 */
     toEntity(): Entity;
@@ -1509,6 +1678,21 @@ interface Entity {
         /** 是否显示粒子效果 */
         ShowParticles: boolean
     }[];
+
+    /** 实体是否为某类型 */
+    isType(
+        /** 实体类型 */
+        type: ActorType
+    ): boolean;
+
+    /** 实体是否包含某类型 */
+    hasType(
+        /** 实体类型 */
+        type: ActorType
+    ): boolean;
+
+    /** 获取实体类型ID */
+    getEntityTypeId(): ActorType;
 }
 
 interface Block {
@@ -1532,9 +1716,6 @@ interface Block {
 
     /** (GMLIB) */
     canDropWithAnyTool(): boolean;
-
-    /** (GMLIB)方块是否不需要工具采集 */
-    isAlwaysDestroyable(): boolean;
 
     /** (GMLIB)检测方块是否能被玩家挖掘(比如插件拦截) */
     playerWillDestroy(
@@ -1573,9 +1754,6 @@ interface Item {
         /** 挖掘的方块对象 */
         block: Block
     ): boolean;
-
-    /** (GMLIB)获取物品可以拥有的附魔 */
-    getLegalEnchants(): string[]
 
     /** (GMLIB)添加附魔 */
     applyEnchant(
