@@ -15,7 +15,7 @@ public:
         auto nextId = getNextId();
         cretateBinaryStream(nextId);
         if(auto bs = getBinaryStream(nextId); bs !=nullptr){
-            *getBinaryStream(nextId)->mBuffer = *getBinaryStream(id)->mBuffer;
+            getBinaryStream(nextId)->mBuffer = getBinaryStream(id)->mBuffer;
         }
         return nextId;
     }

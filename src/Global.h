@@ -11,8 +11,6 @@
 
 #define LIB_VERSION GMLIB::Version(LIB_VERSION_MAJOR, LIB_VERSION_MINOR, LIB_VERSION_PATCH)
 
-extern ll::Logger logger;
-
 extern void Export_Legacy_GMLib_ModAPI();
 extern void Export_Legacy_GMLib_ServerAPI();
 extern void Export_Compatibility_API();

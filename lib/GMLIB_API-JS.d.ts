@@ -1717,9 +1717,6 @@ interface Block {
     /** (GMLIB) */
     canDropWithAnyTool(): boolean;
 
-    /** (GMLIB)方块是否不需要工具采集 */
-    isAlwaysDestroyable(): boolean;
-
     /** (GMLIB)检测方块是否能被玩家挖掘(比如插件拦截) */
     playerWillDestroy(
         /** 挖掘的玩家对象 */
@@ -1757,9 +1754,6 @@ interface Item {
         /** 挖掘的方块对象 */
         block: Block
     ): boolean;
-
-    /** (GMLIB)获取物品可以拥有的附魔 */
-    getLegalEnchants(): string[]
 
     /** (GMLIB)添加附魔 */
     applyEnchant(

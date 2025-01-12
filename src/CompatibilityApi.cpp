@@ -1,3 +1,4 @@
+#include "GMLIB/Mod/CustomRecipe/CustomRecipe.h"
 #include "Global.h"
 #include <regex>
 
@@ -7,7 +8,7 @@ bool isInteger(const std::string& str) {
 }
 
 ActorUniqueID parseScriptUniqueID(std::string const& uniqueId) {
-    return isInteger(uniqueId) ? ActorUniqueID(std::stoll(uniqueId)) : ActorUniqueID::INVALID_ID;
+    return isInteger(uniqueId) ? ActorUniqueID(std::stoll(uniqueId)) : ActorUniqueID::INVALID_ID();
 }
 
 void Export_Compatibility_API() {
@@ -394,7 +395,7 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getAllScoreboardEntities", []() -> std::vector<std::string> {
         std::vector<std::string> result;
         for (auto& uniqueId : GMLIB_Scoreboard::getInstance()->getAllEntities()) {
-            result.push_back(std::to_string(uniqueId.id));
+            result.push_back(std::to_string(uniqueId.rawID));
         }
         return result;
     });
@@ -418,7 +419,7 @@ void Export_Compatibility_API() {
             for (auto& uniqueId : GMLIB_Scoreboard::getInstance()->getAllEntities()) {
                 result.push_back({
                     {"Type",     "Entity"                   },
-                    {"UniqueId", std::to_string(uniqueId.id)}
+                    {"UniqueId", std::to_string(uniqueId.rawID)}
                 });
             }
             return result;
@@ -431,7 +432,7 @@ void Export_Compatibility_API() {
         return ll::service::getLevel()->getPlayer(parseScriptUniqueID(uniqueId));
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityFromUniqueId", [](std::string const& uniqueId) -> Actor* {
-        return ll::service::getLevel()->fetchEntity(parseScriptUniqueID(uniqueId));
+        return ll::service::getLevel()->fetchEntity(parseScriptUniqueID(uniqueId), false);
     });
     RemoteCall::exportAs("GMLIB_API", "getWorldSpawn", []() -> std::pair<BlockPos, int> {
         return {GMLIB_Level::getInstance()->getWorldSpawn(), 0};
@@ -555,10 +556,7 @@ void Export_Compatibility_API() {
         return item->canDestroySpecial(*block);
     });
     RemoteCall::exportAs("GMLIB_API", "blockCanDropWithAnyTool", [](Block const* block) -> bool {
-        return block->canDropWithAnyTool();
-    });
-    RemoteCall::exportAs("GMLIB_API", "blockIsAlwaysDestroyable", [](Block const* block) -> bool {
-        return block->getMaterial().isAlwaysDestroyable();
+        return !block->requiresCorrectToolForDrops();
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -583,7 +581,7 @@ void Export_Compatibility_API() {
         "getBlockLightEmission",
         [](std::string const& blockName, short legacyData) -> char {
             return Block::tryGetFromRegistry(blockName)
-                .transform([](const Block& block) -> char { return (char)block.getLightEmission().value; })
+                .transform([](const Block& block) -> char { return (char)block.getLightEmission().mValue; })
                 .value_or(-1);
         }
     );
@@ -622,13 +620,6 @@ void Export_Compatibility_API() {
             return result;
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "getLegalEnchants", [](ItemStack const* item) -> std::vector<std::string> {
-        std::vector<std::string> result;
-        for (auto& enchant : EnchantUtils::getLegalEnchants(item->getItem())) {
-            result.push_back(Enchant::getEnchant((Enchant::Type)enchant)->getStringId());
-        }
-        return result;
-    });
     RemoteCall::exportAs("GMLIB_API", "getEnchantTypeNameFromId", [](int id) -> std::string {
         if (auto enchant = Enchant::getEnchant((Enchant::Type)id)) {
             return std::string(enchant->getStringId());
@@ -669,10 +660,10 @@ void Export_Compatibility_API() {
         [](Player* player, ItemStack const* item, bool randomly) -> bool { return player->drop(*item, randomly); }
     );
     RemoteCall::exportAs("GMLIB_API", "getPlayerRuntimeId", [](Player* player) -> uint64 {
-        return player->getRuntimeID().id;
+        return player->getRuntimeID().rawID;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityRuntimeId", [](Actor* entity) -> uint64 {
-        return entity->getRuntimeID().id;
+        return entity->getRuntimeID().rawID;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityNameTag", [](Actor* entity) -> std::string {
         return entity->getNameTag();
@@ -730,7 +721,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getPlayerHungry", [](Player* player) -> float {
-        return player->getMutableAttribute(Player::HUNGER)->getCurrentValue();
+        return player->getMutableAttribute(Player::HUNGER())->getCurrentValue();
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerArmorCoverPercentage", [](Player* player) -> float {
         return player->getArmorCoverPercentage();
@@ -739,7 +730,7 @@ void Export_Compatibility_API() {
         return player->getArmorValue();
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityOwnerUniqueId", [](Actor* entity) -> int64 {
-        return entity->getOwnerId().id;
+        return entity->getOwnerId().rawID;
     });
     RemoteCall::exportAs("GMLIB_API", "getItemCategoryName", [](ItemStack const* item) -> std::string {
         return item->getCategoryName();
@@ -757,7 +748,7 @@ void Export_Compatibility_API() {
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "setPlayerUIItem", [](Player* player, int slot, ItemStack const* item) -> void {
-        player->setPlayerUIItem((PlayerUISlot)slot, *item);
+        player->setPlayerUIItem((PlayerUISlot)slot, *item, false);
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerUIItem", [](Player* player, int slot) -> ItemStack* {
         return const_cast<ItemStack*>(&player->getPlayerUIItem((PlayerUISlot)slot));
@@ -792,25 +783,25 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDuration", [](Actor* entity, int effectId) -> int {
         if (auto effect = entity->getEffect(effectId)) {
-            return effect->mDuration;
+            return effect->mDuration->mValue;
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationEasy", [](Actor* entity, int effectId) -> int {
         if (auto effect = entity->getEffect(effectId)) {
-            return effect->mDurationEasy;
+            return effect->mDurationEasy->transform([](auto&& duration) -> int { return duration.mValue; }).value_or(0);
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationHard", [](Actor* entity, int effectId) -> int {
         if (auto effect = entity->getEffect(effectId)) {
-            return effect->mDurationHard;
+            return effect->mDurationHard->transform([](auto&& duration) -> int { return duration.mValue; }).value_or(0);
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationNormal", [](Actor* entity, int effectId) -> int {
         if (auto effect = entity->getEffect(effectId)) {
-            return effect->mDurationNormal;
+            return effect->mDurationNormal->transform([](auto&& duration) -> int { return duration.mValue; }).value_or(0);
         }
         return 0;
     });
@@ -857,7 +848,13 @@ void Export_Compatibility_API() {
             std::vector<Recipes::Type> types;
             char                       rt = 'A';
             for (auto& ing : ingredients) {
-                types.emplace_back(ing, rt++, 1, 0);
+                auto ingredient = RecipeIngredient{ing, 0,1};
+                types.push_back(Recipes::Type{
+                    (Item*)ingredient.getItem(),
+                    ingredient.getBlock(),
+                    ingredient,
+                    rt++
+                });
             }
             GMLIB::Mod::CustomRecipe::registerShapelessCraftingTableRecipe(recipe_id, types, *result);
         }
@@ -873,9 +870,23 @@ void Export_Compatibility_API() {
             std::vector<Recipes::Type> types;
             char                       rt = 'A';
             for (auto& ing : ingredients) {
-                types.emplace_back(ing, rt++, 1, 0);
+                auto ingredient = RecipeIngredient{ing, 0, 1};
+                types.push_back(Recipes::Type{(Item*)ingredient.getItem(), ingredient.getBlock(), ingredient, rt++});
             }
-            GMLIB::Mod::CustomRecipe::registerShapedCraftingTableRecipe(recipe_id, shape, types, *result);
+            auto tmp     = RecipeUnlockingRequirement();
+            tmp.mContext = RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked;
+            ll::service::bedrock::getLevel()->getRecipes().addShapedRecipe(
+                recipe_id,
+                ItemInstance(*result),
+                shape,
+                types,
+                {"crafting_table"},
+                50,
+                nullptr,
+                tmp,
+                SemVersion(1, 20, 80, "", ""),
+                true
+            );
         }
     );
     RemoteCall::exportAs("GMLIB_API", "entityIsType", [](Actor* entity, int type) -> bool {

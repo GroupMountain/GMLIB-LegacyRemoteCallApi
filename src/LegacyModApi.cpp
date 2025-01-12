@@ -149,7 +149,7 @@ void Export_Legacy_GMLib_ModAPI() {
         if (set.contains((AllExperiments)experiment_id)) {
             GMLIB_Level::addExperimentsRequire((AllExperiments)experiment_id);
         } else {
-            ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
+            ll::io::LoggerRegistry::getInstance().getOrCreate("Server")->error("Experiment ID '{}' does not exist!", experiment_id);
         }
     });
     RemoteCall::exportAs("GMLib_ModAPI", "setExperimentEnabled", [](int experiment_id, bool value) -> void {
@@ -158,7 +158,7 @@ void Export_Legacy_GMLib_ModAPI() {
             std::unordered_set<AllExperiments> set(list.begin(), list.end());
             if (set.contains((AllExperiments)experiment_id)) {
                 GMLIB_Level::getInstance()->setExperimentEnabled(((AllExperiments)experiment_id), value);
-            } else ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
+            } else ll::io::LoggerRegistry::getInstance().getOrCreate("Server")->error("Experiment ID '{}' does not exist!", experiment_id);
         }
     });
     RemoteCall::exportAs("GMLib_ModAPI", "getExperimentEnabled", [](int experiment_id) -> bool {
@@ -168,7 +168,7 @@ void Export_Legacy_GMLib_ModAPI() {
             if (set.contains((AllExperiments)experiment_id)) {
                 return GMLIB_Level::getInstance()->getExperimentEnabled(((AllExperiments)experiment_id));
             }
-            ll::Logger("Server").error("Experiment ID '{}' does not exist!", experiment_id);
+            ll::io::LoggerRegistry::getInstance().getOrCreate("Server")->error("Experiment ID '{}' does not exist!", experiment_id);
         }
         return false;
     });

@@ -1,5 +1,4 @@
 #pragma once
-#include <span>
 #include <ll/api/mod/NativeMod.h>
 #include <ll/api/mod/RegisterHelper.h>
 
@@ -8,9 +7,9 @@ namespace gmlib {
 class LegacyRemoteCallApi {
 
 public:
-    static std::unique_ptr<LegacyRemoteCallApi>& getInstance();
+    static LegacyRemoteCallApi& getInstance();
 
-    LegacyRemoteCallApi(ll::mod::NativeMod& self) : mSelf(self) {}
+    LegacyRemoteCallApi() : mSelf(*ll::mod::NativeMod::current()) {}
 
     [[nodiscard]] ll::mod::NativeMod& getSelf() const { return mSelf; }
 

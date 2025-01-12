@@ -140,7 +140,7 @@ void Export_Event_API() {
                     (ItemStack * item, std::pair<Vec3, int> position, int64 spawnerUniqueId, bool isCancelled),
                     (&event.getItem(),
                      {event.getPosition(), event.getBlockSource().getDimensionId().id},
-                     event.getSpawner().has_value() ? event.getSpawner()->getOrCreateUniqueID().id : -1,
+                     event.getSpawner().has_value() ? event.getSpawner()->getOrCreateUniqueID().rawID : -1,
                      event.isCancelled()),
                     event.setCancelled(result);
                 );
@@ -151,7 +151,7 @@ void Export_Event_API() {
                     (Actor * item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
                     (&event.self(),
                      {event.getPosition(), event.getBlockSource().getDimensionId().id},
-                     event.getSpawner().has_value() ? event.getSpawner()->getOrCreateUniqueID().id : -1),
+                     event.getSpawner().has_value() ? event.getSpawner()->getOrCreateUniqueID().rawID : -1),
                     ,
                 );
             }
@@ -221,7 +221,7 @@ void Export_Event_API() {
                     Actor* source      = nullptr;
                     if (damageSource.isEntitySource()) {
                         auto uniqueId = damageSource.getDamagingEntityUniqueID();
-                        source        = ll::service::getLevel()->fetchEntity(uniqueId);
+                        source        = ll::service::getLevel()->fetchEntity(uniqueId, false);
                         if (source->getOwner()) source = source->getOwner();
                     }
                 );
@@ -254,7 +254,7 @@ void Export_Event_API() {
                     GMLIB::Event::EntityEvent::ProjectileCreateBeforeEvent,
                     (Actor * mob, int64 uniqueId, bool isCancelled),
                     (&event.self(),
-                     event.getShooter() ? event.getShooter()->getOrCreateUniqueID().id : -1,
+                     event.getShooter() ? event.getShooter()->getOrCreateUniqueID().rawID : -1,
                      event.isCancelled()),
                     event.setCancelled(result);
                 );
@@ -263,7 +263,7 @@ void Export_Event_API() {
                 REGISTER_EVENT_LISTEN(
                     GMLIB::Event::EntityEvent::ProjectileCreateAfterEvent,
                     (Actor * mob, int64 uniqueId),
-                    (&event.self(), event.getShooter() ? event.getShooter()->getOrCreateUniqueID().id : -1),
+                    (&event.self(), event.getShooter() ? event.getShooter()->getOrCreateUniqueID().rawID : -1),
                 );
             }
             case doHash("gmlib::SpawnWanderingTraderBeforeEvent"): {
@@ -299,10 +299,10 @@ void Export_Event_API() {
                             (Player*)&event.self(),
                             magic_enum::enum_name(requestAction.mActionType).data(),
                             (int)requestAction.mAmount,
-                            magic_enum::enum_name(requestAction.mSrc.mOpenContainerNetId).data(),
-                            (int)requestAction.mSrc.mSlot,
-                            magic_enum::enum_name(requestAction.mDst.mOpenContainerNetId).data(),
-                            (int)requestAction.mDst.mSlot,
+                            magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
+                            (int)requestAction.mSrc->mSlot,
+                            magic_enum::enum_name(requestAction.mDst->mFullContainerName.mName).data(),
+                            (int)requestAction.mDst->mSlot,
                             event.isCancelled()
                         ),
                         event.setCancelled(result);,
@@ -327,10 +327,10 @@ void Export_Event_API() {
                             (Player*)&event.self(),
                             magic_enum::enum_name(requestAction.mActionType).data(),
                             (int)requestAction.mAmount,
-                            magic_enum::enum_name(requestAction.mSrc.mOpenContainerNetId).data(),
-                            (int)requestAction.mSrc.mSlot,
-                            magic_enum::enum_name(requestAction.mDst.mOpenContainerNetId).data(),
-                            (int)requestAction.mDst.mSlot
+                            magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
+                            (int)requestAction.mSrc->mSlot,
+                            magic_enum::enum_name(requestAction.mDst->mFullContainerName.mName).data(),
+                            (int)requestAction.mDst->mSlot
                         ),
                         ,
                         auto& requestAction = (ItemStackRequestActionTransferBase&)event.getRequestAction();
@@ -342,7 +342,7 @@ void Export_Event_API() {
                     GMLIB::Event::PacketEvent::ContainerClosePacketSendAfterEvent,
                     (Player * player, int containerId, bool serverInitiatedClose, bool),
                     (event.getServerNetworkHandler()
-                         .getServerPlayer(event.getNetworkIdentifier(), event.getPacket().mClientSubId),
+                         ._getServerPlayer(event.getNetworkIdentifier(), event.getPacket().mClientSubId),
                      (int)event.getPacket().mContainerId,
                      event.getPacket().mServerInitiatedClose,
                      false),
