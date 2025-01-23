@@ -7,10 +7,10 @@ if not has_config("vs_runtime") then
     set_runtimes("MD")
 end
 
-add_requires("levilamina", {configs = {target_type = "server"}})
-add_requires("legacyremotecall")
-add_requires("gmlib")
-add_requires("levibuildscript")
+add_requires("levilamina 1.0.0-rc.3", {configs = {target_type = "server"}})
+add_requires("legacyremotecall 0.9.0-rc.1")
+add_requires("gmlib 0.13.10")
+add_requires("levibuildscript 0.3.0")
 
 target("GMLIB-LegacyRemoteCallApi")
     add_cxflags(
@@ -19,7 +19,10 @@ target("GMLIB-LegacyRemoteCallApi")
     )
     add_defines(
         "NOMINMAX",
-        "UNICODE"
+        "UNICODE",
+        "_HAS_CXX17",
+        "_HAS_CXX20",
+        "_HAS_CXX23"
     )
     add_files(
         "src/**.cpp"
@@ -35,7 +38,7 @@ target("GMLIB-LegacyRemoteCallApi")
     add_rules("@levibuildscript/linkrule")
     set_exceptions("none")
     set_kind("shared")
-    set_languages("c++23")
+    set_languages("cxx20")
     set_symbols("debug")
 
     after_build(function (target)

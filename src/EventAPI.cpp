@@ -1,4 +1,6 @@
 #include "Global.h"
+#include "ll/api/service/Bedrock.h"
+#include "ll/api/utils/ErrorUtils.h"
 using namespace ll::hash_utils;
 
 class EventManager {
@@ -26,6 +28,7 @@ public:
 
     bool removeListener(ullong id) {
         if (ll::event::EventBus::getInstance().removeListener(mEventIds[id])) {
+            ll::mod::NativeMod::current()->getLogger().warn("Removed listener with id {}", id);
             mEventIds[id] = nullptr;
             return true;
         }
@@ -296,7 +299,7 @@ void Export_Event_API() {
                             bool               isCancelled
                         ),
                         (
-                            (Player*)&event.self(),
+                            &event.self(),
                             magic_enum::enum_name(requestAction.mActionType).data(),
                             (int)requestAction.mAmount,
                             magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
@@ -324,7 +327,7 @@ void Export_Event_API() {
                             int                destinationSlot
                         ),
                         (
-                            (Player*)&event.self(),
+                            &event.self(),
                             magic_enum::enum_name(requestAction.mActionType).data(),
                             (int)requestAction.mAmount,
                             magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
@@ -341,8 +344,8 @@ void Export_Event_API() {
                 REGISTER_EVENT_LISTEN(
                     GMLIB::Event::PacketEvent::ContainerClosePacketSendAfterEvent,
                     (Player * player, int containerId, bool serverInitiatedClose, bool),
-                    (event.getServerNetworkHandler()
-                         ._getServerPlayer(event.getNetworkIdentifier(), event.getPacket().mClientSubId),
+                    (ll::service::getServerNetworkHandler()
+                         ->_getServerPlayer(event.getNetworkIdentifier(), event.getPacket().mClientSubId),
                      (int)event.getPacket().mContainerId,
                      event.getPacket().mServerInitiatedClose,
                      false),
