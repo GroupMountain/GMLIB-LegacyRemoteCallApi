@@ -1,29 +1,45 @@
 {
-    "format_version": 2,
+    "format_version": 3,
+    "format_uuid": "289f771f-2c9a-4d73-9f3f-8492495a924d",
     "tooth": "github.com/GroupMountain/GMLIB-LegacyRemoteCallApi",
-    "version": "0.13.6",
+    "version": "1.0.0-rc.1",
     "info": {
         "name": "GMLIB-LegacyRemoteCallApi",
         "description": "Legacy RemoteCall API for GMLIB",
-        "source": "github.com/GroupMountain/GMLIB-LegacyRemoteCallApi",
-        "author": "GroupMountain",
         "tags": [
-            "levilamina",
+            "platform:levilamina",
+            "type:mod",
             "gmlib",
             "lse",
             "library"
-        ]
+        ],
+        "avatar_url": "https://raw.githubusercontent.com/GroupMountain/GMLIB-LegacyRemoteCallApi/refs/heads/main/icon.jpg"
     },
-    "asset_url": "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v0.13.6/GMLIB-LegacyRemoteCallApi-windows-x64.zip",
-    "dependencies": {
-        "github.com/GroupMountain/GMLIB": ">=0.13.9"
-    },
-    "files": {
-        "place": [
-            {
-                "src": "GMLIB-LegacyRemoteCallApi/*",
-                "dest": "plugins/GMLIB-LegacyRemoteCallApi"
-            }
-        ]
-    }
+    "variants": [
+        {
+            "platform": "win-x64",
+            "dependencies": {
+                "github.com/LiteLDev/LeviLamina": ">=1.1.1",
+                "github.com/GroupMountain/GMLIB-Release": ">=1.0.0-rc.3"
+            },
+            "assets": [
+                {
+                    "type": "zip",
+                    "urls": [
+                        "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v$(version)/GMLIB-LegacyRemoteCallApi-windows-x64.zip"
+                    ],
+                    "placements": [
+                        {
+                            "type": "dir",
+                            "src": "GMLIB-LegacyRemoteCallApi",
+                            "dest": "plugins/GMLIB-LegacyRemoteCallApi/"
+                        }
+                    ]
+                }
+            ],
+            "remove_files": [
+                "plugins/GMLIB-LegacyRemoteCallApi"
+            ]
+        }
+    ]
 }

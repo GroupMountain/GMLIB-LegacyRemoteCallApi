@@ -9,17 +9,22 @@
 
 #define PLUGIN_NAME fmt::format(fg(fmt::color::light_green), "GMLIB-LRCA")
 
-#define LIB_VERSION_MAJOR 0
-#define LIB_VERSION_MINOR 13
-#define LIB_VERSION_PATCH 6
+#define LIB_VERSION_MAJOR    1
+#define LIB_VERSION_MINOR    0
+#define LIB_VERSION_PATCH    0
+#define LIB_VERSION_PRERELEASE "rc.1"
 
+#ifdef LIB_VERSION_PRERELEASE
+#define LIB_VERSION ll::data::Version(LIB_VERSION_MAJOR, LIB_VERSION_MINOR, LIB_VERSION_PATCH, LIB_VERSION_PRERELEASE)
+#else
 #define LIB_VERSION ll::data::Version(LIB_VERSION_MAJOR, LIB_VERSION_MINOR, LIB_VERSION_PATCH)
+#endif
 
-extern void Export_Legacy_GMLib_ModAPI();
-extern void Export_Legacy_GMLib_ServerAPI();
-extern void Export_Compatibility_API();
-extern void ExportPAPI();
-extern void Export_Event_API();
-extern void Export_BinaryStream_API();
+extern void                                  Export_Legacy_GMLib_ModAPI();
+extern void                                  Export_Legacy_GMLib_ServerAPI();
+extern void                                  Export_Compatibility_API();
+extern void                                  ExportPAPI();
+extern void                                  Export_Event_API();
+extern void                                  Export_BinaryStream_API();
 extern ll::thread::ThreadPoolExecutor const& getThreadPoolExecutor();
 // extern void Export_Form_API();

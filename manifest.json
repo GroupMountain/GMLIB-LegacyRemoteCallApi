@@ -1,7 +1,7 @@
 {
     "name": "${pluginName}",
     "entry": "${pluginFile}",
-    "version": "0.13.6",
+    "version": "1.0.0-rc.1",
     "author": "GroupMountain",
     "type": "native",
     "passive": true,
