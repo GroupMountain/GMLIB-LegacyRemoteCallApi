@@ -12,7 +12,7 @@ export class PAPI {
         pluginsName: string,
         /** PAPI变量 */
         PAPIName: string
-    ): boolean;
+    ): void;
 
     /** 注册一个服务器PAPI变量 */
     static registerServerPlaceholder(
@@ -25,7 +25,7 @@ export class PAPI {
         pluginsName: string,
         /** PAPI变量 */
         PAPIName: string
-    ): boolean;
+    ): void;
 
     /** 注册一个静态PAPI变量 */
     static registerStaticPlaceholder(
@@ -37,7 +37,7 @@ export class PAPI {
         PAPIName: string,
         /** 更新时间 */
         UpdateInterval: number
-    ): boolean;
+    ): void;
 
     /** 获取一个服务器变量的值 */
     static getValue(
