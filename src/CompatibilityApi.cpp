@@ -513,7 +513,7 @@ void Export_Compatibility_API() {
             .value_or(0);
     });
     RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKey", [](Block const* block) -> std::string {
-        return block->getLegacyBlock().mDescriptionId;
+        return block->getLegacyBlock().mDescriptionId + ".name";
     });
     RemoteCall::exportAs("GMLIB_API", "getItemTranslateKey", [](ItemStack* item) -> std::string {
         return item->getDescriptionId();

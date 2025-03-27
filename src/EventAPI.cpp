@@ -246,23 +246,23 @@ void Export_Event_API() {
                     (&event.self()),
                 );
             }
-            // case doHash("gmlib::ProjectileCreateBeforeEvent"): {
-            //     REGISTER_EVENT_LISTEN(
-            //         ila::mc::ProjectileCreateBeforeEvent,
-            //         (Actor * mob, int64 uniqueId, bool isCancelled),
-            //         (&event.self(),
-            //          event.getShooter() ? event.getShooter()->getOrCreateUniqueID().rawID : -1,
-            //          event.isCancelled()),
-            //         event.setCancelled(result);
-            //     );
-            // }
-            // case doHash("gmlib::ProjectileCreateAfterEvent"): {
-            //     REGISTER_EVENT_LISTEN(
-            //         GMLIB::Event::EntityEvent::ProjectileCreateAfterEvent,
-            //         (Actor * mob, int64 uniqueId),
-            //         (&event.self(), event.getShooter() ? event.getShooter()->getOrCreateUniqueID().rawID : -1),
-            //     );
-            // }
+            case doHash("gmlib::ProjectileCreateBeforeEvent"): {
+                REGISTER_EVENT_LISTEN(
+                    ila::mc::ProjectileCreateBeforeEvent,
+                    (Actor * mob, int64 uniqueId, bool isCancelled),
+                    (&event.self(),
+                     event.self().getOwnerId().rawID,
+                     event.isCancelled()),
+                    event.setCancelled(result);
+                );
+            }
+            case doHash("gmlib::ProjectileCreateAfterEvent"): {
+                REGISTER_EVENT_LISTEN(
+                    ila::mc::ProjectileCreateAfterEvent,
+                    (Actor * mob, int64 uniqueId),
+                    (&event.self(), event.self().getOwnerId().rawID),
+                );
+            }
             case doHash("gmlib::SpawnWanderingTraderBeforeEvent"): {
                 REGISTER_EVENT_LISTEN(
                     ila::mc::SpawnWanderingTraderBeforeEvent,
