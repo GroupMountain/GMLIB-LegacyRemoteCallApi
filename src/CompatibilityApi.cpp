@@ -15,18 +15,18 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getServerMspt", []() -> double {
         return GMLevel::getInstance().transform(
-                                             [](GMLevel& level) -> double { return level.getServerMspt(); }
+                                         [](GMLevel& level) -> double { return level.getServerMspt(); }
         ).value_or(0.0);
     });
     RemoteCall::exportAs("GMLIB_API", "getServerCurrentTps", []() -> float {
-        return GMLevel::getInstance()
-            .transform([](GMLevel& level) -> float { return level.getServerCurrentTps(); })
-            .value_or(0.0);
+        return GMLevel::getInstance().transform(
+                                         [](GMLevel& level) -> float { return level.getServerCurrentTps(); }
+        ).value_or(0.0);
     });
     RemoteCall::exportAs("GMLIB_API", "getServerAverageTps", []() -> double {
-        return GMLevel::getInstance()
-            .transform([](GMLevel& level) -> double { return level.getServerAverageTps(); })
-            .value_or(0.0);
+        return GMLevel::getInstance().transform(
+                                         [](GMLevel& level) -> double { return level.getServerAverageTps(); }
+        ).value_or(0.0);
     });
     RemoteCall::exportAs("GMLIB_API", "getAllPlayerUuids", []() -> std::vector<std::string> {
         std::vector<std::string> result;
@@ -59,7 +59,7 @@ void Export_Compatibility_API() {
                 GMCompoundTag::writeNbtTags(nbt2, *nbt, tags);
                 return player->setNbt(nbt2);
             }
-            return false;       
+            return false;
         }
     );
     RemoteCall::exportAs("GMLIB_API", "deletePlayerNbt", [](std::string const& uuid) -> bool {
@@ -116,7 +116,7 @@ void Export_Compatibility_API() {
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "removeFloatingTextFromPlayer", [](uint64 id, Player* pl) -> bool {
-        if (auto ft = FloatingTextManager::getInstance().get(id); !ft.expired()){
+        if (auto ft = FloatingTextManager::getInstance().get(id); !ft.expired()) {
             ft.lock()->removeFrom((GMPlayer&)*pl);
             return true;
         }
@@ -143,9 +143,13 @@ void Export_Compatibility_API() {
         }
         return false;
     });
-    RemoteCall::exportAs("GMLIB_API", "isVersionMatched", [](std::uint16_t a, std::uint16_t b, std::uint16_t c) -> bool {
-        return LIB_VERSION >= ll::data::Version(a, b, c, "", "");
-    });
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "isVersionMatched",
+        [](std::uint16_t a, std::uint16_t b, std::uint16_t c) -> bool {
+            return LIB_VERSION >= ll::data::Version(a, b, c, "", "");
+        }
+    );
     RemoteCall::exportAs("GMLIB_API", "getVersion_LRCA", []() -> std::string { return LIB_VERSION.to_string(); });
     RemoteCall::exportAs("GMLIB_API", "getVersion_GMLIB", []() -> std::string {
         return GMLIB_VERSION_TO_STRING(GMLIB_VERSION_MAJOR) "." GMLIB_VERSION_TO_STRING(GMLIB_VERSION_MINOR
@@ -406,7 +410,7 @@ void Export_Compatibility_API() {
             std::vector<std::unordered_map<std::string, std::string>> result;
             for (auto& player : GMScoreboard::getInstance()->getAllPlayers()) {
                 result.push_back({
-                    {"Type", "Player"       },
+                    {"Type", "Player"                   },
                     {"Uuid", player.getUUID().asString()}
                 });
             }
@@ -418,7 +422,7 @@ void Export_Compatibility_API() {
             }
             for (auto& uniqueId : GMScoreboard::getInstance()->getAllEntities()) {
                 result.push_back({
-                    {"Type",     "Entity"                   },
+                    {"Type",     "Entity"                      },
                     {"UniqueId", std::to_string(uniqueId.rawID)}
                 });
             }
@@ -440,10 +444,10 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "setWorldSpawn", [](std::pair<BlockPos, int> pos) -> bool {
         if (pos.second != 0) return false;
         GMLevel::getInstance()->getLevelData().setSpawnPos(pos.first);
-        auto pkt = SetSpawnPositionPacket();
+        auto pkt           = SetSpawnPositionPacket();
         pkt.mSpawnBlockPos = NetworkBlockPosition(pos.first);
         pkt.mDimensionType = 0;
-        pkt.mSpawnPosType = SpawnPositionType::WorldSpawn;
+        pkt.mSpawnPosType  = SpawnPositionType::WorldSpawn;
         pkt.sendToClients();
         return true;
     });
@@ -483,21 +487,21 @@ void Export_Compatibility_API() {
         return UserCache::getNameByXuid(xuid).value_or("");
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string const& xuid) -> std::string {
-        return UserCache::getUuidByXuid(xuid)
-            .transform([](mce::UUID&& uuid) -> std::string { return uuid.asString(); })
-            .value_or("");
+        return UserCache::getUuidByXuid(xuid).transform(
+                                                 [](mce::UUID&& uuid) -> std::string { return uuid.asString(); }
+        ).value_or("");
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        return UserCache::getUuidByName(name)
-            .transform([](mce::UUID&& uuid) -> std::string { return uuid.asString(); })
-            .value_or("");
+        return UserCache::getUuidByName(name).transform(
+                                                 [](mce::UUID&& uuid) -> std::string { return uuid.asString(); }
+        ).value_or("");
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "getAllPlayerInfo",
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
             std::vector<std::unordered_map<std::string, std::string>> result;
-            for (auto entry : UserCache::entries()){
+            for (auto entry : UserCache::entries()) {
                 result.push_back({
                     {"Name", entry.mName           },
                     {"Xuid", entry.mXuid           },
@@ -607,22 +611,22 @@ void Export_Compatibility_API() {
                 switch (gameRule.mType) {
                 case GameRule::Type::Bool:
                     result.push_back({
-                        {"Name",  gameRule.mName                },
-                        {"Type",  "Bool"                            },
+                        {"Name",  gameRule.mName                                        },
+                        {"Type",  "Bool"                                                },
                         {"Value", std::to_string(gameRule.mValue->mUnk29fff1.as<bool>())}
                     });
                     break;
                 case GameRule::Type::Float:
                     result.push_back({
-                        {"Name",  gameRule.mName                 },
-                        {"Type",  "Float"                            },
+                        {"Name",  gameRule.mName                                         },
+                        {"Type",  "Float"                                                },
                         {"Value", std::to_string(gameRule.mValue->mUnk768db5.as<float>())}
                     });
                     break;
                 case GameRule::Type::Int:
                     result.push_back({
-                        {"Name",  gameRule.mName               },
-                        {"Type",  "Int"                            },
+                        {"Name",  gameRule.mName                                       },
+                        {"Type",  "Int"                                                },
                         {"Value", std::to_string(gameRule.mValue->mUnk2ab4f3.as<int>())}
                     });
                     break;
@@ -634,7 +638,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getEnchantTypeNameFromId", [](size_t id) -> std::string {
-        if (id < Enchant::mEnchants().size()){
+        if (id < Enchant::mEnchants().size()) {
             return Enchant::mEnchants()[id]->mStringId->getString();
         }
         return "";
@@ -651,9 +655,7 @@ void Export_Compatibility_API() {
             );
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack* item) -> void {
-        item->removeEnchants();
-    });
+    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack* item) -> void { item->removeEnchants(); });
     RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack* item, std::string const& typeName) -> bool {
         return EnchantUtils::hasEnchant(Enchant::mEnchantNameToType()[HashedString(typeName)], *item);
     });
@@ -694,8 +696,8 @@ void Export_Compatibility_API() {
         auto nbt = ((GMItemStack*)item)->getNbt();
         if (value) {
             (*nbt)["tags"]["minecraft:keep_on_death"] = true;
-        }else{
-            if (nbt->contains("tags") && (*nbt)["tags"].contains("minecraft:keep_on_death")){
+        } else {
+            if (nbt->contains("tags") && (*nbt)["tags"].contains("minecraft:keep_on_death")) {
                 (*nbt)["tags"].get<CompoundTag>().erase("minecraft:keep_on_death");
             }
         }
@@ -766,7 +768,7 @@ void Export_Compatibility_API() {
         return entity->getOwnerId().rawID;
     });
     RemoteCall::exportAs("GMLIB_API", "getItemCategoryName", [](ItemStack const* item) -> std::string {
-        if (auto item2 = item->mItem){
+        if (auto item2 = item->mItem) {
             return item2->buildCategoryDescriptionName();
         }
         return "";
@@ -775,7 +777,7 @@ void Export_Compatibility_API() {
         return item->getCustomName();
     });
     RemoteCall::exportAs("GMLIB_API", "getItemEffecName", [](ItemStack const* item) -> std::string {
-        if (auto item2 = item->mItem){
+        if (auto item2 = item->mItem) {
             return item2->buildEffectDescriptionName(*item);
         }
         return "";
@@ -803,7 +805,9 @@ void Export_Compatibility_API() {
         return magic_enum::enum_name(container->mContainerType).data();
     });
     RemoteCall::exportAs("GMLIB_API", "hasPlayerNbt", [](std::string const& uuid) -> bool {
-        return OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid)).transform([&](auto&& player) -> bool { return player.hasNbt(); }).value_or(false);
+        return OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))
+            .transform([&](auto&& player) -> bool { return player.hasNbt(); })
+            .value_or(false);
     });
     RemoteCall::exportAs("GMLIB_API", "getItemMaxCount", [](ItemStack const* item) -> int {
         return item->getMaxStackSize();

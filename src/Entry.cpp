@@ -13,7 +13,7 @@ bool LegacyRemoteCallApi::load() {
     Export_Legacy_GMLib_ServerAPI();
     Export_Compatibility_API();
     ExportPAPI();
-    // Export_Event_API();
+    Export_Event_API();
     Export_BinaryStream_API();
     // Export_Form_API();
     auto logger = ll::io::LoggerRegistry::getInstance().getOrCreate(PLUGIN_NAME);

@@ -88,10 +88,7 @@ void Export_Event_API() {
                      std::string const& uuid,
                      std::string const& serverXuid,
                      std::string const& clientXuid),
-                    (event.realName(),
-                     event.uuid().asString(),
-                     event.serverAuthXuid(),
-                     event.clientAuthXuid()),
+                    (event.realName(), event.uuid().asString(), event.serverAuthXuid(), event.clientAuthXuid()),
                     if (result) event.disConnectClient();
                 );
             }
@@ -116,12 +113,10 @@ void Export_Event_API() {
                 );
             }
             case doHash("gmlib::MobPickupItemBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(
-                    ila::mc::ActorPickupItemBeforeEvent,
-                    (Actor * mob, Actor * item, bool isCancelled),
-                    (&event.self(), (Actor*)&event.itemActor(), event.isCancelled()),
-                    event.setCancelled(result);
-                );
+                REGISTER_EVENT_LISTEN(ila::mc::ActorPickupItemBeforeEvent,
+                                      (Actor * mob, Actor * item, bool isCancelled),
+                                      (&event.self(), (Actor*)&event.itemActor(), event.isCancelled()),
+                                      event.setCancelled(result););
             }
             case doHash("gmlib::MobPickupItemAfterEvent"): {
                 REGISTER_EVENT_LISTEN(
@@ -153,12 +148,10 @@ void Export_Event_API() {
                 );
             }
             case doHash("gmlib::ActorChangeDimensionBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(
-                    ila::mc::ActorChangeDimensionBeforeEvent,
-                    (Actor * entity, int toDimId, bool isCancelled),
-                    (&event.self(), event.toDimensionId(), event.isCancelled()),
-                    event.setCancelled(result);
-                );
+                REGISTER_EVENT_LISTEN(ila::mc::ActorChangeDimensionBeforeEvent,
+                                      (Actor * entity, int toDimId, bool isCancelled),
+                                      (&event.self(), event.toDimensionId(), event.isCancelled()),
+                                      event.setCancelled(result););
             }
             case doHash("gmlib::ActorChangeDimensionAfterEvent"): {
                 REGISTER_EVENT_LISTEN(
@@ -224,37 +217,25 @@ void Export_Event_API() {
             //     );
             // }
             case doHash("gmlib::EndermanTakeBlockBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(
-                    ila::mc::EndermanTakeBlockBeforeEvent,
-                    (Actor * mob, bool isCancelled),
-                    (&event.self(), event.isCancelled()),
-                    event.setCancelled(result);
-                );
+                REGISTER_EVENT_LISTEN(ila::mc::EndermanTakeBlockBeforeEvent,
+                                      (Actor * mob, bool isCancelled),
+                                      (&event.self(), event.isCancelled()),
+                                      event.setCancelled(result););
             }
             case doHash("gmlib::DragonRespawnBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(
-                    ila::mc::DragonRespawnBeforeEvent,
-                    (bool isCancelled),
-                    (event.isCancelled()),
-                    event.setCancelled(result);
-                );
+                REGISTER_EVENT_LISTEN(ila::mc::DragonRespawnBeforeEvent,
+                                      (bool isCancelled),
+                                      (event.isCancelled()),
+                                      event.setCancelled(result););
             }
             case doHash("gmlib::DragonRespawnAfterEvent"): {
-                REGISTER_EVENT_LISTEN(
-                    ila::mc::DragonRespawnAfterEvent,
-                    (Actor * mob),
-                    (&event.self()),
-                );
+                REGISTER_EVENT_LISTEN(ila::mc::DragonRespawnAfterEvent, (Actor * mob), (&event.self()), );
             }
             case doHash("gmlib::ProjectileCreateBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(
-                    ila::mc::ProjectileCreateBeforeEvent,
-                    (Actor * mob, int64 uniqueId, bool isCancelled),
-                    (&event.self(),
-                     event.self().getOwnerId().rawID,
-                     event.isCancelled()),
-                    event.setCancelled(result);
-                );
+                REGISTER_EVENT_LISTEN(ila::mc::ProjectileCreateBeforeEvent,
+                                      (Actor * mob, int64 uniqueId, bool isCancelled),
+                                      (&event.self(), event.self().getOwnerId().rawID, event.isCancelled()),
+                                      event.setCancelled(result););
             }
             case doHash("gmlib::ProjectileCreateAfterEvent"): {
                 REGISTER_EVENT_LISTEN(
@@ -264,12 +245,10 @@ void Export_Event_API() {
                 );
             }
             case doHash("gmlib::SpawnWanderingTraderBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(
-                    ila::mc::SpawnWanderingTraderBeforeEvent,
-                    (std::pair<BlockPos, int> pos, bool isCancelled),
-                    ({event.pos(), event.blockSource().getDimensionId()}, event.isCancelled()),
-                    event.setCancelled(result);
-                );
+                REGISTER_EVENT_LISTEN(ila::mc::SpawnWanderingTraderBeforeEvent,
+                                      (std::pair<BlockPos, int> pos, bool isCancelled),
+                                      ({event.pos(), event.blockSource().getDimensionId()}, event.isCancelled()),
+                                      event.setCancelled(result););
             }
             case doHash("gmlib::SpawnWanderingTraderAfterEvent"): {
                 REGISTER_EVENT_LISTEN(
@@ -278,74 +257,74 @@ void Export_Event_API() {
                     ({event.pos(), event.blockSource().getDimensionId()}),
                 );
             }
-            // case doHash("gmlib::HandleRequestActionBeforeEvent"): {
-            //     // clang-format off
-            //         REGISTER_EVENT_LISTEN(
-            //             GMLIB::Event::PlayerEvent::HandleRequestActionBeforeEvent,
-            //             (
-            //                 Player *           player,
-            //                 std::string const& actionType,
-            //                 int                count,
-            //                 std::string const& sourceContainerNetId,
-            //                 int                sourceSlot,
-            //                 std::string const& destinationContainerNetId,
-            //                 int                destinationSlot,
-            //                 bool               isCancelled
-            //             ),
-            //             (
-            //                 (Player*)&event.self(),
-            //                 magic_enum::enum_name(requestAction.mActionType).data(),
-            //                 (int)requestAction.mAmount,
-            //                 magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
-            //                 (int)requestAction.mSrc->mSlot,
-            //                 magic_enum::enum_name(requestAction.mDst->mFullContainerName.mName).data(),
-            //                 (int)requestAction.mDst->mSlot,
-            //                 event.isCancelled()
-            //             ),
-            //             event.setCancelled(result);,
-            //             auto& requestAction = (ItemStackRequestActionTransferBase&)event.getRequestAction();
-            //         );
-            //     // clang-format on
-            // }
-            // case doHash("gmlib::HandleRequestActionAfterEvent"): {
-            //     // clang-format off
-            //         REGISTER_EVENT_LISTEN(
-            //             GMLIB::Event::PlayerEvent::HandleRequestActionAfterEvent,
-            //             (
-            //                 Player *           player,
-            //                 std::string const& actionType,
-            //                 int                count,
-            //                 std::string const& sourceContainerNetId,
-            //                 int                sourceSlot,
-            //                 std::string const& destinationContainerNetId,
-            //                 int                destinationSlot
-            //             ),
-            //             (
-            //                 (Player*)&event.self(),
-            //                 magic_enum::enum_name(requestAction.mActionType).data(),
-            //                 (int)requestAction.mAmount,
-            //                 magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
-            //                 (int)requestAction.mSrc->mSlot,
-            //                 magic_enum::enum_name(requestAction.mDst->mFullContainerName.mName).data(),
-            //                 (int)requestAction.mDst->mSlot
-            //             ),
-            //             ,
-            //             auto& requestAction = (ItemStackRequestActionTransferBase&)event.getRequestAction();
-            //         );
-            //     // clang-format on
-            // }
-            // case doHash("gmlib::ContainerClosePacketSendAfterEvent"): {
-            //     REGISTER_EVENT_LISTEN(
-            //         GMLIB::Event::PacketEvent::ContainerClosePacketSendAfterEvent,
-            //         (Player * player, int containerId, bool serverInitiatedClose, bool),
-            //         (event.getServerNetworkHandler()
-            //              ._getServerPlayer(event.getNetworkIdentifier(), event.getPacket().mClientSubId),
-            //          (int)event.getPacket().mContainerId,
-            //          event.getPacket().mServerInitiatedClose,
-            //          false),
-            //         ,
-            //     );
-            // }
+                // case doHash("gmlib::HandleRequestActionBeforeEvent"): {
+                //     // clang-format off
+                //         REGISTER_EVENT_LISTEN(
+                //             GMLIB::Event::PlayerEvent::HandleRequestActionBeforeEvent,
+                //             (
+                //                 Player *           player,
+                //                 std::string const& actionType,
+                //                 int                count,
+                //                 std::string const& sourceContainerNetId,
+                //                 int                sourceSlot,
+                //                 std::string const& destinationContainerNetId,
+                //                 int                destinationSlot,
+                //                 bool               isCancelled
+                //             ),
+                //             (
+                //                 (Player*)&event.self(),
+                //                 magic_enum::enum_name(requestAction.mActionType).data(),
+                //                 (int)requestAction.mAmount,
+                //                 magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
+                //                 (int)requestAction.mSrc->mSlot,
+                //                 magic_enum::enum_name(requestAction.mDst->mFullContainerName.mName).data(),
+                //                 (int)requestAction.mDst->mSlot,
+                //                 event.isCancelled()
+                //             ),
+                //             event.setCancelled(result);,
+                //             auto& requestAction = (ItemStackRequestActionTransferBase&)event.getRequestAction();
+                //         );
+                //     // clang-format on
+                // }
+                // case doHash("gmlib::HandleRequestActionAfterEvent"): {
+                //     // clang-format off
+                //         REGISTER_EVENT_LISTEN(
+                //             GMLIB::Event::PlayerEvent::HandleRequestActionAfterEvent,
+                //             (
+                //                 Player *           player,
+                //                 std::string const& actionType,
+                //                 int                count,
+                //                 std::string const& sourceContainerNetId,
+                //                 int                sourceSlot,
+                //                 std::string const& destinationContainerNetId,
+                //                 int                destinationSlot
+                //             ),
+                //             (
+                //                 (Player*)&event.self(),
+                //                 magic_enum::enum_name(requestAction.mActionType).data(),
+                //                 (int)requestAction.mAmount,
+                //                 magic_enum::enum_name(requestAction.mSrc->mFullContainerName.mName).data(),
+                //                 (int)requestAction.mSrc->mSlot,
+                //                 magic_enum::enum_name(requestAction.mDst->mFullContainerName.mName).data(),
+                //                 (int)requestAction.mDst->mSlot
+                //             ),
+                //             ,
+                //             auto& requestAction = (ItemStackRequestActionTransferBase&)event.getRequestAction();
+                //         );
+                //     // clang-format on
+                // }
+                // case doHash("gmlib::ContainerClosePacketSendAfterEvent"): {
+                //     REGISTER_EVENT_LISTEN(
+                //         GMLIB::Event::PacketEvent::ContainerClosePacketSendAfterEvent,
+                //         (Player * player, int containerId, bool serverInitiatedClose, bool),
+                //         (event.getServerNetworkHandler()
+                //              ._getServerPlayer(event.getNetworkIdentifier(), event.getPacket().mClientSubId),
+                //          (int)event.getPacket().mContainerId,
+                //          event.getPacket().mServerInitiatedClose,
+                //          false),
+                //         ,
+                //     );
+                // }
             }
             return -1;
         }

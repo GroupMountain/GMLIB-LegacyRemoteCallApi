@@ -4,7 +4,7 @@
 
 class LegacyScriptBinaryStreamManager {
 private:
-    int64                                                           mNextBinaryStreamId = 0;
+    int64                                                       mNextBinaryStreamId = 0;
     std::unordered_map<uint64, std::shared_ptr<GMBinaryStream>> mBinaryStream;
 
 public:
@@ -15,7 +15,7 @@ public:
     uint64 copyBinaryStream(uint id) {
         auto nextId = getNextId();
         cretateBinaryStream(nextId);
-        if(auto bs = getBinaryStream(nextId); bs !=nullptr){
+        if (auto bs = getBinaryStream(nextId); bs != nullptr) {
             getBinaryStream(nextId)->mBuffer = getBinaryStream(id)->mBuffer;
         }
         return nextId;
