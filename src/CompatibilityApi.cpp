@@ -1,6 +1,5 @@
 #include "Global.h"
 #include <regex>
-#include <unordered_map>
 
 ActorUniqueID parseScriptUniqueID(std::string const& uniqueId) {
     return string_utils::isInteger(uniqueId) ? ActorUniqueID(std::stoll(uniqueId)) : ActorUniqueID::INVALID_ID();

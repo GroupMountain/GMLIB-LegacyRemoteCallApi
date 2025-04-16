@@ -20,7 +20,8 @@
             "platform": "win-x64",
             "dependencies": {
                 "github.com/LiteLDev/LeviLamina": ">=1.1.1",
-                "github.com/GroupMountain/GMLIB-Release": ">=1.0.0"
+                "github.com/GroupMountain/GMLIB-Release": ">=1.0.0",
+                "github.com/MiracleForest/iListenAttentively-Release": ">=0.4.1"
             },
             "assets": [
                 {

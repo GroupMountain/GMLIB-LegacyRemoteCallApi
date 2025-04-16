@@ -1,6 +1,4 @@
 #include "Global.h"
-#include <gmlib/mc/network/BinaryStream.h>
-#include <mc/world/item/NetworkItemStackDescriptor.h>
 
 class LegacyScriptBinaryStreamManager {
 private:

@@ -1,7 +1,4 @@
 #include "Global.h"
-#include "gmlib/mod/recipe/CustomRecipeRegistry.h"
-#include <gmlib/mc/world/Level.h>
-#include <mc/world/item/crafting/RecipeIngredient.h>
 
 std::unordered_set<std::string> HardCodedKeys = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
 
