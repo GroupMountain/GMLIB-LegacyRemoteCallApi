@@ -13,11 +13,12 @@ add_requires("legacyremotecall")
 add_requires("levibuildscript")
 add_requires("ilistenattentively")
 add_requires("gmlib")
- 
+
 target("GMLIB-LegacyRemoteCallApi")
     add_cxflags(
         "/EHa",
-        "/utf-8"
+        "/utf-8",
+        "/bigobj"
     )
     add_defines(
         "NOMINMAX",
