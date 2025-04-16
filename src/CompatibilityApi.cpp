@@ -1,17 +1,17 @@
 #include "Global.h"
 #include <regex>
+#include <unordered_map>
 
 ActorUniqueID parseScriptUniqueID(std::string const& uniqueId) {
-    return StringUtils::isInteger(uniqueId) ? ActorUniqueID(std::stoll(uniqueId)) : ActorUniqueID::INVALID_ID();
+    return string_utils::isInteger(uniqueId) ? ActorUniqueID(std::stoll(uniqueId)) : ActorUniqueID::INVALID_ID();
 }
 
 void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "unregisterRecipe", [](std::string const& id) -> bool {
-        // return GMLevel::getInstance().has_value() ? GMLIB::Mod::CustomRecipe::unregisterRecipe(id) : false;
-        throw std::runtime_error("GMLIB_API::unregisterRecipe is not implemented");
+        return CustomRecipeRegistry::getInstance().unregisterRecipe(id, true);
     });
     RemoteCall::exportAs("GMLIB_API", "setCustomPackPath", [](std::string const& path) -> void {
-        AddonsLoaderUtils::addCustomPackPath(path);
+        AddonsLoader::addCustomPackPath(path);
     });
     RemoteCall::exportAs("GMLIB_API", "getServerMspt", []() -> double {
         return GMLevel::getInstance().transform(
@@ -66,20 +66,21 @@ void Export_Compatibility_API() {
         return OfflinePlayer::deletePlayerNbt(mce::UUID::fromString(uuid));
     });
     RemoteCall::exportAs("GMLIB_API", "getAllExperiments", []() -> std::vector<int> {
-        // std::vector<int> result;
-        // for (auto& key : GMLevel::getAllExperiments()) {
-        //     result.push_back((int)key);
-        // }
-        // return result;
-        throw std::runtime_error("GMLIB_API::getAllExperiments is not implemented");
+        return {36, 45, 38, 48, 47, 53, 56, 45, 40};
     });
     RemoteCall::exportAs("GMLIB_API", "getExperimentTranslateKey", [](int id) -> std::string {
-        // std::string result;
-        // try {
-        //     result = Experiments::getExperimentTextID(AllExperiments(id));
-        // } catch (...) {}
-        // return result;
-        throw std::runtime_error("GMLIB_API::getExperimentTranslateKey is not implemented");
+        static std::unordered_map<int, std::string> mMap = {
+            {36, "createWorldScreen.experimentalbiomes"                    },
+            {45, "createWorldScreen.experimentalCreatorFeatures"           },
+            {38, "createWorldScreen.experimentalGameTest"                  },
+            {48, "createWorldScreen.experimentalThirdPersonCameras"        },
+            {47, "createWorldScreen.experimentalFocusTargetCamera"         },
+            {53, "createWorldScreen.experimentalVillagerTradesRebalance"   },
+            {56, "createWorldScreen.experimentalDataDrivenJigsawStructures"},
+            {45, "createWorldScreen.experimentalCameraAimAssist"           },
+            {40, "createWorldScreen.experimentalY2025Drop1"                }
+        };
+        return mMap.contains(id) ? mMap[id] : "";
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -213,8 +214,10 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setPlayerPosition",
         [](std::string const& uuid, std::pair<BlockPos, int> pos) -> bool {
-            // return GMPlayer::setPlayerPosition(mce::UUID::fromString(uuid), pos.first, pos.second);
-            throw std::runtime_error("GMLIB_API::setPlayerPosition is not implemented");
+            if (auto player = OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))) {
+                return player->setPosition(pos.first, pos.second);
+            }
+            return false;
         }
     );
     RemoteCall::exportAs("GMLIB_API", "playerHasScore", [](std::string const& uuid, std::string const& obj) -> bool {
@@ -452,17 +455,14 @@ void Export_Compatibility_API() {
         return true;
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerSpawnPoint", [](Player* pl) -> std::pair<BlockPos, int> {
-        // auto res = ((GMPlayer*)pl)->getSpawnPoint();
-        // return {res.first, res.second};
-        throw std::runtime_error("GMLIB_API::getPlayerSpawnPoint is not implemented");
+        return {pl->mPlayerRespawnPoint->mSpawnBlockPos, pl->mPlayerRespawnPoint->mDimension.get()};
     });
     RemoteCall::exportAs("GMLIB_API", "setPlayerSpawnPoint", [](Player* pl, std::pair<BlockPos, int> pos) -> void {
-        // ((GMPlayer*)pl)->setSpawnPoint(pos.first, pos.second);
-        throw std::runtime_error("GMLIB_API::setPlayerSpawnPoint is not implemented");
+        pl->setRespawnPosition(pos.first, pos.second);
     });
     RemoteCall::exportAs("GMLIB_API", "clearPlayerSpawnPoint", [](Player* pl) -> void {
-        // ((GMPlayer*)pl)->clearSpawnPoint();
-        throw std::runtime_error("GMLIB_API::clearPlayerSpawnPoint is not implemented");
+        pl->mPlayerRespawnPoint->mSpawnBlockPos = BlockPos::MIN();
+        pl->mPlayerRespawnPoint->mDimension     = VanillaDimensions::Undefined();
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -546,8 +546,7 @@ void Export_Compatibility_API() {
         return block->mDirectData->mUnkc08fbd.as<float>();
     });
     RemoteCall::exportAs("GMLIB_API", "getDestroyBlockSpeed", [](ItemStack const* item, Block const* block) -> float {
-        // return item->getDestroySpeed(*block);
-        throw std::runtime_error("GMLIB_API::getDestroyBlockSpeed is not implemented");
+        return item->getItem()->getDestroySpeed(*item, *block);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -568,8 +567,7 @@ void Export_Compatibility_API() {
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroySpecial", [](ItemStack const* item, Block const* block) -> bool {
-        // return item->canDestroySpecial(*block);
-        throw std::runtime_error("GMLIB_API::itemCanDestroySpecial is not implemented");
+        return item->getItem()->canDestroySpecial(*block);
     });
     RemoteCall::exportAs("GMLIB_API", "blockCanDropWithAnyTool", [](Block const* block) -> bool {
         return !block->getLegacyBlock().mRequiresCorrectToolForDrops;
@@ -584,9 +582,10 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "playerAttack", [](Player* player, Actor* entity) -> bool {
         return player->attack(*entity, SharedTypes::Legacy::ActorDamageCause::EntityAttack);
     });
-    RemoteCall::exportAs("GMLIB_API", "playerPullInEntity", [](Player* player, Actor* entity) -> bool {
-        // return player->pullInEntity(*entity);
-        throw std::runtime_error("GMLIB_API::playerPullInEntity is not implemented");
+    RemoteCall::exportAs("GMLIB_API", "playerPullInEntity", [](Player* player, Actor* entity) -> void {
+        if (auto component = player->getEntityContext().tryGetComponent<RideableComponent>()){
+            component->pullInEntity(*player, *entity);
+        }
     });
     RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKeyFromName", [](std::string const& blockName) -> std::string {
         return Block::tryGetFromRegistry(blockName)
@@ -896,20 +895,16 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "registerCustomShapelessRecipe",
         [](std::string const& recipe_id, std::vector<std::string> ingredients, ItemStack* result) -> void {
-            // if (!GMLevel::getInstance().has_value()) return;
-            // std::vector<Recipes::Type> types;
-            // char                       rt = 'A';
-            // for (auto& ing : ingredients) {
-            //     auto ingredient = RecipeIngredient{ing, 0,1};
-            //     types.push_back(Recipes::Type{
-            //         (Item*)ingredient.getItem(),
-            //         ingredient.getBlock(),
-            //         ingredient,
-            //         rt++
-            //     });
-            // }
-            // GMLIB::Mod::CustomRecipe::registerShapelessCraftingTableRecipe(recipe_id, types, *result);
-            throw std::runtime_error("GMLIB_API::registerCustomShapelessRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            std::vector<ICustomRecipe::Ingredient> types;
+            for (auto& ing : ingredients) {
+                types.push_back(ICustomRecipe::Ingredient{ing});
+            }
+            CustomRecipeRegistry::getInstance().registerShapelessRecipe(
+                recipe_id,
+                types,
+                ItemInstance(*result->getItem(), result->mCount, result->mAuxValue, result->mUserData.get())
+            );
         }
     );
     RemoteCall::exportAs(

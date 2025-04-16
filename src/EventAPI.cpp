@@ -141,7 +141,7 @@ void Export_Event_API() {
                 REGISTER_EVENT_LISTEN(
                     ila::mc::SpawnItemActorAfterEvent,
                     (Actor * item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
-                    (event.itemActor(),
+                    (&event.itemActor(),
                      {event.pos(), event.blockSource().getDimensionId().id},
                      event.spawner() ? event.spawner()->getOrCreateUniqueID().rawID : -1),
                     ,

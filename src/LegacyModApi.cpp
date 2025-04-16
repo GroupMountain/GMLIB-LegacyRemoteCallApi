@@ -1,12 +1,13 @@
 #include "Global.h"
+#include "gmlib/mod/recipe/CustomRecipeRegistry.h"
 #include <gmlib/mc/world/Level.h>
 #include <mc/world/item/crafting/RecipeIngredient.h>
 
 std::unordered_set<std::string> HardCodedKeys = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
 
-std::variant<std::string, std::vector<RecipeIngredient>> makeRecipeUnlockingKey(std::string const& key) {
-    if (HardCodedKeys.count(key)) return key;
-    return std::vector<RecipeIngredient>({RecipeIngredient(key, 0, 1)});
+ICustomRecipe::UnlockingRequirement makeRecipeUnlockingKey(std::string const& key) {
+    if (HardCodedKeys.count(key)) return {{ICustomRecipe::Ingredient{key}}};
+    return ICustomRecipe::UnlockingRequirement({ICustomRecipe::Ingredient(key, 1, 0)});
 }
 
 void Export_Legacy_GMLib_ModAPI() {
@@ -19,18 +20,13 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       result,
            int                      count,
            std::string const&       unlock) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // std::vector<RecipeIngredient> types;
-            // for (auto ing : ingredients) {
-            //     types.emplace_back(ing, 0, 1);
-            // }
-            // GMLIB::Mod::JsonRecipe::registerShapelessCraftingTableRecipe(
-            //     recipe_id,
-            //     types,
-            //     RecipeIngredient(result, 0, count),
-            //     makeRecipeUnlockingKey(unlock)
-            // );
-            throw std::runtime_error("GMLib_ModAPI::registerShapelessRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            std::vector<ICustomRecipe::Ingredient> types;
+            for (auto& ing : ingredients) {
+                types.emplace_back(ICustomRecipe::Ingredient{ing, 1});
+            }
+            CustomRecipeRegistry::getInstance()
+                .registerShapelessRecipe(recipe_id, types, ItemInstance(result, count), makeRecipeUnlockingKey(unlock));
         }
     );
     RemoteCall::exportAs(
@@ -42,19 +38,20 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       result,
            int                      count,
            std::string const&       unlock) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // std::vector<RecipeIngredient> types;
-            // for (auto ing : ingredients) {
-            //     types.push_back(RecipeIngredient(ing, 0, 1));
-            // }
-            // GMLIB::Mod::JsonRecipe::registerShapedCraftingTableRecipe(
-            //     recipe_id,
-            //     shape,
-            //     types,
-            //     RecipeIngredient(result, 0, count),
-            //     makeRecipeUnlockingKey(unlock)
-            // );
-            throw std::runtime_error("GMLib_ModAPI::registerShapedRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            ICustomShapedRecipe::ShapedIngredients types;
+            char                                   index = 'a';
+            for (auto& ing : ingredients) {
+                types.add(std::string{index++}, ICustomRecipe::Ingredient{ing, 1});
+            }
+            CustomRecipeRegistry::getInstance().registerShapedRecipe(
+                recipe_id,
+                shape,
+                types,
+                ItemInstance(result, count),
+                makeRecipeUnlockingKey(unlock)
+            );
+
         }
     );
     RemoteCall::exportAs(
@@ -64,14 +61,9 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       input,
            std::string const&       output,
            std::vector<std::string> tags) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // GMLIB::Mod::JsonRecipe::registerFurnaceRecipe(
-            //     recipe_id,
-            //     RecipeIngredient(input, 0, 1),
-            //     RecipeIngredient(output, 0, 1),
-            //     tags
-            // );
-            throw std::runtime_error("GMLib_ModAPI::registerFurnaceRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            CustomRecipeRegistry::getInstance()
+                .registerFurnaceRecipe(ICustomRecipe::Ingredient{input}, ItemInstance{output}, tags);
         }
     );
     RemoteCall::exportAs(
@@ -79,10 +71,12 @@ void Export_Legacy_GMLib_ModAPI() {
         "registerBrewingMixRecipe",
         [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
         ) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // GMLIB::Mod::JsonRecipe::registerBrewingMixRecipe(recipe_id, input, output, RecipeIngredient(reagent, 0,
-            // 1));
-            throw std::runtime_error("GMLib_ModAPI::registerBrewingMixRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            CustomRecipeRegistry::getInstance().registerBrewingRecipe(
+                ICustomRecipe::Ingredient{input},
+                ICustomRecipe::Ingredient{reagent},
+                ICustomRecipe::Ingredient{output}
+            );
         }
     );
     RemoteCall::exportAs(
@@ -90,14 +84,12 @@ void Export_Legacy_GMLib_ModAPI() {
         "registerBrewingContainerRecipe",
         [](std::string const& recipe_id, std::string const& input, std::string const& output, std::string const& reagent
         ) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // GMLIB::Mod::JsonRecipe::registerBrewingContainerRecipe(
-            //     recipe_id,
-            //     RecipeIngredient(input, 0, 1),
-            //     RecipeIngredient(output, 0, 1),
-            //     RecipeIngredient(reagent, 0, 1)
-            // );
-            throw std::runtime_error("GMLib_ModAPI::registerBrewingContainerRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            CustomRecipeRegistry::getInstance().registerBrewingRecipe(
+                ICustomRecipe::Ingredient{input},
+                ICustomRecipe::Ingredient{reagent},
+                ICustomRecipe::Ingredient{output}
+            );
         }
     );
     RemoteCall::exportAs(
@@ -108,15 +100,14 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& base,
            std::string const& addition,
            std::string const& result) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // GMLIB::Mod::JsonRecipe::registerSmithingTransformRecipe(
-            //     recipe_id,
-            //     smithing_template,
-            //     base,
-            //     addition,
-            //     result
-            // );
-            throw std::runtime_error("GMLib_ModAPI::registerSmithingTransformRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            CustomRecipeRegistry::getInstance().registerSmithingTransformRecipe(
+                recipe_id,
+                ICustomRecipe::Ingredient{smithing_template},
+                ICustomRecipe::Ingredient{base},
+                ICustomRecipe::Ingredient{addition},
+                ItemInstance{result}
+            );
         }
     );
     RemoteCall::exportAs(
@@ -126,9 +117,13 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& smithing_template,
            std::string const& base,
            std::string const& addition) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // GMLIB::Mod::JsonRecipe::registerSmithingTrimRecipe(recipe_id, smithing_template, base, addition);
-            throw std::runtime_error("GMLib_ModAPI::registerSmithingTrimRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            CustomRecipeRegistry::getInstance().registerSmithingTrimRecipe(
+                recipe_id,
+                ICustomRecipe::Ingredient{smithing_template},
+                ICustomRecipe::Ingredient{base},
+                ICustomRecipe::Ingredient{addition}
+            );
         }
     );
     RemoteCall::exportAs(
@@ -140,19 +135,17 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const& output,
            int                output_data,
            int                output_count) -> void {
-            // if (!GMLIB_Level::getInstance().has_value()) return;
-            // GMLIB::Mod::JsonRecipe::registerStoneCutterRecipe(
-            //     recipe_id,
-            //     RecipeIngredient(input, 0, 1),
-            //     RecipeIngredient(output, 0, 1)
-            // );
-            throw std::runtime_error("GMLib_ModAPI::registerStoneCutterRecipe is not implemented");
+            if (!GMLevel::getInstance().has_value()) return;
+            CustomRecipeRegistry::getInstance().registerStoneCutterRecipe(
+                recipe_id,
+                ICustomRecipe::Ingredient{input, 1, input_data},
+                {output, output_count, output_data}
+            );
         }
     );
     // 错误方块清理
     RemoteCall::exportAs("GMLib_ModAPI", "setUnknownBlockCleaner", []() -> void {
-        // GMLIB::Mod::VanillaFix::setAutoCleanUnknownBlockEnabled();
-        throw std::runtime_error("GMLib_ModAPI::setUnknownBlockCleaner is not implemented");
+        getLogger().error("setUnknownBlockCleaner is not implemented");
     });
     // 实验性
     RemoteCall::exportAs("GMLib_ModAPI", "registerExperimentsRequire", [](int experiment_id) -> void {
@@ -172,8 +165,5 @@ void Export_Legacy_GMLib_ModAPI() {
             .transform([&](GMLevel& level) { return level.getExperimentEnabled((AllExperiments)experiment_id); })
             .value_or(false);
     });
-    RemoteCall::exportAs("GMLib_ModAPI", "setFixI18nEnabled", []() -> void {
-        // GMLIB::Mod::VanillaFix::setFixI18nEnabled();
-        throw std::runtime_error("GMLib_ModAPI::setFixI18nEnabled is not implemented");
-    });
+    RemoteCall::exportAs("GMLib_ModAPI", "setFixI18nEnabled", []() -> void {});
 }

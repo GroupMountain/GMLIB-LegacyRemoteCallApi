@@ -2,24 +2,19 @@
 
 void Export_Legacy_GMLib_ServerAPI() {
     RemoteCall::exportAs("GMLib_ServerAPI", "setEducationFeatureEnabled", []() -> void {
-        // GMLIB_Level::tryEnableEducationEdition();
-        throw std::runtime_error("GMLib_ServerAPI::setEducationFeatureEnabled is not implemented");
+        getLogger().error("GMLib_ServerAPI::setEducationFeatureEnabled is not implemented");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "registerAbilityCommand", []() -> void {
-        // GMLIB_Level::tryRegisterAbilityCommand();
-        throw std::runtime_error("GMLib_ServerAPI::registerAbilityCommand is not implemented");
+        getLogger().error("GMLib_ServerAPI::registerAbilityCommand is not implemented");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setEnableAchievement", []() -> void {
-        // GMLIB_Level::setForceAchievementsEnabled();
-        throw std::runtime_error("GMLib_ServerAPI::setEnableAchievement is not implemented");
+        getLogger().error("GMLib_ServerAPI::setEnableAchievement is not implemented");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setForceTrustSkins", []() -> void {
-        // GMLIB_Level::trustAllSkins();
-        throw std::runtime_error("GMLib_ServerAPI::setForceTrustSkins is not implemented");
+        getLogger().error("GMLib_ServerAPI::setForceTrustSkins is not implemented");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "enableCoResourcePack", []() -> void {
-        // GMLIB_Level::requireServerResourcePackAndAllowClientResourcePack();
-        throw std::runtime_error("GMLib_ServerAPI::enableCoResourcePack is not implemented");
+        getLogger().error("GMLib_ServerAPI::enableCoResourcePack is not implemented");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "getLevelName", []() -> std::string {
         return GMLevel::getInstance().transform(
@@ -37,8 +32,7 @@ void Export_Legacy_GMLib_ServerAPI() {
             .value_or("");
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "setFakeSeed", [](int64_t seed) -> void {
-        // return GMLIB_Level::setFakeSeed(seed);
-        throw std::runtime_error("GMLib_ServerAPI::setFakeSeed is not implemented");
+        getLogger().error("GMLib_ServerAPI::setFakeSeed is not implemented");
     });
     RemoteCall::exportAs(
         "GMLib_ServerAPI",

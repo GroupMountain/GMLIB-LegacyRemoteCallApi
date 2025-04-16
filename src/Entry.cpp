@@ -9,6 +9,7 @@ LegacyRemoteCallApi& LegacyRemoteCallApi::getInstance() {
 }
 
 bool LegacyRemoteCallApi::load() {
+    (void)CustomRecipeRegistry::getInstance();
     Export_Legacy_GMLib_ModAPI();
     Export_Legacy_GMLib_ServerAPI();
     Export_Compatibility_API();
@@ -40,3 +41,5 @@ LL_REGISTER_MOD(gmlib::LegacyRemoteCallApi, gmlib::LegacyRemoteCallApi::getInsta
 ll::thread::ThreadPoolExecutor const& getThreadPoolExecutor() {
     return gmlib::LegacyRemoteCallApi::getInstance().getThreadPoolExecutor();
 }
+
+ll::io::Logger& getLogger() { return gmlib::LegacyRemoteCallApi::getInstance().getSelf().getLogger(); }
