@@ -12,6 +12,7 @@ add_requires("levilamina", {configs = {target_type = "server"}})
 add_requires("legacyremotecall")
 add_requires("levibuildscript")
 add_requires("ilistenattentively")
+add_requires("gmlib")
  
 target("GMLIB-LegacyRemoteCallApi")
     add_cxflags(
@@ -27,14 +28,13 @@ target("GMLIB-LegacyRemoteCallApi")
         "src/**.cpp"
     )
     add_includedirs(
-        "src",
-        "../GMLIB/bin/SDK/include"
+        "src"
     )
-    add_links("../GMLIB/bin/SDK/lib/GMLIB.lib")
     add_packages(
         "levilamina",
         "legacyremotecall",
-        "ilistenattentively"
+        "ilistenattentively",
+        "gmlib"
     )
     add_rules("@levibuildscript/linkrule")
     set_exceptions("none")
