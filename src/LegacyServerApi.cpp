@@ -70,7 +70,7 @@ void Export_Legacy_GMLib_ServerAPI() {
         }
     );
     RemoteCall::exportAs("GMLib_ServerAPI", "removeFakeList", [](const std::string& nameOrXuid) -> bool {
-        PlayerListAPI::resetListName(nameOrXuid);
+        PlayerListAPI::erase(nameOrXuid);
         return true;
     });
     RemoteCall::exportAs("GMLib_ServerAPI", "removeAllFakeList", []() -> void { PlayerListAPI::clear(); });
