@@ -1,10 +1,10 @@
 #include "Global.h"
 
-std::unordered_set<std::string> HardCodedKeys = {"AlwaysUnlocked", "PlayerHasManyItems", "PlayerInWater", "None"};
-
 ICustomRecipe::UnlockingRequirement makeRecipeUnlockingKey(std::string const& key) {
-    if (HardCodedKeys.count(key)) return {{ICustomRecipe::Ingredient{key}}};
-    return ICustomRecipe::UnlockingRequirement({ICustomRecipe::Ingredient(key, 1, 0)});
+    if (auto context = magic_enum::enum_cast<RecipeUnlockingContext>(key)) {
+        return ICustomRecipe::UnlockingRequirement(*context);
+    }
+    return ICustomRecipe::UnlockingRequirement({ICustomRecipe::Ingredient(key)});
 }
 
 void Export_Legacy_GMLib_ModAPI() {
@@ -37,9 +37,9 @@ void Export_Legacy_GMLib_ModAPI() {
            std::string const&       unlock) -> void {
             if (!GMLevel::getInstance().has_value()) return;
             ICustomShapedRecipe::ShapedIngredients types;
-            char                                   index = 'a';
+            char                                   index = 'A';
             for (auto& ing : ingredients) {
-                types.add(std::string{index++}, ICustomRecipe::Ingredient{ing, 1});
+                types.add(std::string(1, index++), ICustomRecipe::Ingredient{ing});
             }
             CustomRecipeRegistry::getInstance().registerShapedRecipe(
                 recipe_id,
@@ -48,7 +48,6 @@ void Export_Legacy_GMLib_ModAPI() {
                 ItemInstance(result, count),
                 makeRecipeUnlockingKey(unlock)
             );
-
         }
     );
     RemoteCall::exportAs(
