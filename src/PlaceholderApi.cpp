@@ -23,10 +23,14 @@ void registerPlayerPlaceholder(
             [Call = RemoteCall::importAs<std::string(Player * pl, std::unordered_map<std::string, std::string>)>(
                  PluginName,
                  FuncName
-             )](optional_ref<GMActor> actor, std::unordered_map<std::string, std::string> const& params, auto&&...
+             )](optional_ref<Actor> actor, ll::StringMap<std::string> const& params, auto&&...
             ) -> std::optional<std::string> {
                 if (actor.has_value() && ((Actor*)actor.as_ptr())->isPlayer()) {
-                    return Call((Player*)actor.as_ptr(), params);
+                    std::unordered_map<std::string, std::string> paramMap;
+                    for (auto& [key, val] : params) {
+                        paramMap[key] = val;
+                    }
+                    return Call((Player*)actor.as_ptr(), paramMap);
                 }
                 return std::nullopt;
             },
@@ -55,8 +59,13 @@ void registerServerPlaceholder(
             [Call = RemoteCall::importAs<std::string(std::unordered_map<std::string, std::string>)>(
                  PluginName,
                  FuncName
-             )](auto, std::unordered_map<std::string, std::string> const& params, auto&&...
-            ) -> std::optional<std::string> { return Call(params); },
+             )](auto, ll::StringMap<std::string> const& params, auto&&...) -> std::optional<std::string> {
+                std::unordered_map<std::string, std::string> paramMap;
+                for (auto& [key, val] : params) {
+                    paramMap[key] = val;
+                }
+                return Call(paramMap);
+            },
             mod
         );
     };
@@ -80,8 +89,8 @@ void registerStaticPlaceholder(
         if (mod.expired()) return;
         PlaceholderAPI::registerPlaceholder(
             PAPIName,
-            [Call = RemoteCall::importAs<std::string()>(PluginName, FuncName)](auto&&...
-            ) -> std::optional<std::string> { return Call(); },
+            [Call = RemoteCall::importAs<std::string()>(PluginName, FuncName)](auto&&...)
+                -> std::optional<std::string> { return Call(); },
             mod
         );
     };
@@ -128,10 +137,13 @@ void registerPlaceholder(std::string const& placeholder, std::string const& func
                      std::string(Actor*, std::unordered_map<std::string, std::string>, std::string)>(
                      pluginName,
                      funcName
-                 )](optional_ref<GMActor>                               actor,
-                    std::unordered_map<std::string, std::string> const& params,
-                    std::string const&                                  language) -> std::optional<std::string> {
-                    auto result = Call((Actor*)actor.as_ptr(), params, language);
+                 )](optional_ref<Actor> actor, ll::StringMap<std::string> const& params, std::string const& language
+                ) -> std::optional<std::string> {
+                    std::unordered_map<std::string, std::string> paramMap;
+                    for (auto& [key, val] : params) {
+                        paramMap[key] = val;
+                    }
+                    auto result = Call((Actor*)actor.as_ptr(), paramMap, language);
                     return result == "<std::nullopt>" ? std::nullopt : std::optional(result);
                 },
                 mod
@@ -157,7 +169,11 @@ std::string getValue(
     std::unordered_map<std::string, std::string> params,
     std::string const&                           language
 ) {
-    return PlaceholderAPI::getValue(placeholder, std::nullopt, params, language).value_or("<std::nullopt>");
+    ll::StringMap<std::string> paramMap;
+    for (auto& [key, val] : params) {
+        paramMap[key] = val;
+    }
+    return PlaceholderAPI::getValue(placeholder, std::nullopt, paramMap, language).value_or("<std::nullopt>");
 }
 std::string getValueFromActor(
     std::string const&                           placeholder,
@@ -165,7 +181,11 @@ std::string getValueFromActor(
     std::unordered_map<std::string, std::string> params,
     std::string const&                           language
 ) {
-    return PlaceholderAPI::getValue(placeholder, (GMActor*)actor, params, language).value_or("<std::nullopt>");
+    ll::StringMap<std::string> paramMap;
+    for (auto& [key, val] : params) {
+        paramMap[key] = val;
+    }
+    return PlaceholderAPI::getValue(placeholder, (GMActor*)actor, paramMap, language).value_or("<std::nullopt>");
 }
 } // namespace NewPapiRemoteCall
 

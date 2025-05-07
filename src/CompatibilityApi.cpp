@@ -152,7 +152,8 @@ void Export_Compatibility_API() {
     );
     RemoteCall::exportAs("GMLIB_API", "getVersion_LRCA", []() -> std::string { return LIB_VERSION.to_string(); });
     RemoteCall::exportAs("GMLIB_API", "getVersion_GMLIB", []() -> std::string {
-        return GMLIB_VERSION_TO_STRING(GMLIB_VERSION_MAJOR) "." GMLIB_VERSION_TO_STRING(GMLIB_VERSION_MINOR
+        return GMLIB_VERSION_TO_STRING(GMLIB_VERSION_MAJOR) "." GMLIB_VERSION_TO_STRING(
+            GMLIB_VERSION_MINOR
         ) "." GMLIB_VERSION_TO_STRING(GMLIB_VERSION_PATCH);
     });
     RemoteCall::exportAs(
@@ -582,7 +583,7 @@ void Export_Compatibility_API() {
         return player->attack(*entity, SharedTypes::Legacy::ActorDamageCause::EntityAttack);
     });
     RemoteCall::exportAs("GMLIB_API", "playerPullInEntity", [](Player* player, Actor* entity) -> void {
-        if (auto component = player->getEntityContext().tryGetComponent<RideableComponent>()){
+        if (auto component = player->getEntityContext().tryGetComponent<RideableComponent>()) {
             component->pullInEntity(*player, *entity);
         }
     });
@@ -950,5 +951,8 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityTypeId", [](Actor* entity) -> int {
         return (int)entity->getEntityTypeId();
+    });
+    RemoteCall::exportAs("GMLIB_API", "getPlayerProtocolVersion", [](Player* player) -> int {
+        return ((GMPlayer*)player)->getNetworkProtocolVersion();
     });
 }

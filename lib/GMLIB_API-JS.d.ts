@@ -1556,6 +1556,9 @@ interface Player {
         slot: number
     ): Item;
 
+    /** (GMLIB & Glacie)获取客户端版本协议*/
+    getNetworkProtocolVersion(): number
+
     /** (GMLIB)发送更新更新物品数据包 */
     sendInventorySlotPacket(
         /** 容器ID */
