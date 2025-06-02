@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "mc/platform/UUID.h"
 #include <regex>
 
 ActorUniqueID parseScriptUniqueID(std::string const& uniqueId) {
@@ -35,7 +36,7 @@ void Export_Compatibility_API() {
         return result;
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerNbt", [](std::string const& uuid) -> std::unique_ptr<CompoundTag> {
-        if (auto player = OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))) {
+        if (auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))) {
             return std::make_unique<CompoundTag>(*player->getNbt());
         }
         return nullptr;
@@ -44,7 +45,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setPlayerNbt",
         [](std::string const& uuid, CompoundTag* nbt, bool forceCreate) -> bool {
-            if (auto player = OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))) return player->setNbt(*nbt);
+            if (auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))) return player->setNbt(*nbt);
             return forceCreate ? OfflinePlayer::createNewPlayerNbt(mce::UUID::fromString(uuid), *nbt).has_value()
                                : false;
         }
@@ -53,7 +54,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setPlayerNbtTags",
         [](std::string const& uuid, CompoundTag* nbt, std::vector<std::string> tags) -> bool {
-            if (auto player = OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))) {
+            if (auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))) {
                 auto nbt2 = *player->getNbt();
                 GMCompoundTag::writeNbtTags(nbt2, *nbt, tags);
                 return player->setNbt(nbt2);
@@ -200,7 +201,7 @@ void Export_Compatibility_API() {
         }
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerPosition", [](std::string const& uuid) -> std::pair<BlockPos, int> {
-        if (auto player = OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))) {
+        if (auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))) {
             if (auto pos = player->getPlayerPosition()) {
                 return *pos;
             }
@@ -214,7 +215,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setPlayerPosition",
         [](std::string const& uuid, std::pair<BlockPos, int> pos) -> bool {
-            if (auto player = OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))) {
+            if (auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))) {
                 return player->setPosition(pos.first, pos.second);
             }
             return false;
@@ -475,33 +476,29 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getXuidByUuid", [](std::string const& uuid) -> std::string {
-        return UserCache::getXuidByUuid(mce::UUID::fromString(uuid)).value_or("");
+        return UserCache::getInstance()->from(mce::UUID::fromString(uuid))->mXuid;
     });
     RemoteCall::exportAs("GMLIB_API", "getXuidByName", [](std::string const& name) -> std::string {
-        return UserCache::getXuidByName(name).value_or("");
+        return UserCache::getInstance()->from(name)->mXuid;
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByUuid", [](std::string const& uuid) -> std::string {
-        return UserCache::getNameByUuid(mce::UUID::fromString(uuid)).value_or("");
+        return UserCache::getInstance()->from(mce::UUID::fromString(uuid))->mName;
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string const& xuid) -> std::string {
-        return UserCache::getNameByXuid(xuid).value_or("");
+        return UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)->mName;
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string const& xuid) -> std::string {
-        return UserCache::getUuidByXuid(xuid).transform(
-                                                 [](mce::UUID&& uuid) -> std::string { return uuid.asString(); }
-        ).value_or("");
+        return UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)->mUuid.asString();
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        return UserCache::getUuidByName(name).transform(
-                                                 [](mce::UUID&& uuid) -> std::string { return uuid.asString(); }
-        ).value_or("");
+        return UserCache::getInstance()->from(name)->mUuid.asString();
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "getAllPlayerInfo",
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
             std::vector<std::unordered_map<std::string, std::string>> result;
-            for (auto entry : UserCache::entries()) {
+            for (auto entry : UserCache::getInstance()->entries()) {
                 result.push_back({
                     {"Name", entry.mName           },
                     {"Xuid", entry.mXuid           },
@@ -612,21 +609,21 @@ void Export_Compatibility_API() {
                     result.push_back({
                         {"Name",  gameRule.mName                                        },
                         {"Type",  "Bool"                                                },
-                        {"Value", std::to_string(gameRule.mValue->mUnk29fff1.as<bool>())}
+                        {"Value", std::to_string(gameRule.mValue->boolVal)}
                     });
                     break;
                 case GameRule::Type::Float:
                     result.push_back({
                         {"Name",  gameRule.mName                                         },
                         {"Type",  "Float"                                                },
-                        {"Value", std::to_string(gameRule.mValue->mUnk768db5.as<float>())}
+                        {"Value", std::to_string(gameRule.mValue->floatVal)}
                     });
                     break;
                 case GameRule::Type::Int:
                     result.push_back({
                         {"Name",  gameRule.mName                                       },
                         {"Type",  "Int"                                                },
-                        {"Value", std::to_string(gameRule.mValue->mUnk2ab4f3.as<int>())}
+                        {"Value", std::to_string(gameRule.mValue->intVal)}
                     });
                     break;
                 case GameRule::Type::Invalid:
@@ -804,7 +801,7 @@ void Export_Compatibility_API() {
         return magic_enum::enum_name(container->mContainerType).data();
     });
     RemoteCall::exportAs("GMLIB_API", "hasPlayerNbt", [](std::string const& uuid) -> bool {
-        return OfflinePlayer::getOfflinePlayer(mce::UUID::fromString(uuid))
+        return OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))
             .transform([&](auto&& player) -> bool { return player.hasNbt(); })
             .value_or(false);
     });
