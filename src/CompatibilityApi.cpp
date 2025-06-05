@@ -188,8 +188,9 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs(
         "GMLIB_API",
         "updateOrCreateLanguageFile",
-        [](std::string const& code, std::unordered_map<std::string, std::string> lang, std::string const& path
-        ) -> void {
+        [](std::string const&                           code,
+           std::unordered_map<std::string, std::string> lang,
+           std::string const&                           path) -> void {
             if (GMLevel::getInstance()) {
                 I18nAPI::updateOrCreateLanguageFile(path, code, lang);
             }
@@ -476,22 +477,39 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getXuidByUuid", [](std::string const& uuid) -> std::string {
-        return UserCache::getInstance()->from(mce::UUID::fromString(uuid))->mXuid;
+        if (auto uce = UserCache::getInstance()->from(mce::UUID::fromString(uuid))) {
+            return uce->mXuid;
+        }
+        return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getXuidByName", [](std::string const& name) -> std::string {
-        return UserCache::getInstance()->from(name)->mXuid;
+        if (auto uce = UserCache::getInstance()->from(name, UserCache::QueryType::Name)) {
+            return uce->mXuid;
+        }
+        return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByUuid", [](std::string const& uuid) -> std::string {
-        return UserCache::getInstance()->from(mce::UUID::fromString(uuid))->mName;
+        if (auto uce = UserCache::getInstance()->from(mce::UUID::fromString(uuid))) {
+            return uce->mName;
+        }
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string const& xuid) -> std::string {
-        return UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)->mName;
+        if (auto uce = UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)) {
+            return uce->mName;
+        }
+        return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string const& xuid) -> std::string {
-        return UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)->mUuid.asString();
+        if (auto uce = UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)) {
+            return uce->mUuid.asString();
+        }
+        return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        return UserCache::getInstance()->from(name)->mUuid.asString();
+        if (auto uce = UserCache::getInstance()->from(name, UserCache::QueryType::Name)) {
+            return uce->mUuid.asString();
+        }
+        return "";
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -607,22 +625,22 @@ void Export_Compatibility_API() {
                 switch (gameRule.mType) {
                 case GameRule::Type::Bool:
                     result.push_back({
-                        {"Name",  gameRule.mName                                        },
-                        {"Type",  "Bool"                                                },
+                        {"Name",  gameRule.mName                          },
+                        {"Type",  "Bool"                                  },
                         {"Value", std::to_string(gameRule.mValue->boolVal)}
                     });
                     break;
                 case GameRule::Type::Float:
                     result.push_back({
-                        {"Name",  gameRule.mName                                         },
-                        {"Type",  "Float"                                                },
+                        {"Name",  gameRule.mName                           },
+                        {"Type",  "Float"                                  },
                         {"Value", std::to_string(gameRule.mValue->floatVal)}
                     });
                     break;
                 case GameRule::Type::Int:
                     result.push_back({
-                        {"Name",  gameRule.mName                                       },
-                        {"Type",  "Int"                                                },
+                        {"Name",  gameRule.mName                         },
+                        {"Type",  "Int"                                  },
                         {"Value", std::to_string(gameRule.mValue->intVal)}
                     });
                     break;
