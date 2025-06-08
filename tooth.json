@@ -27,7 +27,7 @@
                 {
                     "type": "zip",
                     "urls": [
-                        "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v$(version)/GMLIB-LegacyRemoteCallApi-windows-x64.zip"
+                        "https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi/releases/download/v{{version}}/GMLIB-LegacyRemoteCallApi-windows-x64.zip"
                     ],
                     "placements": [
                         {
