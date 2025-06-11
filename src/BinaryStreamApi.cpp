@@ -78,6 +78,7 @@ void Export_BinaryStream_API() {
     EXPORTAPI("writeItem", ItemStack*, bs->writeNetworkItemStackDescriptor(NetworkItemStackDescriptor(*value)));
     EXPORTAPI("writeString", std::string const&, bs->writeString(value));
     EXPORTAPI("writeCompoundTag", CompoundTag*, bs->writeCompoundTag(*value));
+    EXPORTAPI("writeUnsignedChar", uchar, bs->writeUnsignedChar(value));
     EXPORTAPI2(writeBool);
     EXPORTAPI2(writeByte);
     EXPORTAPI2(writeDouble);
@@ -86,7 +87,6 @@ void Export_BinaryStream_API() {
     EXPORTAPI2(writeSignedInt);
     EXPORTAPI2(writeSignedInt64);
     EXPORTAPI2(writeSignedShort);
-    EXPORTAPI2(writeUnsignedChar);
     EXPORTAPI2(writeUnsignedInt);
     EXPORTAPI2(writeUnsignedInt64);
     EXPORTAPI2(writeUnsignedShort);

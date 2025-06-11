@@ -22,7 +22,7 @@ bool LegacyRemoteCallApi::load() {
     logger->info(
         "Loaded Version: {} with {}",
         fmt::format(fg(fmt::color::pink), "GMLIB-" GMLIB_FILE_VERSION_STRING),
-        fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-" + LIB_VERSION.to_string())
+        fmt::format(fg(fmt::color::light_green), "GMLIB-LegacyRemoteCallApi-{}", LIB_VERSION.to_string())
     );
     logger->info("Author: GroupMountain");
     logger->info("Repository: https://github.com/GroupMountain/GMLIB-LegacyRemoteCallApi");

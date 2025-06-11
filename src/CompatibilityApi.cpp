@@ -492,6 +492,7 @@ void Export_Compatibility_API() {
         if (auto uce = UserCache::getInstance()->from(mce::UUID::fromString(uuid))) {
             return uce->mName;
         }
+        return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string const& xuid) -> std::string {
         if (auto uce = UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)) {

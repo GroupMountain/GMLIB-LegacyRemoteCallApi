@@ -8,11 +8,11 @@ if not has_config("vs_runtime") then
     set_runtimes("MD")
 end
 
-add_requires("levilamina 1.2.0", {configs = {target_type = "server"}})
+add_requires("levilamina 1.3.0", {configs = {target_type = "server"}})
 add_requires("legacyremotecall")
 add_requires("levibuildscript")
-add_requires("ilistenattentively 0.5.0-rc.1")
-add_requires("gmlib 1.2.0-rc.1")
+add_requires("ilistenattentively 0.6.0")
+add_requires("gmlib 1.3.0-rc.1")
 
 target("GMLIB-LegacyRemoteCallApi")
     add_cxflags(
@@ -38,18 +38,15 @@ target("GMLIB-LegacyRemoteCallApi")
         "gmlib"
     )
     add_rules("@levibuildscript/linkrule")
+    add_rules("@levibuildscript/modpacker")
     set_exceptions("none")
     set_kind("shared")
     set_languages("cxx20")
     set_symbols("debug")
-
     after_build(function (target)
-        local plugin_packer = import("scripts.after_build")
-
-        local plugin_define = {
-            pluginName = target:name(),
-            pluginFile = path.filename(target:targetfile()),
-        }
-        
-        plugin_packer.pack_plugin(target,plugin_define)
+        local target_path = path.join("bin", target:name(), "lib")
+        if os.exists(target_path) then 
+            os.rm(target_path)
+        end
+        os.cp("lib", target_path)
     end)
