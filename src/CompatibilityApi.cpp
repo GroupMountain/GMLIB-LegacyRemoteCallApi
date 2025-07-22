@@ -559,7 +559,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getBlockDestroySpeed", [](Block const* block) -> float {
-        return block->mDirectData->mUnkc08fbd.as<float>();
+        return block->mDirectData->mDestroySpeed;
     });
     RemoteCall::exportAs("GMLIB_API", "getDestroyBlockSpeed", [](ItemStack const* item, Block const* block) -> float {
         return item->getItem()->getDestroySpeed(*item, *block);
@@ -613,7 +613,7 @@ void Export_Compatibility_API() {
         "getBlockLightEmission",
         [](std::string const& blockName, short legacyData) -> char {
             return Block::tryGetFromRegistry(blockName)
-                .transform([](const Block& block) -> char { return block.mDirectData->mUnkda4e0e.as<char>(); })
+                .transform([](const Block& block) -> char { return block.mDirectData->mLightEmission->mValue; })
                 .value_or(-1);
         }
     );
