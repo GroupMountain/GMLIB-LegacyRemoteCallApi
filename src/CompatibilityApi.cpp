@@ -45,7 +45,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setPlayerNbt",
         [](std::string const& uuid, CompoundTag* nbt, bool forceCreate) -> bool {
-            if (auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))) return player->setNbt(*nbt);
+            if (auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid))&&player.hasNbt()) return player->setNbt(*nbt);
             return forceCreate ? OfflinePlayer::createNewPlayerNbt(mce::UUID::fromString(uuid), *nbt).has_value()
                                : false;
         }
