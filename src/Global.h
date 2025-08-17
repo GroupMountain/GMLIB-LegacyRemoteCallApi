@@ -1,11 +1,14 @@
 #pragma once
 // clang-format off
+#pragma warning(push)
+#pragma warning(disable : 4996)
 #define GMLIB_GLOBAL_USING
 #include <gmlib/GlobalUsing.h>
 #include <gmlib/include_all.h>
 #include <ila/include_all.h>
 #include <RemoteCallAPI.h>
 using namespace gmlib::mod;
+#pragma warning(pop)
 // clang-format on
 
 #define PLUGIN_NAME fmt::format(fg(fmt::color::light_green), "GMLIB-LRCA")

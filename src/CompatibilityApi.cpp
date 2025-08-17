@@ -574,7 +574,7 @@ void Export_Compatibility_API() {
     );
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroyBlock", [](ItemStack const* item, Block const* block) -> bool {
         return std::ranges::any_of(item->mCanDestroy, [block](BlockLegacy const* blockLegacy) {
-            return block->getTypeName() == blockLegacy->getTypeName();
+            return blockLegacy && block->getTypeName() == blockLegacy->getTypeName();
         });
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroyInCreative", [](ItemStack const* item) -> bool {
@@ -584,7 +584,10 @@ void Export_Compatibility_API() {
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroySpecial", [](ItemStack const* item, Block const* block) -> bool {
-        return item->getItem()->canDestroySpecial(*block);
+        if (auto itemDef = item->getItem(); itemDef) {
+            return itemDef->canDestroySpecial(*block);
+        }
+        return false;
     });
     RemoteCall::exportAs("GMLIB_API", "blockCanDropWithAnyTool", [](Block const* block) -> bool {
         return !block->getLegacyBlock().mRequiresCorrectToolForDrops;
@@ -834,36 +837,39 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getPlayerDestroyBlockProgress", [](Player* player, Block const* block) -> float {
         return player->getDestroyProgress(*block);
     });
+
+    static constexpr size_t effectMaxCount = 36;
+
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectVisible", [](Actor* entity, int effectId) -> bool {
-        if (effectId < 0 || !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mEffectVisible;
         }
-        return 0;
+        return false;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDuration", [](Actor* entity, int effectId) -> int {
-        if (effectId < 0 || !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0  || effectId > effectMaxCount|| !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mDuration->mValue;
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationEasy", [](Actor* entity, int effectId) -> int {
-        if (effectId < 0 || !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mDurationEasy->transform([](auto&& duration) -> int { return duration.mValue; }).value_or(0);
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationHard", [](Actor* entity, int effectId) -> int {
-        if (effectId < 0 || !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mDurationHard->transform([](auto&& duration) -> int { return duration.mValue; }).value_or(0);
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationNormal", [](Actor* entity, int effectId) -> int {
-        if (effectId < 0 || !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0  || effectId > effectMaxCount|| !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mDurationNormal->transform(
                                               [](auto&& duration) -> int { return duration.mValue; }
@@ -872,21 +878,23 @@ void Export_Compatibility_API() {
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmplifier", [](Actor* entity, int effectId) -> int {
-        if (effectId < 0 || !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mAmplifier;
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmbient", [](Actor* entity, int effectId) -> bool {
-        if (effectId < 0 || !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mAmbient;
         }
-        return 0;
+        return false;
     });
     RemoteCall::exportAs("GMLIB_API", "entityHasEffect", [](Actor* entity, int effectId) -> bool {
-        return effectId > 0x24 ? false : entity->hasEffect(*MobEffect::mMobEffects()[effectId]);
+        return effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]
+                 ? false
+                 : entity->hasEffect(*MobEffect::mMobEffects()[effectId]);
     });
     RemoteCall::exportAs("GMLIB_API", "getGameDifficulty", []() -> int {
         return ll::service::getLevel().transform(
