@@ -711,10 +711,10 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "setItemShouldKeepOnDeath", [](ItemStack const* item, bool value) -> void {
         auto nbt = ((GMItemStack*)item)->getNbt();
         if (value) {
-            (*nbt)["tags"]["minecraft:keep_on_death"] = true;
+            (*nbt)["tag"]["minecraft:keep_on_death"] = true;
         } else {
-            if (nbt->contains("tags") && (*nbt)["tags"].contains("minecraft:keep_on_death")) {
-                (*nbt)["tags"].get<CompoundTag>().erase("minecraft:keep_on_death");
+            if (nbt->contains("tag") && (*nbt)["tag"].contains("minecraft:keep_on_death")) {
+                (*nbt)["tag"].get<CompoundTag>().erase("minecraft:keep_on_death");
             }
         }
         ((GMItemStack*)item)->setNbt(*nbt);
