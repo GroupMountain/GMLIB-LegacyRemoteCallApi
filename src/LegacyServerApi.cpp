@@ -79,4 +79,9 @@ void Export_Legacy_GMLib_ServerAPI() {
                                          [](GMLevel& level) -> int { return level.getMaxPlayerCount(); }
         ).value_or(0);
     });
+    RemoteCall::exportAs("GMLib_ServerAPI", "setMaxPlayers", [&](int count, bool ignoreVanillaLimit) {
+        if (auto level = GMLevel::getInstance(); level) {
+            level->setMaxPlayerCount(count, ignoreVanillaLimit);
+        }
+    });
 }

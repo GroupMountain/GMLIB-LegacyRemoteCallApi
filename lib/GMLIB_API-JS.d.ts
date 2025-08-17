@@ -359,13 +359,21 @@ export class Minecraft {
     ): string;
 
     /** 通过附魔ID获取附魔命名空间ID */
-    static getMaxPlayers(
+    static getEnchantTypeNameFromId(
         /** 附魔ID */
         id: number
     ): string | null;
 
     /** 获取最大玩家数 */
     static getMaxPlayers(): number;
+
+    /** 设置最大玩家数 */
+    static setMaxPlayers(
+        /** 最大玩家数 */
+        count: number,
+        /** 是否忽略原版限制 */
+        ignoreVanillaLimit?: boolean
+    ): void;
 
     /** 玩家是否拥有NBT */
     static hasPlayerNbt(
