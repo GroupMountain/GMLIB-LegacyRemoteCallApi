@@ -183,19 +183,34 @@ export class Minecraft {
         pos: IntPos
     ): void;
 
-    /** 启用教育版内容 */
+    /** 
+     * @deprecated 已删
+     * 启用教育版内容
+     */
     static setEducationFeatureEnabled(): void;
 
-    /** 注册Ability命令 */
+    /** 
+     * @deprecated 已删
+     * 注册Ability命令
+     */
     static registerAbilityCommand(): void;
 
-    /** 启用Xbox成就 */
+    /**
+     * @deprecated 已删
+     * 启用Xbox成就
+     */
     static setEnableAchievement(): void;
 
-    /** 信任所有玩家皮肤 */
+    /** 
+     * @deprecated 已删
+     * 信任所有玩家皮肤
+     */
     static setForceTrustSkins(): void;
 
-    /** 启用资源包双端共存 */
+    /**
+     * @deprecated 已删
+     * 启用资源包双端共存
+     */
     static enableCoResourcePack(): void;
 
     /** 获取存档名称 */
@@ -206,13 +221,19 @@ export class Minecraft {
         name: string
     ): boolean;
 
-    /** 设置假种子 */
+    /**
+     * @deprecated 已删
+     * 设置假种子
+     */
     static setFakeSeed(
         /** 要设置的假种子 */
         seed: number | undefined
     ): void;
 
-    /** 启用错误方块清理 */
+    /**
+     * @deprecated 已删
+     * 启用错误方块清理
+     */
     static setUnknownBlockCleaner(): void;
 
     /** 强制生成实体 */
