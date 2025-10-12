@@ -2,12 +2,20 @@
 // clang-format off
 #pragma warning(push)
 #pragma warning(disable : 4996)
-#define GMLIB_GLOBAL_USING
-#include <gmlib/GlobalUsing.h>
-#include <gmlib/include_all.h>
+#pragma include_alias("mc/world/item/HumanoidArmorItem.h", "modapi/item/types/mc/HumanoidArmorItem.h")
+#include <gmlib/include_ll.h>
+#include <gmlib/include_lib.h>
+#include <gmlib/include_mc.h>
 #include <ila/include_all.h>
+#include <modapi/addons/AddonsLoader.h>
+#include <modapi/recipe/CustomRecipeRegistry.h>
+#include <modapi/item/CustomItemRegistry.h>
 #include <RemoteCallAPI.h>
-using namespace gmlib::mod;
+using namespace gmlib;
+using namespace gmlib::ui;
+using namespace gmlib::i18n;
+using namespace gmlib::memory;
+using namespace modapi;
 #pragma warning(pop)
 // clang-format on
 

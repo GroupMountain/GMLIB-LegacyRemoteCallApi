@@ -11,7 +11,7 @@ void Export_Compatibility_API() {
         return CustomRecipeRegistry::getInstance().unregisterRecipe(id, true);
     });
     RemoteCall::exportAs("GMLIB_API", "setCustomPackPath", [](std::string const& path) -> void {
-        AddonsLoader::addCustomPackPath(path);
+        AddonsLoader::getInstance().addCustomPackPath(path);
     });
     RemoteCall::exportAs("GMLIB_API", "getServerMspt", []() -> double {
         return GMLevel::getInstance().transform(
@@ -19,14 +19,10 @@ void Export_Compatibility_API() {
         ).value_or(0.0);
     });
     RemoteCall::exportAs("GMLIB_API", "getServerCurrentTps", []() -> float {
-        return GMLevel::getInstance().transform(
-                                         [](GMLevel& level) -> float { return level.getServerCurrentTps(); }
-        ).value_or(0.0);
+        return TpsStatus::getInstance().getLevelCurrentTps();
     });
     RemoteCall::exportAs("GMLIB_API", "getServerAverageTps", []() -> double {
-        return GMLevel::getInstance().transform(
-                                         [](GMLevel& level) -> double { return level.getServerAverageTps(); }
-        ).value_or(0.0);
+        return TpsStatus::getInstance().getLevelAverageTps();
     });
     RemoteCall::exportAs("GMLIB_API", "getAllPlayerUuids", []() -> std::vector<std::string> {
         std::vector<std::string> result;
@@ -534,7 +530,7 @@ void Export_Compatibility_API() {
             .value_or(0);
     });
     RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKey", [](Block const* block) -> std::string {
-        return block->getLegacyBlock().mDescriptionId.get() + ".name";
+        return block->mBlockType->mDescriptionId.get() + ".name";
     });
     RemoteCall::exportAs("GMLIB_API", "getItemTranslateKey", [](ItemStack* item) -> std::string {
         return item->getDescriptionId();
@@ -573,7 +569,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroyBlock", [](ItemStack const* item, Block const* block) -> bool {
-        return std::ranges::any_of(item->mCanDestroy, [block](BlockLegacy const* blockLegacy) {
+        return std::ranges::any_of(item->mCanDestroy, [block](BlockType const* blockLegacy) {
             return blockLegacy && block->getTypeName() == blockLegacy->getTypeName();
         });
     });
@@ -590,13 +586,13 @@ void Export_Compatibility_API() {
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "blockCanDropWithAnyTool", [](Block const* block) -> bool {
-        return !block->getLegacyBlock().mRequiresCorrectToolForDrops;
+        return !block->mBlockType->mRequiresCorrectToolForDrops;
     });
     RemoteCall::exportAs(
         "GMLIB_API",
         "blockPlayerWillDestroy",
         [](Block const* block, Player* player, std::pair<BlockPos, int> pos) -> bool {
-            return block->getLegacyBlock().playerWillDestroy(*player, pos.first, *block);
+            return block->mBlockType->playerWillDestroy(*player, pos.first, *block);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "playerAttack", [](Player* player, Actor* entity) -> bool {
@@ -745,9 +741,9 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setItemCanDestroy",
         [](ItemStack const* item, std::vector<std::string> blocks) -> void {
-            std::vector<const BlockLegacy*> data;
+            std::vector<const BlockType*> data;
             for (auto& name : blocks) {
-                if (auto block = BlockLegacy::tryGetFromRegistry(name)) {
+                if (auto block = BlockType::tryGetFromRegistry(name)) {
                     data.push_back(block.as_ptr());
                 }
             }
@@ -765,9 +761,9 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "setItemCanPlaceOn",
         [](ItemStack const* item, std::vector<std::string> blocks) -> void {
-            std::vector<const BlockLegacy*> data;
+            std::vector<const BlockType*> data;
             for (auto& name : blocks) {
-                if (auto block = BlockLegacy::tryGetFromRegistry(name)) {
+                if (auto block = BlockType::tryGetFromRegistry(name)) {
                     data.push_back(block.as_ptr());
                 }
             }

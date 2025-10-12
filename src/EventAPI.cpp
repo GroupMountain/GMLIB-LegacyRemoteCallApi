@@ -216,10 +216,11 @@ void Export_Event_API() {
                 );
             }
             case doHash("gmlib::EndermanTakeBlockBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(ila::mc::EndermanTakeBlockBeforeEvent,
+                REGISTER_EVENT_LISTEN(ila::mc::MobTakeBlockBeforeEvent,
                                       (Actor * mob, bool isCancelled),
                                       (&event.self(), event.isCancelled()),
-                                      event.setCancelled(result););
+                                      event.setCancelled(result);
+                                      , if (!event.self().isType(ActorType::EnderMan)) return;);
             }
             case doHash("gmlib::DragonRespawnBeforeEvent"): {
                 REGISTER_EVENT_LISTEN(ila::mc::DragonRespawnBeforeEvent,
