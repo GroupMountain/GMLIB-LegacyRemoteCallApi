@@ -12,7 +12,7 @@ add_requires("levilamina 1.5.2", {configs = {target_type = "server"}})
 add_requires("legacyremotecall")
 add_requires("levibuildscript 0.5.2")
 add_requires("ilistenattentively 0.8.0")
-add_requires("gmlib 1.5.1")
+add_requires("gmlib 1.5.2")
 add_requires("modapi 0.1.1")
 
 target("GMLIB-LegacyRemoteCallApi")
