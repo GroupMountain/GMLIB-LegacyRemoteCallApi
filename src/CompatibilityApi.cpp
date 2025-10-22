@@ -441,7 +441,30 @@ void Export_Compatibility_API() {
         return ll::service::getLevel()->fetchEntity(parseScriptUniqueID(uniqueId), false);
     });
     RemoteCall::exportAs("GMLIB_API", "getWorldSpawn", []() -> std::pair<BlockPos, int> {
-        return {GMLevel::getInstance()->getLevelData().getSpawnPos(), 0};
+        constexpr static HashedString SPAWN_POS{"spawnPos"};
+        using mUnkfc867e = std::variant<
+            int,
+            bool,
+            float,
+            std::string,
+            GeneratorType,
+            GameType,
+            BlockPos,
+            LevelSeed64,
+            LevelDataValue::Tag,
+            DaylightCycle>;
+        auto& levelData = GMLevel::getInstance()->getLevelData();
+        if (auto it = levelData.mValues->find(SPAWN_POS); it != levelData.mValues->end()) {
+            if (auto value = std::get_if<BlockPos>(&it->second.mUnkfc867e.as<mUnkfc867e>()); value) {
+                return {*value, 0};
+            }
+        }
+        if (auto it = levelData.mOverrides->find(SPAWN_POS); it != levelData.mOverrides->end()) {
+            if (auto value = std::get_if<BlockPos>(&it->second.mUnkfc867e.as<mUnkfc867e>()); value) {
+                return {*value, 0};
+            }
+        }
+        return {BlockPos::ZERO(), 1};
     });
     RemoteCall::exportAs("GMLIB_API", "setWorldSpawn", [](std::pair<BlockPos, int> pos) -> bool {
         if (pos.second != 0) return false;
@@ -626,23 +649,23 @@ void Export_Compatibility_API() {
                 switch (gameRule.mType) {
                 case GameRule::Type::Bool:
                     result.push_back({
-                        {"Name",  gameRule.mName                          },
-                        {"Type",  "Bool"                                  },
-                        {"Value", std::to_string(gameRule.mValue->boolVal)}
+                        {"Name",  gameRule.mName                                 },
+                        {"Type",  "Bool"                                         },
+                        {"Value", std::to_string(std::get<bool>(*gameRule.mValue))}
                     });
                     break;
                 case GameRule::Type::Float:
                     result.push_back({
-                        {"Name",  gameRule.mName                           },
-                        {"Type",  "Float"                                  },
-                        {"Value", std::to_string(gameRule.mValue->floatVal)}
+                        {"Name",  gameRule.mName                                  },
+                        {"Type",  "Float"                                         },
+                        {"Value", std::to_string(std::get<float>(*gameRule.mValue))}
                     });
                     break;
                 case GameRule::Type::Int:
                     result.push_back({
-                        {"Name",  gameRule.mName                         },
-                        {"Type",  "Int"                                  },
-                        {"Value", std::to_string(gameRule.mValue->intVal)}
+                        {"Name",  gameRule.mName                                },
+                        {"Type",  "Int"                                         },
+                        {"Value", std::to_string(std::get<int>(*gameRule.mValue))}
                     });
                     break;
                 case GameRule::Type::Invalid:
@@ -670,7 +693,7 @@ void Export_Compatibility_API() {
             );
         }
     );
-    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack* item) -> void { item->removeEnchants(); });
+    RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack* item) -> void { (void)item->removeEnchants(); });
     RemoteCall::exportAs("GMLIB_API", "hasEnchant", [](ItemStack* item, std::string const& typeName) -> bool {
         return EnchantUtils::hasEnchant(Enchant::mEnchantNameToType()[HashedString(typeName)], *item);
     });
@@ -968,7 +991,10 @@ void Export_Compatibility_API() {
         return entity->isType((ActorType)type);
     });
     RemoteCall::exportAs("GMLIB_API", "entityHasType", [](Actor* entity, int type) -> bool {
-        return entity->hasType((ActorType)type);
+        if (auto component = entity->mEntityContext->tryGetComponent<ActorTypeComponent>(); component) {
+            return (type & std::to_underlying(component->mType)) == type;
+        }
+        return false;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityTypeId", [](Actor* entity) -> int {
         return (int)entity->getEntityTypeId();
