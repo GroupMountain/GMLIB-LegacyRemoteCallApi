@@ -814,9 +814,9 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getItemCustomName", [](ItemStack const* item) -> std::string {
         return item->getCustomName();
     });
-    RemoteCall::exportAs("GMLIB_API", "getItemEffecName", [](ItemStack const* item) -> std::string {
+    RemoteCall::exportAs("GMLIB_API", "getItemEffecName", [](ItemStack const* item, bool playerIsCreative) -> std::string {
         if (auto item2 = item->mItem) {
-            return item2->buildEffectDescriptionName(*item);
+            return item2->buildEffectDescriptionName(*item, playerIsCreative);
         }
         return "";
     });

@@ -2,7 +2,7 @@
     "format_version": 3,
     "format_uuid": "289f771f-2c9a-4d73-9f3f-8492495a924d",
     "tooth": "github.com/GroupMountain/GMLIB-LegacyRemoteCallApi",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "info": {
         "name": "GMLIB-LegacyRemoteCallApi",
         "description": "Legacy RemoteCall API for GMLIB",
@@ -19,10 +19,10 @@
         {
             "platform": "win-x64",
             "dependencies": {
-                "github.com/LiteLDev/LeviLamina": ">=1.6.0",
-                "github.com/GroupMountain/GMLIB-Release": ">=1.6.0",
-                "github.com/GroupMountain/ModAPI-Release": ">=0.2.0",
-                "github.com/MiracleForest/iListenAttentively-Release": ">=0.9.0"
+                "github.com/LiteLDev/LeviLamina": ">=1.7.0",
+                "github.com/GroupMountain/GMLIB-Release": ">=1.7.0",
+                "github.com/GroupMountain/ModAPI-Release": ">=0.3.0",
+                "github.com/MiracleForest/iListenAttentively-Release": ">=0.10.0"
             },
             "assets": [
                 {

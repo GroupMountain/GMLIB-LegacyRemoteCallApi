@@ -3,6 +3,9 @@
 #pragma warning(push)
 #pragma warning(disable : 4996)
 #pragma include_alias("mc/world/item/HumanoidArmorItem.h", "modapi/item/types/mc/HumanoidArmorItem.h")
+#pragma include_alias("mc/world/level/block/states/BuiltInBlockStateVariant.h", "mc/BuiltInBlockStateVariant.h")
+#pragma include_alias("mc/world/events/EventCoordinatorPimpl.h", "mc/EventCoordinatorPimpl.h")
+#pragma include_alias("mc/world/events/PlayerNotificationEvent.h", "mc/PlayerNotificationEvent.h")
 #include <gmlib/include_ll.h>
 #include <gmlib/include_lib.h>
 #include <gmlib/include_mc.h>
