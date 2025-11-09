@@ -8,11 +8,11 @@ if not has_config("vs_runtime") then
     set_runtimes("MD")
 end
 
-add_requires("levilamina 1.7.1", {configs = {target_type = "server"}})
+add_requires("levilamina 1.7.3", {configs = {target_type = "server"}})
 add_requires("legacyremotecall")
 add_requires("levibuildscript 0.5.2")
 add_requires("ilistenattentively 0.10.0")
-add_requires("gmlib 1.7.00")
+add_requires("gmlib 1.7.0")
 add_requires("modapi 0.3.0")
 
 target("GMLIB-LegacyRemoteCallApi")

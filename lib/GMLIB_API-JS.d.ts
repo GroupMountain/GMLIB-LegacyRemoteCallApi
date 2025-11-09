@@ -1078,12 +1078,12 @@ export class UserCache {
 
     /** 获取玩家信息 */
     static getPlayerInfo(
-        /** 玩家名 或 xuid 或 uuid */
+        /** 玩家名 或 xuid 或 uuid 或 serverId 或 uniqueId */
         playerIdentifier: string
-    ): { Xuid: String, Uuid: string, Name: string } | null;
+    ): { Xuid: string, Uuid: string, Name: string, ServerId: string, ActorUniqueID: string } | null;
 
     /** 获取所有玩家信息 */
-    static getAllPlayerInfo(): { Xuid: String; Uuid: string; Name: string; }[]
+    static getAllPlayerInfo(): { Xuid: string, Uuid: string, Name: string, ServerId: string, ActorUniqueID: string }[]
 }
 
 type PacketDataItem = (

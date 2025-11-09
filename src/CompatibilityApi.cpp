@@ -534,15 +534,44 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs(
         "GMLIB_API",
+        "getPlayerInfo",
+        [](std::string const& info) -> std::unordered_map<std::string, std::string> {
+            // TODO: 下个GMLIB更新直接改成from(info, UserCache::QueryType::All)
+            std::unordered_map<std::string, std::string> result;
+            if (auto uce = UserCache::getInstance()->from(mce::UUID::fromString(info))) {
+                ll::reflection::forEachMember(*uce, [&](std::string_view name, auto&& member) {
+                    result[std::string{name.substr(1)}] = fmt::to_string(member);
+                });
+                return result;
+            }
+            if (auto uniqeuId = ll::string_utils::svtoll(info); uniqeuId) {
+                if (auto uce = UserCache::getInstance()->from(ActorUniqueID{*uniqeuId})) {
+                    ll::reflection::forEachMember(*uce, [&](std::string_view name, auto&& member) {
+                        result[std::string{name.substr(1)}] = fmt::to_string(member);
+                    });
+                    return result;
+                }
+            }
+            if (auto uce = UserCache::getInstance()->from(info, UserCache::QueryType::Default)) {
+                ll::reflection::forEachMember(*uce, [&](std::string_view name, auto&& member) {
+                    result[std::string{name.substr(1)}] = fmt::to_string(member);
+                });
+                return result;
+            }
+            return result;
+        }
+    );
+    RemoteCall::exportAs(
+        "GMLIB_API",
         "getAllPlayerInfo",
         []() -> std::vector<std::unordered_map<std::string, std::string>> {
             std::vector<std::unordered_map<std::string, std::string>> result;
-            for (auto entry : UserCache::getInstance()->entries()) {
-                result.push_back({
-                    {"Name", entry.mName           },
-                    {"Xuid", entry.mXuid           },
-                    {"Uuid", entry.mUuid.asString()}
+            for (auto& entry : UserCache::getInstance()->entries()) {
+                std::unordered_map<std::string, std::string> item;
+                ll::reflection::forEachMember(entry, [&](std::string_view name, auto&& member) {
+                    item[std::string{name.substr(1)}] = fmt::to_string(member);
                 });
+                result.emplace_back(std::move(item));
             }
             return result;
         }

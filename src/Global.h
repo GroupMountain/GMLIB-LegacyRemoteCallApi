@@ -3,9 +3,6 @@
 #pragma warning(push)
 #pragma warning(disable : 4996)
 #pragma include_alias("mc/world/item/HumanoidArmorItem.h", "modapi/item/types/mc/HumanoidArmorItem.h")
-#pragma include_alias("mc/world/level/block/states/BuiltInBlockStateVariant.h", "mc/BuiltInBlockStateVariant.h")
-#pragma include_alias("mc/world/events/EventCoordinatorPimpl.h", "mc/EventCoordinatorPimpl.h")
-#pragma include_alias("mc/world/events/PlayerNotificationEvent.h", "mc/PlayerNotificationEvent.h")
 #include <gmlib/include_ll.h>
 #include <gmlib/include_lib.h>
 #include <gmlib/include_mc.h>
@@ -25,8 +22,8 @@ using namespace modapi;
 #define PLUGIN_NAME fmt::format(fg(fmt::color::light_green), "GMLIB-LRCA")
 
 #define LIB_VERSION_MAJOR    1
-#define LIB_VERSION_MINOR    6
-#define LIB_VERSION_PATCH    0
+#define LIB_VERSION_MINOR    7
+#define LIB_VERSION_PATCH    1
 #define LIB_VERSION_PRERELEASE std::nullopt
 
 #ifdef LIB_VERSION_PRERELEASE
@@ -44,3 +41,19 @@ extern void                                  Export_BinaryStream_API();
 extern ll::thread::ThreadPoolExecutor const& getThreadPoolExecutor();
 extern ll::io::Logger&                       getLogger();
 // extern void Export_Form_API();
+
+
+template <>
+struct fmt::formatter<ActorUniqueID> : fmt::formatter<int64> {
+    template <class FormatContext>
+    auto format(ActorUniqueID const& t, FormatContext& ctx) const {
+        return formatter<int64>::format(t.rawID, ctx);
+    }
+};
+template <>
+struct fmt::formatter<mce::UUID> : fmt::formatter<std::string> {
+    template <class FormatContext>
+    auto format(mce::UUID const& t, FormatContext& ctx) const {
+        return formatter<std::string>::format(t.asString(), ctx);
+    }
+};
