@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "gmlib/mc/world/actor/Player.h"
 #include "mc/platform/UUID.h"
 #include <regex>
 
@@ -503,7 +504,7 @@ void Export_Compatibility_API() {
         return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getXuidByName", [](std::string const& name) -> std::string {
-        if (auto uce = UserCache::getInstance()->from(name, UserCache::QueryType::Name)) {
+        if (auto uce = UserCache::getInstance()->from(name, UserCache::Name)) {
             return uce->mXuid;
         }
         return "";
@@ -515,19 +516,19 @@ void Export_Compatibility_API() {
         return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getNameByXuid", [](std::string const& xuid) -> std::string {
-        if (auto uce = UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)) {
+        if (auto uce = UserCache::getInstance()->from(xuid, UserCache::Xuid)) {
             return uce->mName;
         }
         return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByXuid", [](std::string const& xuid) -> std::string {
-        if (auto uce = UserCache::getInstance()->from(xuid, UserCache::QueryType::Xuid)) {
+        if (auto uce = UserCache::getInstance()->from(xuid, UserCache::Xuid)) {
             return uce->mUuid.asString();
         }
         return "";
     });
     RemoteCall::exportAs("GMLIB_API", "getUuidByName", [](std::string const& name) -> std::string {
-        if (auto uce = UserCache::getInstance()->from(name, UserCache::QueryType::Name)) {
+        if (auto uce = UserCache::getInstance()->from(name, UserCache::Name)) {
             return uce->mUuid.asString();
         }
         return "";
@@ -552,7 +553,7 @@ void Export_Compatibility_API() {
                     return result;
                 }
             }
-            if (auto uce = UserCache::getInstance()->from(info, UserCache::QueryType::Default)) {
+            if (auto uce = UserCache::getInstance()->from(info, UserCache::Default)) {
                 ll::reflection::forEachMember(*uce, [&](std::string_view name, auto&& member) {
                     result[std::string{name.substr(1)}] = fmt::to_string(member);
                 });
@@ -823,7 +824,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getPlayerHungry", [](Player* player) -> float {
-        return player->getMutableAttribute(Player::HUNGER()).mInstance->mCurrentValue;
+        return player->getAttribute(Player::HUNGER()).mPtr->mCurrentValue;
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerArmorCoverPercentage", [](Player* player) -> float {
         return player->getArmorCoverPercentage();

@@ -8,12 +8,12 @@ if not has_config("vs_runtime") then
     set_runtimes("MD")
 end
 
-add_requires("levilamina 1.7.3", {configs = {target_type = "server"}})
+add_requires("levilamina 050b392575227db10340075328e833c1a0f41e27", {configs = {target_type = "server"}})
 add_requires("legacyremotecall")
-add_requires("levibuildscript 0.5.2")
-add_requires("ilistenattentively 0.10.0")
-add_requires("gmlib 1.7.0")
-add_requires("modapi 0.3.0")
+add_requires("levibuildscript 0.6.0")
+add_requires("ilistenattentively 0.11.0")
+add_requires("gmlib 1.9.0")
+add_requires("modapi 0.4.0")
 
 target("GMLIB-LegacyRemoteCallApi")
     add_cxflags(
@@ -26,6 +26,7 @@ target("GMLIB-LegacyRemoteCallApi")
         "UNICODE", 
         "_HAS_CXX23=1"
     )
+    add_defines("LL_PLAT_S")  --TODO: check client compatibility
     add_files(
         "src/**.cpp"
     )
