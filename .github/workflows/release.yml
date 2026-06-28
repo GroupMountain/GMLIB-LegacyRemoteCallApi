@@ -7,12 +7,20 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - uses: xmake-io/github-action-setup-xmake@v1
+        # with:
+        #   xmake-version: branch@master
+
+      - uses: actions/cache@v5
         with:
-          xmake-version: 3.0.0
+          path: |
+            ~/AppData/Local/.xmake
+          key: xmake-${{ hashFiles('xmake.lua') }}
+          restore-keys: |
+            xmake-
+
       
       - run: |
           xmake repo -u
@@ -23,7 +31,7 @@ jobs:
       - run: |
           xmake -w -y
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ github.event.repository.name }}-windows-x64-${{ github.sha }}
           path: |
@@ -37,10 +45,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download Mod
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ${{ github.event.repository.name }}-windows-x64-${{ github.sha }}
           path: artifact
@@ -55,7 +63,7 @@ jobs:
         working-directory: artifact
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             ${{ github.event.repository.name }}-windows-x64.zip

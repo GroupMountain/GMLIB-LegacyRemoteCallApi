@@ -443,25 +443,16 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getWorldSpawn", []() -> std::pair<BlockPos, int> {
         constexpr static HashedString SPAWN_POS{"spawnPos"};
-        using mUnkfc867e = std::variant<
-            int,
-            bool,
-            float,
-            std::string,
-            GeneratorType,
-            GameType,
-            BlockPos,
-            LevelSeed64,
-            LevelDataValue::Tag,
-            DaylightCycle>;
+
         auto& levelData = GMLevel::getInstance()->getLevelData();
         if (auto it = levelData.mValues->find(SPAWN_POS); it != levelData.mValues->end()) {
-            if (auto value = std::get_if<BlockPos>(&it->second.mUnkfc867e.as<mUnkfc867e>()); value) {
+
+            if (auto value = std::get_if<BlockPos>(&it->second.mValue.get()); value) {
                 return {*value, 0};
             }
         }
         if (auto it = levelData.mOverrides->find(SPAWN_POS); it != levelData.mOverrides->end()) {
-            if (auto value = std::get_if<BlockPos>(&it->second.mUnkfc867e.as<mUnkfc867e>()); value) {
+            if (auto value = std::get_if<BlockPos>(&it->second.mValue.get()); value) {
                 return {*value, 0};
             }
         }
@@ -471,7 +462,8 @@ void Export_Compatibility_API() {
         if (pos.second != 0) return false;
         GMLevel::getInstance()->getLevelData().setSpawnPos(pos.first);
         auto pkt           = SetSpawnPositionPacket();
-        pkt.mSpawnBlockPos = NetworkBlockPosition(pos.first);
+        pkt.mSpawnBlockPos = pos.first;
+
         pkt.mDimensionType = 0;
         pkt.mSpawnPosType  = SpawnPositionType::WorldSpawn;
         pkt.sendToClients();
@@ -752,7 +744,7 @@ void Export_Compatibility_API() {
         return entity->getNameTag();
     });
     RemoteCall::exportAs("GMLIB_API", "ItemisUnbreakable", [](ItemStack const* item) -> bool {
-        return ((GMItemStack*)item)->isUnbreakable();
+        return ((GMItemStack*)item)->getUnbreakable();
     });
     RemoteCall::exportAs("GMLIB_API", "setItemUnbreakable", [](ItemStack const* item, bool value) -> void {
         ((GMItemStack*)item)->setUnbreakable(value);

@@ -22,8 +22,8 @@ using namespace modapi;
 #define PLUGIN_NAME fmt::format(fg(fmt::color::light_green), "GMLIB-LRCA")
 
 #define LIB_VERSION_MAJOR    1
-#define LIB_VERSION_MINOR    7
-#define LIB_VERSION_PATCH    1
+#define LIB_VERSION_MINOR    8
+#define LIB_VERSION_PATCH    0
 #define LIB_VERSION_PRERELEASE std::nullopt
 
 #ifdef LIB_VERSION_PRERELEASE
