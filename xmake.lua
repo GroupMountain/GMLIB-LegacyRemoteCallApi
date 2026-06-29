@@ -15,6 +15,12 @@ add_requires("ilistenattentively 0.12.0")
 add_requires("gmlib 26.10.0")
 add_requires("modapi 26.10.0")
 
+rule("package_envs")
+    before_link(function (target)
+        os.addenvs(target:pkgenvs())
+    end)
+rule_end()
+
 target("GMLIB-LegacyRemoteCallApi")
     add_cxflags(
         "/EHa",
@@ -36,10 +42,12 @@ target("GMLIB-LegacyRemoteCallApi")
     add_packages(
         "levilamina",
         "legacyremotecall",
+        "levibuildscript",
         "ilistenattentively",
         "gmlib",
         "modapi"
     )
+    add_rules("package_envs")
     add_rules("@levibuildscript/linkrule")
     add_rules("@levibuildscript/modpacker")
     set_exceptions("none")
