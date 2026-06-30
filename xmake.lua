@@ -8,7 +8,7 @@ if not has_config("vs_runtime") then
     set_runtimes("MD")
 end
 
-add_requires("levilamina 26.10.10", {configs = {target_type = "server"}})
+add_requires("levilamina 26.10.14", {configs = {target_type = "server"}})
 add_requires("legacyremotecall")
 add_requires("levibuildscript 0.6.0")
 add_requires("ilistenattentively 0.12.0")
@@ -52,8 +52,8 @@ rule("linkrule")
 
         local inputs = table.copy(target:objectfiles())
 
-        local gmlib_shared = assert(find_file("GMLIB.lib", {"sdk\\gmlib\\26.10.10\\shared\\lib"}), "Cannot find GMLIB.lib shared ):")
-        local gmlib_static = assert(find_file("GMLIB.lib", {"sdk\\gmlib\\26.10.10\\static\\lib"}), "Cannot find GMLIB.lib static ):")
+        local gmlib_shared = assert(find_file("GMLIB.lib", {"sdk\\gmlib\\26.10.14\\shared\\lib"}), "Cannot find GMLIB.lib shared ):")
+        local gmlib_static = assert(find_file("GMLIB.lib", {"sdk\\gmlib\\26.10.14\\static\\lib"}), "Cannot find GMLIB.lib static ):")
         table.insert(inputs, "legacy_stdio_definitions.lib")
 
 
@@ -122,15 +122,15 @@ target("GMLIB-LegacyRemoteCallApi")
         "modapi"
     )
         add_includedirs(
-                    "sdk/gmlib/26.10.10/shared/include",
-                    "sdk/gmlib/26.10.10/static/include",
+                    "sdk/gmlib/26.10.14/shared/include",
+                    "sdk/gmlib/26.10.14/static/include",
             "src"
 
 
         )
     add_links(
-        "sdk/gmlib/26.10.10/static/lib/GMLIB.lib",
-        "sdk/gmlib/26.10.10/shared/lib/GMLIB.lib"
+        "sdk/gmlib/26.10.14/static/lib/GMLIB.lib",
+        "sdk/gmlib/26.10.14/shared/lib/GMLIB.lib"
     )
     add_rules("package_envs")
     add_rules("linkrule")
