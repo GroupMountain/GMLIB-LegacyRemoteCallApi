@@ -48,8 +48,8 @@
                 "plugins/GMLIB-LegacyRemoteCallApi"
             ],
             "scripts": {
-                "post_install": ["rmdir /s /q \"plugins/GMLIB\"",
-                "move \"plugins/GMLIB-LegacyRemoteCallApi/GMLIB\" \"plugins/\""
+                "post_install": ["rmdir /s /q .\\plugins\\GMLIB",
+                "move plugins/GMLIB-LegacyRemoteCallApi/GMLIB plugins/"
                 ]
             }
         }
