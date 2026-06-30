@@ -25,10 +25,10 @@ jobs:
           xmake repo -u
 
       - run: |
-          xmake f -a x64 -m release -p windows -y
+          xmake f -a x64 -m release -p windows -v -y
 
       - run: |
-          xmake -w -y
+          xmake -w -v -y
 
       - uses: actions/upload-artifact@v7
         with:
