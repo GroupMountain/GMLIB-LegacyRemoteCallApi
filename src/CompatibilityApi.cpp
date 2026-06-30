@@ -570,7 +570,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getBlockRuntimeId", [](std::string const& blockName, short legacyData) -> uint {
-        return Block::tryGetFromRegistry(blockName, legacyData)
+        return Block::tryGetFromRegistry(HashedString(blockName), static_cast<ushort>(legacyData))
             .transform([](const Block& block) -> uint { return block.mNetworkId; })
             .value_or(0);
     });
@@ -649,7 +649,7 @@ void Export_Compatibility_API() {
         }
     });
     RemoteCall::exportAs("GMLIB_API", "getBlockTranslateKeyFromName", [](std::string const& blockName) -> std::string {
-        return Block::tryGetFromRegistry(blockName)
+        return Block::tryGetFromRegistry(HashedString(blockName))
             .transform([](const Block& block) -> std::string { return block.buildDescriptionName(); })
             .value_or("tile.unknown.name");
     });
@@ -657,7 +657,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "getBlockLightEmission",
         [](std::string const& blockName, short legacyData) -> char {
-            return Block::tryGetFromRegistry(blockName)
+            return Block::tryGetFromRegistry(HashedString(blockName))
                 .transform([](const Block& block) -> char { return block.mDirectData->mLightEmission->mValue; })
                 .value_or(-1);
         }
@@ -788,7 +788,7 @@ void Export_Compatibility_API() {
         [](ItemStack const* item, std::vector<std::string> blocks) -> void {
             std::vector<const BlockType*> data;
             for (auto& name : blocks) {
-                if (auto block = BlockType::tryGetFromRegistry(name)) {
+                if (auto block = BlockType::tryGetFromRegistry(HashedString(name))) {
                     data.push_back(block.as_ptr());
                 }
             }
@@ -808,7 +808,7 @@ void Export_Compatibility_API() {
         [](ItemStack const* item, std::vector<std::string> blocks) -> void {
             std::vector<const BlockType*> data;
             for (auto& name : blocks) {
-                if (auto block = BlockType::tryGetFromRegistry(name)) {
+                if (auto block = BlockType::tryGetFromRegistry(HashedString(name))) {
                     data.push_back(block.as_ptr());
                 }
             }

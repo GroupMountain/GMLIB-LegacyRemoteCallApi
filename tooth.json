@@ -2,7 +2,7 @@
     "format_version": 3,
     "format_uuid": "289f771f-2c9a-4d73-9f3f-8492495a924d",
     "tooth": "github.com/GroupMountain/GMLIB-LegacyRemoteCallApi",
-    "version": "1.10.0",
+    "version": "1.10.1",
     "info": {
         "name": "GMLIB-LegacyRemoteCallApi",
         "description": "Legacy RemoteCall API for GMLIB",
@@ -35,13 +35,23 @@
                             "type": "dir",
                             "src": "GMLIB-LegacyRemoteCallApi",
                             "dest": "plugins/GMLIB-LegacyRemoteCallApi/"
+                        },
+                        {
+                            "type": "dir",
+                            "src": "GMLIB",
+                            "dest": "plugins/GMLIB-LegacyRemoteCallApi/GMLIB/"
                         }
                     ]
                 }
             ],
             "remove_files": [
                 "plugins/GMLIB-LegacyRemoteCallApi"
-            ]
+            ],
+            "scripts": {
+                "post_install": ["rmdir /s /q plugins/GMLIB",
+                "move plugins/GMLIB-LegacyRemoteCallApi/GMLIB plugins/"
+                ]
+            }
         }
     ]
 }
