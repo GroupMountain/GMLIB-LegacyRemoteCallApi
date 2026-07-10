@@ -56,7 +56,6 @@ jobs:
       - name: Copy additional files
         run: |
           cp -v LICENSE README.md artifact/
-          cp -rvf sdk/gmlib/26.10.10/shared/dll/GMLIB artifact
 
       - name: Archive release
         run: |
