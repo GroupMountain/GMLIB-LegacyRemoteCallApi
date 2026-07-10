@@ -43,7 +43,7 @@ void Export_Compatibility_API() {
         "setPlayerNbt",
         [](std::string const& uuid, CompoundTag* nbt, bool forceCreate) -> bool {
             auto player = OfflinePlayer::fromUuid(mce::UUID::fromString(uuid));
-            if (player&&player->hasNbt()) return player->setNbt(*nbt);
+            if (player && player->hasNbt()) return player->setNbt(*nbt);
             return forceCreate ? OfflinePlayer::createNewPlayerNbt(mce::UUID::fromString(uuid), *nbt).has_value()
                                : false;
         }
@@ -671,22 +671,22 @@ void Export_Compatibility_API() {
                 switch (gameRule.mType) {
                 case GameRule::Type::Bool:
                     result.push_back({
-                        {"Name",  gameRule.mName                                 },
-                        {"Type",  "Bool"                                         },
+                        {"Name",  gameRule.mName                                  },
+                        {"Type",  "Bool"                                          },
                         {"Value", std::to_string(std::get<bool>(*gameRule.mValue))}
                     });
                     break;
                 case GameRule::Type::Float:
                     result.push_back({
-                        {"Name",  gameRule.mName                                  },
-                        {"Type",  "Float"                                         },
+                        {"Name",  gameRule.mName                                   },
+                        {"Type",  "Float"                                          },
                         {"Value", std::to_string(std::get<float>(*gameRule.mValue))}
                     });
                     break;
                 case GameRule::Type::Int:
                     result.push_back({
-                        {"Name",  gameRule.mName                                },
-                        {"Type",  "Int"                                         },
+                        {"Name",  gameRule.mName                                 },
+                        {"Type",  "Int"                                          },
                         {"Value", std::to_string(std::get<int>(*gameRule.mValue))}
                     });
                     break;
@@ -836,12 +836,16 @@ void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "getItemCustomName", [](ItemStack const* item) -> std::string {
         return item->getCustomName();
     });
-    RemoteCall::exportAs("GMLIB_API", "getItemEffecName", [](ItemStack const* item, bool playerIsCreative) -> std::string {
-        if (auto item2 = item->mItem) {
-            return item2->buildEffectDescriptionName(*item, playerIsCreative);
+    RemoteCall::exportAs(
+        "GMLIB_API",
+        "getItemEffecName",
+        [](ItemStack const* item, bool playerIsCreative) -> std::string {
+            if (auto item2 = item->mItem) {
+                return item2->buildEffectDescriptionName(*item, playerIsCreative);
+            }
+            return "";
         }
-        return "";
-    });
+    );
     RemoteCall::exportAs("GMLIB_API", "itemIsFood", [](ItemStack const* item) -> bool {
         if (auto itemDef = item->getItem()) {
             return itemDef->isFood();
@@ -858,7 +862,7 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "sendInventorySlotPacket",
         [](Player* player, int containerId, int slot, ItemStack const* item) -> void {
-            InventorySlotPacket((ContainerID)containerId, slot, *item).sendTo(*player);
+            InventorySlotPacket(InventorySlotPacketPayload((ContainerID)containerId, slot, *item)).sendTo(*player);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "getContainerType", [](Container* container) -> std::string {
@@ -889,7 +893,7 @@ void Export_Compatibility_API() {
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDuration", [](Actor* entity, int effectId) -> int {
-        if (effectId <= 0  || effectId > effectMaxCount|| !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mDuration->mValue;
         }
@@ -910,7 +914,7 @@ void Export_Compatibility_API() {
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationNormal", [](Actor* entity, int effectId) -> int {
-        if (effectId <= 0  || effectId > effectMaxCount|| !MobEffect::mMobEffects()[effectId]) return false;
+        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
         if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
             return effect->mDurationNormal->transform(
                                               [](auto&& duration) -> int { return duration.mValue; }
@@ -989,6 +993,11 @@ void Export_Compatibility_API() {
             }
             auto tmp     = RecipeUnlockingRequirement();
             tmp.mContext = RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked;
+            SemVersion formatVersion;
+            formatVersion.mMajor        = 1;
+            formatVersion.mMinor        = 20;
+            formatVersion.mPatch        = 80;
+            formatVersion.mValidVersion = true;
             ll::service::bedrock::getLevel()->getRecipes().addShapedRecipe(
                 recipe_id,
                 ItemInstance(*result),
@@ -998,13 +1007,7 @@ void Export_Compatibility_API() {
                 50,
                 nullptr,
                 tmp,
-                SemVersion(
-                    1,
-                    20,
-                    80,
-                    {"", Bedrock::StaticOptimizedString::StorageType::Static},
-                    {"", Bedrock::StaticOptimizedString::StorageType::Static}
-                ),
+                formatVersion,
                 true
             );
         }
@@ -1025,3 +1028,11 @@ void Export_Compatibility_API() {
         return ((GMPlayer*)player)->getNetworkProtocolVersion();
     });
 }
+SemVersion::SemVersion()
+: SemVersionBase<::Bedrock::StaticOptimizedString>{
+      0,
+      0,
+      0,
+      Bedrock::StaticOptimizedString{"", Bedrock::StaticOptimizedString::StorageType::Static},
+      Bedrock::StaticOptimizedString{"", Bedrock::StaticOptimizedString::StorageType::Static}
+} {}

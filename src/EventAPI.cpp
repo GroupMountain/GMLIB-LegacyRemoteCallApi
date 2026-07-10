@@ -130,8 +130,8 @@ void Export_Event_API() {
                 REGISTER_EVENT_LISTEN(
                     ila::mc::SpawnItemActorBeforeEvent,
                     (ItemStack * item, std::pair<Vec3, int> position, int64 spawnerUniqueId, bool isCancelled),
-                    (&event.item(),
-                     {event.pos(), event.blockSource().getDimensionId().id},
+                     (&event.item(),
+                      {event.pos(), event.blockSource().getDimensionId()},
                      event.spawner() ? event.spawner()->getOrCreateUniqueID().rawID : -1,
                      event.isCancelled()),
                     event.setCancelled(result);
@@ -141,8 +141,8 @@ void Export_Event_API() {
                 REGISTER_EVENT_LISTEN(
                     ila::mc::SpawnItemActorAfterEvent,
                     (Actor * item, std::pair<Vec3, int> position, int64 spawnerUniqueId),
-                    (&event.itemActor(),
-                     {event.pos(), event.blockSource().getDimensionId().id},
+                     (&event.itemActor(),
+                      {event.pos(), event.blockSource().getDimensionId()},
                      event.spawner() ? event.spawner()->getOrCreateUniqueID().rawID : -1),
                     ,
                 );
