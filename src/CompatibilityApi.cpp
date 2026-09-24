@@ -7,6 +7,11 @@ ActorUniqueID parseScriptUniqueID(std::string const& uniqueId) {
     return string_utils::isInteger(uniqueId) ? ActorUniqueID(std::stoll(uniqueId)) : ActorUniqueID::INVALID_ID();
 }
 
+MobEffect const* getEffectDefinitionById(int effectId) {
+    if (effectId <= 0 || effectId >= static_cast<int>(MobEffectIds::Count)) return nullptr;
+    return MobEffect::mMobEffects()[static_cast<MobEffectIds>(effectId)].get();
+}
+
 void Export_Compatibility_API() {
     RemoteCall::exportAs("GMLIB_API", "unregisterRecipe", [](std::string const& id) -> bool {
         return CustomRecipeRegistry::getInstance().unregisterRecipe(id, true);
@@ -604,7 +609,7 @@ void Export_Compatibility_API() {
         return block->mDirectData->mDestroySpeed;
     });
     RemoteCall::exportAs("GMLIB_API", "getDestroyBlockSpeed", [](ItemStack const* item, Block const* block) -> float {
-        return item->getItem()->getDestroySpeed(*item, *block);
+        return item->mItem->getDestroySpeed(*item, *block);
     });
     RemoteCall::exportAs(
         "GMLIB_API",
@@ -619,13 +624,13 @@ void Export_Compatibility_API() {
         });
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroyInCreative", [](ItemStack const* item) -> bool {
-        if (auto itemDef = item->getItem()) {
+        if (auto itemDef = item->mItem) {
             return itemDef->canDestroyInCreative();
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "itemCanDestroySpecial", [](ItemStack const* item, Block const* block) -> bool {
-        if (auto itemDef = item->getItem(); itemDef) {
+        if (auto itemDef = item->mItem; itemDef) {
             return itemDef->canDestroySpecial(*block);
         }
         return false;
@@ -707,12 +712,10 @@ void Export_Compatibility_API() {
         "GMLIB_API",
         "applyEnchant",
         [](ItemStack* item, std::string const& typeName, int level, bool allowNonVanilla) -> bool {
-            return EnchantUtils::applyEnchant(
-                *item,
-                Enchant::mEnchantNameToType()[HashedString(typeName)],
-                level,
-                allowNonVanilla
-            );
+            EnchantmentInstance enchant{};
+            enchant.mEnchantType = Enchant::mEnchantNameToType()[HashedString(typeName)];
+            enchant.mLevel       = level;
+            return EnchantUtils::applyEnchant(*item, enchant, allowNonVanilla);
         }
     );
     RemoteCall::exportAs("GMLIB_API", "removeEnchants", [](ItemStack* item) -> void { (void)item->removeEnchants(); });
@@ -819,7 +822,9 @@ void Export_Compatibility_API() {
         return player->getAttribute(Player::HUNGER()).mPtr->mCurrentValue;
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerArmorCoverPercentage", [](Player* player) -> float {
-        return player->getArmorCoverPercentage();
+        return ActorInventoryUtils::getArmorCoverPercentage(
+            ActorEquipment::getArmorContainer(player->getEntityContext())
+        );
     });
     RemoteCall::exportAs("GMLIB_API", "getPlayerArmorValue", [](Player* player) -> int {
         return player->getArmorValue();
@@ -829,7 +834,19 @@ void Export_Compatibility_API() {
     });
     RemoteCall::exportAs("GMLIB_API", "getItemCategoryName", [](ItemStack const* item) -> std::string {
         if (auto item2 = item->mItem) {
-            return item2->buildCategoryDescriptionName();
+            using Category = SharedTypes::CreativeItemCategory;
+            switch (item2->mCreativeCategory) {
+            case Category::Construction:
+                return "craftingScreen.tab.construction";
+            case Category::Nature:
+                return "craftingScreen.tab.nature";
+            case Category::Equipment:
+                return "craftingScreen.tab.equipment";
+            case Category::Items:
+                return "craftingScreen.tab.items";
+            default:
+                return "";
+            }
         }
         return "";
     });
@@ -847,7 +864,7 @@ void Export_Compatibility_API() {
         }
     );
     RemoteCall::exportAs("GMLIB_API", "itemIsFood", [](ItemStack const* item) -> bool {
-        if (auto itemDef = item->getItem()) {
+        if (auto itemDef = item->mItem) {
             return itemDef->isFood();
         }
         return false;
@@ -883,39 +900,42 @@ void Export_Compatibility_API() {
         return player->getDestroyProgress(*block);
     });
 
-    static constexpr size_t effectMaxCount = 36;
-
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectVisible", [](Actor* entity, int effectId) -> bool {
-        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
-        if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
+        auto effectDef = getEffectDefinitionById(effectId);
+        if (!effectDef) return false;
+        if (auto effect = entity->getEffect(*effectDef)) {
             return effect->mEffectVisible;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDuration", [](Actor* entity, int effectId) -> int {
-        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
-        if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
+        auto effectDef = getEffectDefinitionById(effectId);
+        if (!effectDef) return false;
+        if (auto effect = entity->getEffect(*effectDef)) {
             return effect->mDuration->mValue;
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationEasy", [](Actor* entity, int effectId) -> int {
-        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
-        if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
+        auto effectDef = getEffectDefinitionById(effectId);
+        if (!effectDef) return false;
+        if (auto effect = entity->getEffect(*effectDef)) {
             return effect->mDurationEasy->transform([](auto&& duration) -> int { return duration.mValue; }).value_or(0);
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationHard", [](Actor* entity, int effectId) -> int {
-        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
-        if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
+        auto effectDef = getEffectDefinitionById(effectId);
+        if (!effectDef) return false;
+        if (auto effect = entity->getEffect(*effectDef)) {
             return effect->mDurationHard->transform([](auto&& duration) -> int { return duration.mValue; }).value_or(0);
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectDurationNormal", [](Actor* entity, int effectId) -> int {
-        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
-        if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
+        auto effectDef = getEffectDefinitionById(effectId);
+        if (!effectDef) return false;
+        if (auto effect = entity->getEffect(*effectDef)) {
             return effect->mDurationNormal->transform(
                                               [](auto&& duration) -> int { return duration.mValue; }
             ).value_or(0);
@@ -923,23 +943,24 @@ void Export_Compatibility_API() {
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmplifier", [](Actor* entity, int effectId) -> int {
-        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
-        if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
+        auto effectDef = getEffectDefinitionById(effectId);
+        if (!effectDef) return false;
+        if (auto effect = entity->getEffect(*effectDef)) {
             return effect->mAmplifier;
         }
         return 0;
     });
     RemoteCall::exportAs("GMLIB_API", "getEntityEffectAmbient", [](Actor* entity, int effectId) -> bool {
-        if (effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]) return false;
-        if (auto effect = entity->getEffect(*MobEffect::mMobEffects()[effectId])) {
+        auto effectDef = getEffectDefinitionById(effectId);
+        if (!effectDef) return false;
+        if (auto effect = entity->getEffect(*effectDef)) {
             return effect->mAmbient;
         }
         return false;
     });
     RemoteCall::exportAs("GMLIB_API", "entityHasEffect", [](Actor* entity, int effectId) -> bool {
-        return effectId <= 0 || effectId > effectMaxCount || !MobEffect::mMobEffects()[effectId]
-                 ? false
-                 : entity->hasEffect(*MobEffect::mMobEffects()[effectId]);
+        auto effectDef = getEffectDefinitionById(effectId);
+        return effectDef ? entity->getEffect(*effectDef) != nullptr : false;
     });
     RemoteCall::exportAs("GMLIB_API", "getGameDifficulty", []() -> int {
         return ll::service::getLevel().transform(
@@ -970,11 +991,7 @@ void Export_Compatibility_API() {
             for (auto& ing : ingredients) {
                 types.push_back(ICustomRecipe::Ingredient{ing});
             }
-            CustomRecipeRegistry::getInstance().registerShapelessRecipe(
-                recipe_id,
-                types,
-                ItemInstance(*result->getItem(), result->mCount, result->mAuxValue, result->mUserData.get())
-            );
+            CustomRecipeRegistry::getInstance().registerShapelessRecipe(recipe_id, types, ItemInstance(*result));
         }
     );
     RemoteCall::exportAs(
@@ -988,7 +1005,9 @@ void Export_Compatibility_API() {
             std::vector<Recipes::Type> types;
             char                       rt = 'A';
             for (auto& ing : ingredients) {
-                auto ingredient = RecipeIngredient{ing, 0, 1};
+                RecipeIngredient ingredient;
+                static_cast<ItemDescriptor&>(ingredient) = ItemDescriptor(ing, 0);
+                ingredient.mStackSize                    = 1;
                 types.push_back(Recipes::Type{(Item*)ingredient.getItem(), ingredient.getBlock(), ingredient, rt++});
             }
             auto tmp     = RecipeUnlockingRequirement();
@@ -1028,11 +1047,13 @@ void Export_Compatibility_API() {
         return ((GMPlayer*)player)->getNetworkProtocolVersion();
     });
 }
+// 26.51 removed the (char const*, StorageType) StaticOptimizedString constructor, so the empty
+// strings of a default SemVersion are built through _set here.
+static Bedrock::StaticOptimizedString makeEmptyOptimizedString() {
+    Bedrock::StaticOptimizedString result;
+    result._set("", 0, Bedrock::StaticOptimizedString::StorageType::Static);
+    return result;
+}
+
 SemVersion::SemVersion()
-: SemVersionBase<::Bedrock::StaticOptimizedString>{
-      0,
-      0,
-      0,
-      Bedrock::StaticOptimizedString{"", Bedrock::StaticOptimizedString::StorageType::Static},
-      Bedrock::StaticOptimizedString{"", Bedrock::StaticOptimizedString::StorageType::Static}
-} {}
+: SemVersionBase<::Bedrock::StaticOptimizedString>{0, 0, 0, makeEmptyOptimizedString(), makeEmptyOptimizedString()} {}

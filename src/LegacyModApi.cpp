@@ -1,5 +1,12 @@
 #include "Global.h"
 
+// Builds an ItemInstance from an item name, replacing the string constructors BDS removed in 26.51.
+ItemInstance makeItemInstance(std::string_view name, int count = 1, int auxValue = 0) {
+    ItemInstance instance;
+    instance.reinit(name, count, auxValue);
+    return instance;
+}
+
 ICustomRecipe::UnlockingRequirement makeRecipeUnlockingKey(std::string const& key) {
     if (auto context = magic_enum::enum_cast<RecipeUnlockingContext>(key)) {
         return ICustomRecipe::UnlockingRequirement(*context);
@@ -22,8 +29,12 @@ void Export_Legacy_GMLib_ModAPI() {
             for (auto& ing : ingredients) {
                 types.emplace_back(ICustomRecipe::Ingredient{ing, 1});
             }
-            CustomRecipeRegistry::getInstance()
-                .registerShapelessRecipe(recipe_id, types, ItemInstance(result, count), makeRecipeUnlockingKey(unlock));
+            CustomRecipeRegistry::getInstance().registerShapelessRecipe(
+                recipe_id,
+                types,
+                makeItemInstance(result, count),
+                makeRecipeUnlockingKey(unlock)
+            );
         }
     );
     RemoteCall::exportAs(
@@ -45,7 +56,7 @@ void Export_Legacy_GMLib_ModAPI() {
                 recipe_id,
                 shape,
                 types,
-                ItemInstance(result, count),
+                makeItemInstance(result, count),
                 makeRecipeUnlockingKey(unlock)
             );
         }
@@ -59,7 +70,7 @@ void Export_Legacy_GMLib_ModAPI() {
            std::vector<std::string> tags) -> void {
             if (!GMLevel::getInstance().has_value()) return;
             CustomRecipeRegistry::getInstance()
-                .registerFurnaceRecipe(ICustomRecipe::Ingredient{input}, ItemInstance{output}, tags);
+                .registerFurnaceRecipe(ICustomRecipe::Ingredient{input}, makeItemInstance(output), tags);
         }
     );
     RemoteCall::exportAs(
@@ -102,7 +113,7 @@ void Export_Legacy_GMLib_ModAPI() {
                 ICustomRecipe::Ingredient{smithing_template},
                 ICustomRecipe::Ingredient{base},
                 ICustomRecipe::Ingredient{addition},
-                ItemInstance{result}
+                makeItemInstance(result)
             );
         }
     );
@@ -135,7 +146,7 @@ void Export_Legacy_GMLib_ModAPI() {
             CustomRecipeRegistry::getInstance().registerStoneCutterRecipe(
                 recipe_id,
                 ICustomRecipe::Ingredient{input, 1, input_data},
-                {output, output_count, output_data}
+                makeItemInstance(output, output_count, output_data)
             );
         }
     );

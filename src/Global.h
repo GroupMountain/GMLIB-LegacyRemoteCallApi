@@ -82,9 +82,11 @@
 #include <mc/network/packet/InventorySlotPacketPayload.h>
 #include <mc/network/packet/SetSpawnPositionPacket.h>
 #include <mc/network/packet/SpawnPositionType.h>
+#include <mc/util/ActorInventoryUtils.h>
 #include <mc/world/actor/ActorDamageSource.h>
 #include <mc/world/actor/ActorHurtResult.h>
 #include <mc/world/actor/item/ItemActor.h>
+#include <mc/world/actor/provider/ActorEquipment.h>
 #include <mc/world/attribute/AttributeBuff.h>
 #include <mc/world/attribute/AttributeInstance.h>
 #include <mc/world/attribute/AttributeInstanceConstRef.h>
@@ -93,6 +95,7 @@
 #include <mc/world/item/crafting/Recipes.h>
 #include <mc/world/item/crafting/RecipeUnlockingRequirement.h>
 #include <mc/world/item/enchanting/EnchantUtils.h>
+#include <mc/world/item/enchanting/EnchantmentInstance.h>
 #include <mc/world/effect/MobEffect.h>
 #include <mc/world/effect/MobEffectInstance.h>
 #include <mc/world/level/dimension/VanillaDimensions.h>
