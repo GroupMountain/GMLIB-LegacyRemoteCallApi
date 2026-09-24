@@ -21,7 +21,12 @@ jobs:
           restore-keys: |
             xmake-
 
-      
+      # LeviLamina 26.51.x only builds with LLVM 22+ (the image ships 20.1.8).
+      - name: Setup LLVM
+        uses: ZhongRuoyu/setup-llvm@v0
+        with:
+          llvm-version: 22
+
       - run: |
           xmake repo -u
 
