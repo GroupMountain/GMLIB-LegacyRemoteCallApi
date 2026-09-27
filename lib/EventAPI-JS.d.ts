@@ -736,7 +736,10 @@ export namespace Event {
         pluginName?: string
     ): number;
 
-    /** 订阅事件(生成流浪商人前事件) */
+    /**
+     * 订阅事件(生成流浪商人前事件)
+     * @deprecated iListenAttentively 0.17.x 已移除该事件，订阅时只会输出警告，回调不会触发
+     */
     export function emplaceListener(
         /** 事件名 */
         eventName: "gmlib::SpawnWanderingTraderBeforeEvent",
@@ -767,7 +770,10 @@ export namespace Event {
         pluginName?: string
     ): number;
 
-    /** 订阅事件(生成流浪商人后事件) */
+    /**
+     * 订阅事件(生成流浪商人后事件)
+     * @deprecated iListenAttentively 0.17.x 已移除该事件，订阅时只会输出警告，回调不会触发
+     */
     export function emplaceListener(
         /** 事件名 */
         eventName: "gmlib::SpawnWanderingTraderAfterEvent",

@@ -108,21 +108,20 @@
 #include <LegacyRemoteCall/RemoteCallAPI.h>
 
 // ila events
-#include <ila/event/minecraft/server/ClientLoginEvent.h>
-#include <ila/event/minecraft/world/SpawnItemActorEvent.h>
-#include <ila/event/minecraft/world/SpawnWanderingTraderEvent.h>
-#include <ila/event/minecraft/world/actor/ActorChangeDimensionEvent.h>
-#include <ila/event/minecraft/world/actor/ActorPickupItemEvent.h>
-#include <ila/event/minecraft/world/actor/DeathMessageEvent.h>
-#include <ila/event/minecraft/world/actor/DragonRespawnEvent.h>
-#include <ila/event/minecraft/world/actor/MobHealthChangeEvent.h>
-#include <ila/event/minecraft/world/actor/MobTakeBlockEvent.h>
-#include <ila/event/minecraft/world/actor/ProjectileCreateEvent.h>
-#include <ila/event/minecraft/world/actor/player/PlayerCloseContainerEvent.h>
-#include <ila/event/minecraft/world/actor/player/PlayerRequestItemActionEvent.h>
-#include <ila/event/minecraft/world/actor/player/PlayerStartSleepEvent.h>
-#include <ila/event/minecraft/world/actor/player/PlayerStopSleepEvent.h>
-#include <ila/event/minecraft/world/level/WeatherUpdateEvent.h>
+#include <ila/event/server/ClientLoginEvent.h>
+#include <ila/event/world/SpawnItemActorEvent.h>
+#include <ila/event/world/actor/ActorChangeDimensionEvent.h>
+#include <ila/event/world/actor/ActorPickupItemEvent.h>
+#include <ila/event/world/actor/DeathMessageEvent.h>
+#include <ila/event/world/actor/DragonRespawnEvent.h>
+#include <ila/event/world/actor/MobHealthChangeEvent.h>
+#include <ila/event/world/actor/MobTakeBlockEvent.h>
+#include <ila/event/world/actor/ProjectileCreateEvent.h>
+#include <ila/event/world/actor/player/PlayerCloseContainerEvent.h>
+#include <ila/event/world/actor/player/PlayerRequestItemActionEvent.h>
+#include <ila/event/world/actor/player/PlayerStartSleepEvent.h>
+#include <ila/event/world/actor/player/PlayerStopSleepEvent.h>
+#include <ila/event/world/level/WeatherUpdateEvent.h>
 
 // modapi
 #include <modapi/addons/AddonsLoader.h>

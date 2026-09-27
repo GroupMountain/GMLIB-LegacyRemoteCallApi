@@ -25,6 +25,7 @@ public:
     }
 
     bool removeListener(ullong id) {
+        if (!hasListener(id)) return false;
         if (ll::event::EventBus::getInstance().removeListener(mEventIds[id])) {
             mEventIds[id] = nullptr;
             return true;
@@ -245,10 +246,13 @@ void Export_Event_API() {
                 );
             }
             case doHash("gmlib::SpawnWanderingTraderBeforeEvent"): {
-                REGISTER_EVENT_LISTEN(ila::mc::SpawnWanderingTraderBeforeEvent,
-                                      (std::pair<BlockPos, int> pos, bool isCancelled),
-                                      ({event.pos(), event.blockSource().getDimensionId()}, event.isCancelled()),
-                                      event.setCancelled(result););
+                // iListenAttentively 0.14.0 removed this event (WanderingTraderScheduler::_canSpawnAtPosition is
+                // gone since BDS 1.26.40), so the listener can never be called.
+                getLogger().warn(
+                    "gmlib::SpawnWanderingTraderBeforeEvent is no longer provided by iListenAttentively 0.17.x, "
+                    "the listener is ignored"
+                );
+                return -1;
             }
             case doHash("gmlib::HandleRequestActionBeforeEvent"): {
                 // clang-format off
